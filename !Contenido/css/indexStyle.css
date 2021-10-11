@@ -1,7 +1,104 @@
 
+/*Width*/
+.mwidt-100{
+  min-width: 100px;
+}
+
+/*Search Result paragraphs*/
+.sp{
+  max-width: 200px;
+}
+
+/*Background===========================*/
+.bg-sky{
+    background-image: url("../images/sky.png");
+}
+.bg-book{
+    background-image: url("../images/book-front.jpg");
+}
+.bg-body{
+    background-color: steelblue;
+}
+.bg-blue{
+    background-color: blue;
+}
+.bg-red{
+    background-color: red;
+}
+.bg-green{
+    background-color: green;
+}
+.bg-yellow{
+    background-color: yellow;
+}
+.bg-violet{
+    background-color: violet;
+}
+
+.bg-gray{
+  background-color: gray;
+}
+
+.bg-sea{
+  background-color: lightseagreen;
+}
+
+/*Paddings==============================*/
+.pb-30{
+    padding-bottom: 30px;
+}
+.pb-40{
+    padding-bottom: 40px;
+}
+.pt-30{
+    padding-top: 60px;
+}
+.ml-m30{
+    margin-left: -35px;
+}
+
+/*Differents Display Resolutions=======*/
+
+@media (max-width: 575.98px) {
+
+    .books{
+      background-color: blue;
+      margin-top: 20px;
+    }
+  
+  }
+  
+  @media (min-width: 576px) and (max-width: 767.98px) { 
+    .books{
+      background-color: red;
+    }
+  }
+  
+  
+  @media (min-width: 768px) and (max-width: 991.98px) {
+    .books{
+      background-color: green;
+      padding-left: 200px;
+    }
+  }
+  
+  @media (min-width: 992px) and (max-width: 1199.98px) { 
+    .books{
+      background-color: yellow;
+      padding-left: 200px;
+    }
+  }
+  
+  
+  @media (min-width: 1200px) { 
+    .books{
+      background-color: white;
+      padding-left: 200px;
+    }
+  }
+
+/*Parts style=====================================*/
 header {
-    background-color:#002080;
-    color:white;
     text-align:center;
     padding:5px; 
 }
@@ -19,39 +116,25 @@ section {
     padding:10px; 
 }
 footer {
-    background-color:#002080;
-    color:white;
+
     clear:both;
     text-align:center;
     padding:5px; 
 }
-
-/*Using BootStraps*/
-.bg-1 
-{
-    background-color: #eee; /*  */
-    color: #1d1d1d;
-}
-
   .container-fluid {
-    padding-top: 70px;
-    padding-bottom: 70px;
+    padding-top: 50px;
+    padding-bottom: 50px;
   }
 
   body {
-    font: 20px, "Montserrat", sans-serif;
     line-height: 1.8;
-    color: #1d1d1d;
   }
-
-  .padding1{
-      padding-top: 20px;
-  }
-
-  .margin {margin-bottom: 45px;}
 
   li{
       list-style: none;
+  }
+  ul.a {
+    list-style-position: outside;
   }
 
   h1{
@@ -64,6 +147,11 @@ footer {
   }
 
   .bookTitle{
-    font-size: 20px;
+    font-size: 18px;
     min-width: 260px;
 }
+
+/*Bootstrap redefinitions*/
+nav .navbar-nav li a{
+  color: blue !important;
+  }
