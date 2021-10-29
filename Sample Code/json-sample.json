@@ -1,0 +1,14 @@
+{
+    "students":[
+        {
+            "name": "Nestor",
+            "age": "37",
+            "laptop":{"brand":"Dell", "cpu":"Intel Core i7-8750HK","ram":"16GB DDR4","hdd":"1TB NMVE SSD"}
+        },
+        {
+            "name": "Ainara",
+            "age": "31",
+            "laptop":{"brand":"Dell", "cpu":"Intel Core i5-4320M","ram":"8GB DDR3","hdd":"1TB"}
+        }
+    ]
+}

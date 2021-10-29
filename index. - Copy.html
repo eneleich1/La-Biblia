@@ -1,3 +1,4 @@
+<!doctype html>
 <html lang="en">
 
 <head>
@@ -27,24 +28,21 @@
 
 		//Event Handler
 		function seacrh_bt_Click() {
-
-			console.log("Click on Search button");
-
 			//Get the search_tb value
 			var text = $("#search_tb").val();
 
 			//Store in the global storage an entry 'text'|value
 			localStorage.setItem('text', text);
 
-			var json = require('./chapters.json')
+			console.log("Click on Search");
 
-			//Iterate throuhg all chapters
+			//Iterato throuhg all chapters
 			$(document).ready(function () {
 				$.getJSON("chapters.json", function (data) {
-					//console.log(data.Name); // Prints: Harry
-					//console.log(data.Path); // Prints: 14
+					console.log(data.Name); // Prints: Harry
+					console.log(data.Path); // Prints: 14
 				}).fail(function () {
-					//console.log("An error has occurred.");
+					console.log("An error has occurred.");
 				});
 			});
 
@@ -59,17 +57,14 @@
 			localStorage.setItem('len', count);
 
 			//Navigate to the result page
-			//window.location.href = "search-result.html";
+			window.location.href = "search-result.html";
 		}
 
-		//This is a test
+		//Set the string format
 		String.prototype.format = String.prototype.f = StringFormat;
 
-		$(document).ready(
-			function () {
-				$("#search_bt").click(seacrh_bt_Click);
-			}
-		);
+		//Set the search_bt.Click Event Handler
+		$(document).ready($("#search_bt").click(function(){console.log("hasta cuando")}));
 
 	</script>
 
