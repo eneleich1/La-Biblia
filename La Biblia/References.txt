@@ -1,0 +1,3 @@
+
+#String functions: Format, StartWith, EndWith
+https://stackoverflow.com/questions/1038746/equivalent-of-string-format-in-jquery

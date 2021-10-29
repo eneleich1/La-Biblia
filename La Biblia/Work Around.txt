@@ -1,0 +1,11 @@
+
+
+------------------------------------------------------------
+ Steeps
+------------------------------------------------------------
+
+1- Find the specific text in each paragraph in each chapter [working]
+    .Iterate through all chapter [working]
+      .Create a Json files with all files Information [done]
+    .Searh a patter in a text ignoring Sensivity case []
+    .Get all the result paragraph p in chapter c with contain the specific text []
