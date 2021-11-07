@@ -1,3 +1,7 @@
 
 #String functions: Format, StartWith, EndWith
 https://stackoverflow.com/questions/1038746/equivalent-of-string-format-in-jquery
+
+#Bilbias Online
+Rating 10
+https://www.bibliatodo.com/la-biblia/Biblia-de-Jerusalen/salmos-27
