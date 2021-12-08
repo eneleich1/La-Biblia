@@ -36,8 +36,6 @@
 			//Store in the global storage an entry 'text'|value
 			localStorage.setItem('text', text);
 
-			var json = require('./chapters.json')
-
 			//Iterate throuhg all chapters
 			$(document).ready(function () {
 				$.getJSON("chapters.json", function (data) {
@@ -49,6 +47,7 @@
 			});
 
 			//Store in the global storage all a element wich containt the especific text
+			//a is an <a> element.
 			var count = 0;
 			$("a:contains('" + text + "')").each(function (i, el) {
 				localStorage.setItem("item" + i.toString(), "<a href='{0}'>{1}</a>".f(el, el.outerHTML));
@@ -59,7 +58,7 @@
 			localStorage.setItem('len', count);
 
 			//Navigate to the result page
-			//window.location.href = "search-result.html";
+			window.location.href = "search-result.html";
 		}
 
 		//This is a test
@@ -67,6 +66,7 @@
 
 		$(document).ready(
 			function () {
+				console.log("Entre");
 				$("#search_bt").click(seacrh_bt_Click);
 			}
 		);
