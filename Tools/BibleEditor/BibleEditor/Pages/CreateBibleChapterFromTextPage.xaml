@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="BibleEditor.Pages.CreateBibleChapterFromTextPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:BibleEditor.Pages" Loaded="UserControl_Loaded"
+             mc:Ignorable="d">
+
+    <Grid Margin="5" AllowDrop="True" Drop="filePath_tb_Drop" HorizontalAlignment="Center">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="640"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <Label Content="File" Grid.Row="0"/>
+        <TextBox x:Name="filePath_tb" Grid.Row="1" Grid.ColumnSpan="1" />
+        <Button Name="browse_bt" Grid.Row="1" Grid.Column="1" Margin="10,0,0,0" Click="browse_bt_Click" Content="Browse File" HorizontalAlignment="Right"  Width="80"/>
+
+        <Label Content="Save Files Folder" Grid.Row="2" HorizontalAlignment="Left" />
+        <TextBox x:Name="savePath_tb" Grid.Row="3" Height="22"/>
+        <Button x:Name="choosePath_bt" Grid.Row="3"  Grid.Column="1" Margin="10,0,0,0" Click="choosePath_bt_Click" Content="Choose Path" HorizontalAlignment="Right" Width="80"/>
+
+        <Border  Margin="0,10,0,0" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"  HorizontalAlignment="Stretch" Height="210"  BorderThickness="1" BorderBrush="Gray">
+            <ScrollViewer Margin="5">
+                <TextBlock x:Name="display_tb" TextWrapping="Wrap" Text="" />
+            </ScrollViewer>
+        </Border>
+        <Button x:Name="createChapters_bt" Grid.Row="5" Grid.ColumnSpan="2" Margin="0,20,0,0" FontSize="18" Foreground="Blue" Height="35"
+                Click="createChapters_bt_Click" Content="Create Chapters" HorizontalAlignment="Center" Width="150" />
+    </Grid>
+</UserControl>
