@@ -14,26 +14,29 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="640"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <Label Content="File" Grid.Row="0"/>
-        <TextBox x:Name="filePath_tb" Grid.Row="1" Grid.ColumnSpan="1" />
-        <Button Name="browse_bt" Grid.Row="1" Grid.Column="1" Margin="10,0,0,0" Click="browse_bt_Click" Content="Browse File" HorizontalAlignment="Right"  Width="80"/>
+        <TextBlock Text="Create Bible Chapter from Text File" HorizontalAlignment="Center" FontSize="20"/>
 
-        <Label Content="Save Files Folder" Grid.Row="2" HorizontalAlignment="Left" />
-        <TextBox x:Name="savePath_tb" Grid.Row="3" Height="22"/>
-        <Button x:Name="choosePath_bt" Grid.Row="3"  Grid.Column="1" Margin="10,0,0,0" Click="choosePath_bt_Click" Content="Choose Path" HorizontalAlignment="Right" Width="80"/>
+        <Label Content="File" Grid.Row="1"/>
+        <TextBox x:Name="filePath_tb" Grid.Row="2" Grid.ColumnSpan="1" />
+        <Button Name="browse_bt" Grid.Row="2" Grid.Column="1" Margin="10,0,0,0" Click="browse_bt_Click" Content="Browse File" HorizontalAlignment="Right"  Width="80"/>
 
-        <Border  Margin="0,10,0,0" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"  HorizontalAlignment="Stretch" Height="210"  BorderThickness="1" BorderBrush="Gray">
+        <Label Content="Save Files Folder" Grid.Row="3" HorizontalAlignment="Left" />
+        <TextBox x:Name="savePath_tb" Grid.Row="4" Height="22"/>
+        <Button x:Name="choosePath_bt" Grid.Row="4"  Grid.Column="1" Margin="10,0,0,0" Click="choosePath_bt_Click" Content="Choose Path" HorizontalAlignment="Right" Width="80"/>
+
+        <Border  Margin="0,10,0,0" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"  HorizontalAlignment="Stretch" Height="210"  BorderThickness="1" BorderBrush="Gray">
             <ScrollViewer Margin="5">
                 <TextBlock x:Name="display_tb" TextWrapping="Wrap" Text="" />
             </ScrollViewer>
         </Border>
-        <Button x:Name="createChapters_bt" Grid.Row="5" Grid.ColumnSpan="2" Margin="0,20,0,0" FontSize="18" Foreground="Blue" Height="35"
+        <Button x:Name="createChapters_bt" Grid.Row="6" Grid.ColumnSpan="2" Margin="0,20,0,0" FontSize="18" Foreground="Blue" Height="35"
                 Click="createChapters_bt_Click" Content="Create Chapters" HorizontalAlignment="Center" Width="150" />
     </Grid>
 </UserControl>

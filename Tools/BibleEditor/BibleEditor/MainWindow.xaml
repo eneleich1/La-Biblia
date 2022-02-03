@@ -14,6 +14,7 @@
         <Menu Background="AliceBlue" Grid.Row="0">
             <MenuItem Header="Process Text Files" FontSize="14">
                 <MenuItem Name="getChapters_menu" Click="getChapters_menu_Click"  Header="Get Chapters from Text"/>
+                <MenuItem Name="createDescription_menu" Click="createDescription_menu_Click" Header="Create Youtube Video Description"/>
             </MenuItem>
         </Menu>
 
@@ -22,11 +23,10 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" HorizontalAlignment="Center" Text="Welcome to the Bible Tool" FontSize="34" Foreground="Blue"/>
             <Border Grid.Row="2"  Margin="20" BorderThickness="1" BorderBrush="LightGray">
                 <Grid x:Name="content_grid" />
             </Border>
         </Grid>
-        
+
     </Grid>
 </Window>

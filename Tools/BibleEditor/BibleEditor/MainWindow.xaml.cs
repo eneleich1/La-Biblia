@@ -27,11 +27,6 @@ namespace BibleEditor
             InitializeComponent();
         }
 
-        private void getChapters_menu_Click(object sender, RoutedEventArgs e)
-        {
-            content_grid.Children.Add(new CreateBibleChapterFromTextPage());
-        }
-
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Configuration.LoadConfiguration();
@@ -45,6 +40,17 @@ namespace BibleEditor
                         break;
                 }
             }
+        }
+        private void getChapters_menu_Click(object sender, RoutedEventArgs e)
+        {
+            content_grid.Children.Clear();
+            content_grid.Children.Add(new CreateBibleChapterFromTextPage());
+        }
+
+        private void createDescription_menu_Click(object sender, RoutedEventArgs e)
+        {
+            content_grid.Children.Clear();
+            content_grid.Children.Add(new CreateYoutubeVideoDescriptionPage());
         }
     }
 }

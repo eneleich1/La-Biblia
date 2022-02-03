@@ -64,6 +64,9 @@
     <Compile Include="Pages\CreateBibleChapterFromTextPage.xaml.cs">
       <DependentUpon>CreateBibleChapterFromTextPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\CreateYoutubeVideoDescriptionPage.xaml.cs">
+      <DependentUpon>CreateYoutubeVideoDescriptionPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Resource1.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -72,6 +75,7 @@
     <Compile Include="Tools\Chapter.cs" />
     <Compile Include="Tools\Configuration.cs" />
     <Compile Include="Tools\MySerializer.cs" />
+    <Compile Include="Tools\YoutubeVideoDescription.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -85,6 +89,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Pages\CreateBibleChapterFromTextPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\CreateYoutubeVideoDescriptionPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
