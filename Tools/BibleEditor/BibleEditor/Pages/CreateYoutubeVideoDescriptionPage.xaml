@@ -17,10 +17,12 @@
             <TextBox x:Name="chapterName_tb" HorizontalAlignment="Left" Margin="148,6,0,0" TextWrapping="Wrap" Text=""  VerticalAlignment="Top" Width="189" Height="18"/>
             <Label Content="Start Date" HorizontalAlignment="Left" Margin="2,48,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.895,-0.1" Height="26" Width="63"/>
             <DatePicker Name="startDate_dp" HorizontalAlignment="Left" Margin="148,48,0,0" VerticalAlignment="Top" Width="189" Height="24" SelectedDateFormat="Long"/>
-            <Label Content="Topics File" HorizontalAlignment="Left" Margin="2,90,0,0" VerticalAlignment="Top" Height="26" Width="111"/>
-            <TextBox x:Name="topics_tb" HorizontalAlignment="Left" Margin="148,95,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="390" Height="18"/>
-            <Button Content="Browse" Click="browseTopics_bt_Click" Name="browseTopics_bt" HorizontalAlignment="Left" Margin="554,93,0,0" VerticalAlignment="Top" Width="63" Height="20"/>
-            <Button x:Name="generateDescription_bt" Click="generateDescription_bt_Click" Content="Generate Description" HorizontalAlignment="Center" Margin="0,142,0,0" VerticalAlignment="Top" Width="176"/>
+            <Label Content="Topics File" HorizontalAlignment="Left" Margin="2,136,0,0" VerticalAlignment="Top" Height="26" Width="111"/>
+            <TextBox x:Name="topics_tb" HorizontalAlignment="Left" Margin="148,140,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="390" Height="18"/>
+            <Button Content="Browse" Click="browseTopics_bt_Click" Name="browseTopics_bt" HorizontalAlignment="Left" Margin="554,139,0,0" VerticalAlignment="Top" Width="63" Height="20"/>
+            <Button x:Name="generateDescription_bt" Click="generateDescription_bt_Click" Content="Generate Description" HorizontalAlignment="Center" Margin="0,192,0,10" VerticalAlignment="Top" Width="176" Height="25"/>
+            <Label Content="Starting at Topic" HorizontalAlignment="Left" Margin="2,90,0,0" VerticalAlignment="Top" Height="26" Width="111"/>
+            <TextBox x:Name="startingAt_tb" HorizontalAlignment="Left" Margin="148,94,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="54"/>
         </Grid>
     </Grid>
 </UserControl>

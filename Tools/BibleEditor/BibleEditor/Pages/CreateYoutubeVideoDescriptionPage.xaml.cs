@@ -56,27 +56,32 @@ namespace BibleEditor.Pages
                 var v = desc.OtherVideos;
                 var line = "=======================================================================";
                 var nl = Environment.NewLine;
+                var starting = int.Parse(startingAt_tb.Text);
 
                 var topics = LoadTopics(topics_tb.Text);
                 string format,fileName,name = "";
 
-                foreach (var topic in topics)
+                int processed = 0;
+
+                foreach (var topic in topics.Where(t => int.Parse(t.Number) >= starting))
                 {
                     fileName = $"La Biblia de Jerusalen Audio Es - {chapterName_tb.Text} {topic.Number}.txt";
                     name = $"{chapterName_tb.Text} {topic.Number}";
 
                     format = $"{line}{nl}Description {startDate_dp.DisplayDate.ToLongDateString()}" +
-                        $"{nl}{line}{nl}{desc.ChapterName} {chapterName_tb.Text} {topic.Number}{nl}{desc.Description}" +
+                        $"{nl}{line}{nl}{desc.ChapterName} {chapterName_tb.Text} {topic.Number}{nl}{topic.Description}" +
                         $"{nl}{nl}{desc.Comment}{nl}{nl}{desc.LinkToBible}{nl}{nl}{line}{nl}Otros Videos{nl}{line}{nl}" +
                         $"{v[0].Name}{nl}{v[0].Link}{nl}{nl}{v[1].Name}{nl}{v[1].Link}{nl}{nl}{line}{nl}Tags{nl}{line}{nl}{name},{desc.Tags}";
 
-                    using (var writer = new StreamWriter(System.IO.Path.Combine(fb.SelectedPath,fileName)))
+                    using (var writer = new StreamWriter(System.IO.Path.Combine(fb.SelectedPath, fileName)))
                     {
                         writer.WriteLine(format);
                     }
+
+                    processed++;
                 }
 
-                System.Windows.MessageBox.Show($"Successfully generates {topics.Count} Video Descriptions");
+                System.Windows.MessageBox.Show($"Successfully generates {processed} Video Descriptions");
             }
             catch (Exception ex)
             {
