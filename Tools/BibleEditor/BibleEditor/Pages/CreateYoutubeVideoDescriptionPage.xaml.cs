@@ -31,6 +31,66 @@ namespace BibleEditor.Pages
             InitializeComponent();
         }
 
+        MatchCollection Match(string patt, string text)
+        {
+            // Create a Regex  
+            Regex rg = new Regex(patt, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+            // Get all matches  
+            MatchCollection matches = rg.Matches(text);
+
+            return matches;
+        }
+        private List<Topic> LoadTopics(string fileName)
+        {
+            var res = new List<Topic>();
+
+            using (var reader = new StreamReader(fileName))
+            {
+                string numberPatter = @"(?<num>\d+)";
+                string descPatter = @"(?<vers>.+)";
+
+                string text = "";
+                var topic = new Topic();
+
+                while (!reader.EndOfStream)
+                {
+                    text = reader.ReadLine();
+
+                    if (text != "")
+                    {
+                        //Number
+                        var matches = Match(numberPatter, text);
+
+                        if (matches.Count > 0)
+                            topic.Number = matches[0].Groups["num"].Value;
+                        else
+                        {
+                            matches = Match(descPatter, text);
+                            if (matches.Count > 0)
+                                topic.Description = matches[0].Groups["vers"].Value;
+                        }
+                    }
+
+                    if (Topic.ValidTopic(topic))
+                    {
+                        res.Add(topic);
+                        topic = new Topic();
+                    }
+                }
+
+                reader.Close();
+                reader.Dispose();
+            }
+
+            return res;
+        }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            startDate_dp.SelectedDate = DateTime.Now;
+        }
+
         private void browseTopics_bt_Click(object sender, RoutedEventArgs e)
         {
             if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -90,59 +150,14 @@ namespace BibleEditor.Pages
             }
         }
 
-        MatchCollection Match(string patt, string text)
+        private void main_grid_Drop(object sender, System.Windows.DragEventArgs e)
         {
-            // Create a Regex  
-            Regex rg = new Regex(patt, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var source = new List<string>((string[])e.Data.GetData("FileDrop")).First();
 
-            // Get all matches  
-            MatchCollection matches = rg.Matches(text);
+            chapterName_tb.Text = System.IO.Path.GetFileName(source);
 
-            return matches;
+            topics_tb.Text = source;
         }
-        private List<Topic> LoadTopics(string fileName)
-        {
-            var res=new List<Topic>();
-
-            using(var reader = new StreamReader(fileName))
-            {
-                string numberPatter = @"(?<num>\d+)";
-                string descPatter = @"(?<vers>.+)";
-
-                string text = "";
-                var topic = new Topic();
-
-                while (!reader.EndOfStream)
-                {
-                    text = reader.ReadLine();
-
-                    if (text != "")
-                    {
-                        //Number
-                        var matches = Match(numberPatter, text);
-
-                        if (matches.Count > 0)
-                            topic.Number = matches[0].Groups["num"].Value;
-                        else
-                        {
-                            matches = Match(descPatter, text);
-                            if (matches.Count > 0)
-                                topic.Description = matches[0].Groups["vers"].Value;
-                        }
-                    }
-
-                    if(Topic.ValidTopic(topic))
-                    {
-                        res.Add(topic);
-                        topic = new Topic();
-                    }
-                }
-
-                reader.Close();
-                reader.Dispose();
-            }
-
-            return res;
-        }
+       
     }
 }

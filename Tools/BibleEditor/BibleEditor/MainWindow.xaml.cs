@@ -38,6 +38,9 @@ namespace BibleEditor
                     case "CreateChapters":
                         content_grid.Children.Add(new CreateBibleChapterFromTextPage());
                         break;
+                    case "CreateYoutubeVideoDescription":
+                        content_grid.Children.Add(new CreateYoutubeVideoDescriptionPage());
+                        break;
                 }
             }
         }
