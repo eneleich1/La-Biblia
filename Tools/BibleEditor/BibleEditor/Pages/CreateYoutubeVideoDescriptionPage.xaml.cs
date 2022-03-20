@@ -112,6 +112,11 @@ namespace BibleEditor.Pages
                 if(fb.ShowDialog() != DialogResult.OK)
                     throw new InvalidOperationException("You must provide a valid folder to save Video Description fils ");
 
+                //Load Settings
+                Settings settings = new Settings { ChaptersCountByDay = 2 };
+                if (File.Exists("Settings.xml"))
+                    settings = MySerializer<Settings>.Deserialize("Settings.xml");
+
                 var desc = MySerializer<YoutubeVideoDescription>.Deserialize(@"Youtube Video Description/chapter sample.xml");
                 var v = desc.OtherVideos;
                 var line = "=======================================================================";
@@ -124,12 +129,15 @@ namespace BibleEditor.Pages
 
                 int processed = 0;
 
+                var date = startDate_dp.SelectedDate.Value;
+                var chapterCount = 0;
+
                 foreach (var topic in topics.Where(t => int.Parse(t.Number) >= starting))
                 {
                     fileName = $"La Biblia de Jerusalen Audio Es - {chapterName_tb.Text} {topic.Number}.txt";
                     name = $"{chapterName_tb.Text} {topic.Number}";
 
-                    format = $"{line}{nl}Description {startDate_dp.DisplayDate.ToLongDateString()}" +
+                    format = $"{line}{nl}Description {date.ToLongDateString()}" +
                         $"{nl}{line}{nl}{desc.ChapterName} {chapterName_tb.Text} {topic.Number}{nl}{topic.Description}" +
                         $"{nl}{nl}{desc.Comment}{nl}{nl}{desc.LinkToBible}{nl}{nl}{shortLine}{nl}Otros Videos{nl}{shortLine}{nl}" +
                         $"{v[0].Name}{nl}{v[0].Link}{nl}{nl}{v[1].Name}{nl}{v[1].Link}{nl}{nl}{line}{nl}Tags{nl}{line}{nl}{name},{desc.Tags}";
@@ -140,6 +148,13 @@ namespace BibleEditor.Pages
                     }
 
                     processed++;
+                    chapterCount++;
+
+                    if (chapterCount == settings.ChaptersCountByDay)
+                    {
+                        chapterCount = 0;
+                        date = date.AddDays(1);
+                    }
                 }
 
                 System.Windows.MessageBox.Show($"Successfully generates {processed} Video Descriptions");
@@ -154,7 +169,7 @@ namespace BibleEditor.Pages
         {
             var source = new List<string>((string[])e.Data.GetData("FileDrop")).First();
 
-            chapterName_tb.Text = System.IO.Path.GetFileName(source);
+            chapterName_tb.Text = System.IO.Path.GetFileNameWithoutExtension(source);
 
             topics_tb.Text = source;
         }

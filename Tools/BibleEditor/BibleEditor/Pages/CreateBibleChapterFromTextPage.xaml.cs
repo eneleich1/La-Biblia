@@ -60,19 +60,19 @@ namespace BibleEditor.Pages
         {
             if (File.Exists(filePath_tb.Text))
             {
-                try
-                {
-                    var result = CreateHtmlChapter(filePath_tb.Text);
+                //try
+                //{
+                    var result = CreateHtmlChapter(filePath_tb.Text,System.IO.Path.GetFileNameWithoutExtension(filePath_tb.Text));
 
                     if (result > 0)
                         System.Windows.MessageBox.Show($"{result} Chapters have been created successfully in the folder {Configuration.MainConfiguration.ChaptersPath}");
                     else
                         System.Windows.MessageBox.Show($"{result} Chapters have been created. There was an error or the file contain an incorrect format.");
-                }
-                catch (Exception ex)
-                {
-                    System.Windows.MessageBox.Show($"ERROR: {ex.Message}. StackTrace: {ex.StackTrace}");
-                }
+                //}
+                //catch (Exception ex)
+                //{
+                //    System.Windows.MessageBox.Show($"ERROR: {ex.Message}. StackTrace: {ex.StackTrace}");
+                //}
             }
         }
 
@@ -110,9 +110,9 @@ namespace BibleEditor.Pages
         /// </summary>
         /// <param name="sourceFile"></param>
         /// <returns></returns>
-        private int CreateHtmlChapter(string sourceFile)
+        private int CreateHtmlChapter(string sourceFile, string chapterName)
         {
-            var chapters = GetChapters(sourceFile);
+            var chapters = GetChapters(sourceFile, chapterName);
 
             foreach (var salmo in chapters)
             {
@@ -164,7 +164,7 @@ namespace BibleEditor.Pages
             return matches;
         }
 
-        List<Chapter> GetChapters(string filePath)
+        List<Chapter> GetChapters(string filePath,string chapterName)
         {
 
             var chapters = new List<Chapter>();
@@ -172,7 +172,7 @@ namespace BibleEditor.Pages
             var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read));
 
             //salmo(s)?(?<spaces>\s+)(?<num>\d+)
-            string namePatter = @"salmo(s)?(?<spaces>\s+)(?<num>\d+)";//@"Salmo\s+(?<num>\d+)";
+            string namePatter = $"{chapterName}"+@"(?<spaces>\s+)(?<num>\d+)";//@"Salmo\s+(?<num>\d+)";
             string versiclePatter = @"(?<index>\d+\s+)(?<vers>.+)";
 
             string text = "";
@@ -194,7 +194,7 @@ namespace BibleEditor.Pages
                             chapter = new Chapter();
                         }
 
-                        chapter.Name = "Salmo";
+                        chapter.Name = chapterName;
                         chapter.Number = int.Parse(matches[0].Groups["num"].Value);
                     }
                     else

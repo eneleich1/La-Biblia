@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:BibleEditor.Pages" Loaded="UserControl_Loaded"
              mc:Ignorable="d">
 
-    <Grid Margin="5" AllowDrop="True" Drop="filePath_tb_Drop" HorizontalAlignment="Center">
+    <Grid Background="White" Margin="5" AllowDrop="True" Drop="filePath_tb_Drop" HorizontalAlignment="Center">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>

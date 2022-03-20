@@ -75,6 +75,7 @@
     <Compile Include="Tools\Chapter.cs" />
     <Compile Include="Tools\Configuration.cs" />
     <Compile Include="Tools\MySerializer.cs" />
+    <Compile Include="Tools\Settings.cs" />
     <Compile Include="Tools\YoutubeVideoDescription.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
