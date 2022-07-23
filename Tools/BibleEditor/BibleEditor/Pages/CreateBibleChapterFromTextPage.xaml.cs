@@ -58,21 +58,24 @@ namespace BibleEditor.Pages
 
         private void createChapters_bt_Click(object sender, RoutedEventArgs e)
         {
-            if (File.Exists(filePath_tb.Text))
+            try
             {
-                //try
-                //{
-                    var result = CreateHtmlChapter(filePath_tb.Text,System.IO.Path.GetFileNameWithoutExtension(filePath_tb.Text));
+                if (!File.Exists(filePath_tb.Text))
+                    throw new InvalidOperationException($"The file: {filePath_tb.Text} does not exist. Select a valid file");
 
-                    if (result > 0)
-                        System.Windows.MessageBox.Show($"{result} Chapters have been created successfully in the folder {Configuration.MainConfiguration.ChaptersPath}");
-                    else
-                        System.Windows.MessageBox.Show($"{result} Chapters have been created. There was an error or the file contain an incorrect format.");
-                //}
-                //catch (Exception ex)
-                //{
-                //    System.Windows.MessageBox.Show($"ERROR: {ex.Message}. StackTrace: {ex.StackTrace}");
-                //}
+                if (!Directory.Exists(savePath_tb.Text))
+                    throw new InvalidOperationException($"The folder: {savePath_tb.Text} does not exist. Set a valid destination folder");
+
+                var result = CreateHtmlChapter(filePath_tb.Text, chapterName_tb.Text, bookName_tb.Text, bookIndex_tb.Text);
+
+                if (result > 0)
+                    System.Windows.MessageBox.Show($"{result} Chapters have been created successfully in the folder {Configuration.MainConfiguration.ChaptersPath}");
+                else
+                    System.Windows.MessageBox.Show($"{result} Chapters have been created. There was an error or the file contain an incorrect format.");
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.Message);
             }
         }
 
@@ -97,6 +100,8 @@ namespace BibleEditor.Pages
             if (File.Exists(filePath))
             {
                 filePath_tb.Text = filePath;
+                chapterName_tb.Text = System.IO.Path.GetFileNameWithoutExtension(filePath_tb.Text);
+                bookName_tb.Text = chapterName_tb.Text;
 
                 using (var r = new StreamReader(filePath))
                 {
@@ -110,11 +115,11 @@ namespace BibleEditor.Pages
         /// </summary>
         /// <param name="sourceFile"></param>
         /// <returns></returns>
-        private int CreateHtmlChapter(string sourceFile, string chapterName)
+        private int CreateHtmlChapter(string sourceFile, string chapterName, string bookName, string bookIndex)
         {
             var chapters = GetChapters(sourceFile, chapterName);
 
-            foreach (var salmo in chapters)
+            foreach (var chapter in chapters)
             {
                 //Page
                 HtmlPage page = new HtmlPage();
@@ -123,7 +128,7 @@ namespace BibleEditor.Pages
                 //Head
                 var head = page.Html.AddChild("<head>");
                 var headReader = new StreamReader(new FileStream("head.txt", FileMode.Open, FileAccess.Read));
-                head.Content = $"<title>Salmo {salmo.Number}</title>{Environment.NewLine}" + headReader.ReadToEnd();
+                head.Content = $"<title>{chapterName} {chapter.Number}</title>{Environment.NewLine}" + headReader.ReadToEnd();
                 headReader.Close();
 
                 //Body
@@ -131,18 +136,26 @@ namespace BibleEditor.Pages
 
                 //div class='header'
                 var divHeader = body.AddChild("<div class = 'header'>");
-                var divReader = new StreamReader(new FileStream("div content.txt", FileMode.Open, FileAccess.Read));
-                var content = divReader.ReadToEnd();
-                divHeader.Content = content;
-                divReader.Close();
+
+                var nl = Environment.NewLine;
+
+                //Go to Home button
+                divHeader.Content = $"<button type='button' class='btn btn-primary' onclick='location.assign(\"../../Index.html\")'>";
+                divHeader.Content += $"\t{nl}<span class='glyphicon glyphicon-home'></span>";
+                divHeader.Content += $"{nl}</button>";
+
+                //Go to ChapterIndex button
+                divHeader.Content += $"{nl}<button type='button' class='btn btn-primary' onclick='location.assign(\"../00- Indice/{bookIndex}- {bookName.ToUpper()}.html\")'>";
+                divHeader.Content += $"{nl}\t<span class='glyphicon glyphicon-th'></span>";
+                divHeader.Content += $"{nl}</button>";
 
                 var div_container = body.AddChild("<div class='container-fluid text-center section'>");
-                AddSalmo(divHeader, div_container, salmo.Number, salmo.Number - 1, salmo.Versicles);
+                AddChapter(divHeader, div_container, chapterName, chapter.Number, chapter.Versicles);
 
                 //div class='header'
                 body.AddChild(divHeader);
 
-                var writer = new StreamWriter(new FileStream(System.IO.Path.Combine(Configuration.MainConfiguration.ChaptersPath, $"Salmo {salmo.Number}.html"), FileMode.Create, FileAccess.Write));
+                var writer = new StreamWriter(new FileStream(System.IO.Path.Combine(savePath_tb.Text, $"{chapterName} {chapter.Number}.html"), FileMode.Create, FileAccess.Write));
                 page.Write(writer);
                 writer.Close();
                 writer.Dispose();
@@ -171,9 +184,8 @@ namespace BibleEditor.Pages
 
             var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read));
 
-            //salmo(s)?(?<spaces>\s+)(?<num>\d+)
-            string namePatter = $"{chapterName}"+@"(?<spaces>\s+)(?<num>\d+)";//@"Salmo\s+(?<num>\d+)";
-            string versiclePatter = @"(?<index>\d+\s+)(?<vers>.+)";
+            string namePatter = $"{chapterName}"+@"(?<spaces>\s+)(?<num>\d+)";
+            string versiclePattern = @"(?<index>\d+\s+)(?<vers>.+)";
 
             string text = "";
             Chapter chapter = new Chapter();
@@ -199,7 +211,7 @@ namespace BibleEditor.Pages
                     }
                     else
                     {
-                        matches = Match(versiclePatter, text);
+                        matches = Match(versiclePattern, text);
                         if (matches.Count > 0)
                         {
                             chapter.Versicles.Add(matches[0].Groups["vers"].Value);
@@ -217,23 +229,27 @@ namespace BibleEditor.Pages
             return chapters;
         }
 
-        private void AddSalmo(HtmlNode div_header, HtmlNode div_container, int salmNum, int salmAnt, List<string> versicles)
+        private void AddChapter(HtmlNode div_header, HtmlNode div_container,string chapterName, int chapterNum, List<string> versicles)
         {
-            var back_bt = div_header.AddChild($"<button type=\"button\" class=\"btn btn-primary\" onclick=\"location.assign('Salmo {salmNum - 1}.html')\">");
+            var back_bt = div_header.AddChild($"<button type=\"button\" class=\"btn btn-primary\" onclick=\"location.assign('{chapterName} {chapterNum - 1}.html')\">");
             back_bt.AddChild("<span class='glyphicon glyphicon-chevron-left'>");
 
-            var fwd_bt = div_header.AddChild($"<button type=\"button\" class=\"btn btn-primary\" onclick=\"location.assign('Salmo {salmNum + 1}.html')\">");
+            var fwd_bt = div_header.AddChild($"<button type=\"button\" class=\"btn btn-primary\" onclick=\"location.assign('{chapterName} {chapterNum + 1}.html')\">");
             fwd_bt.AddChild("<span class='glyphicon glyphicon-chevron-right'>");
 
             var div1 = div_container.AddChild("<div class='container-fluid text-center section'>");
             var div2 = div1.AddChild("<div class='row-content'>");
-            var div3 = div2.AddChild("<div class='col-sm-3'>");
+            div2.AddChild("<div class='col-sm-3'>");
             var divTextCenter = div2.AddChild("<div class='col-sm-6 text-center'>");
 
             var row = divTextCenter.AddChild("<div class='row'>");
 
-            var h1Chapter = row.AddChild($"<h1 id='chapter{salmNum}'>");
-            h1Chapter.Content = $"Salmo {salmNum} ({salmNum - 1})";
+            var h1Chapter = row.AddChild($"<h1 id='chapter{chapterNum}'>");
+
+            //Only for salmos
+            //h1Chapter.Content = $"{chapterName} {chapterNum} ({chapterNum - 1})";
+
+            h1Chapter.Content = $"{chapterName} {chapterNum}";
 
             var div_book_page1 = row.AddChild("<div class='col-sm-6 book-page'>");
 

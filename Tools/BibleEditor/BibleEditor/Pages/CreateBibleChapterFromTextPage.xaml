@@ -15,6 +15,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="640"/>
@@ -31,12 +32,27 @@
         <TextBox x:Name="savePath_tb" Grid.Row="4" Height="22"/>
         <Button x:Name="choosePath_bt" Grid.Row="4"  Grid.Column="1" Margin="10,0,0,0" Click="choosePath_bt_Click" Content="Choose Path" HorizontalAlignment="Right" Width="80"/>
 
-        <Border  Margin="0,10,0,0" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"  HorizontalAlignment="Stretch" Height="210"  BorderThickness="1" BorderBrush="Gray">
+        <StackPanel Orientation="Horizontal" Grid.Row="5" Margin="0,5,0,0">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Book Name:"/>
+                <TextBox x:Name="bookName_tb" Width="150" ToolTip="Ex: Los Salmo" Height="22"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Book Index:"/>
+                <TextBox x:Name="bookIndex_tb" Width="40" ToolTip="Ex: 23" Height="22"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Chapter Name:"/>
+                <TextBox x:Name="chapterName_tb" Width="150" ToolTip="Ex: Salmo" Height="22"/>
+            </StackPanel>
+        </StackPanel>
+
+        <Border  Margin="0,10,0,0" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"  HorizontalAlignment="Stretch" Height="210"  BorderThickness="1" BorderBrush="Gray">
             <ScrollViewer Margin="5">
                 <TextBlock x:Name="display_tb" TextWrapping="Wrap" Text="" />
             </ScrollViewer>
         </Border>
-        <Button x:Name="createChapters_bt" Grid.Row="6" Grid.ColumnSpan="2" Margin="0,20,0,0" FontSize="18" Foreground="Blue" Height="35"
+        <Button x:Name="createChapters_bt" Grid.Row="7" Grid.ColumnSpan="2" Margin="0,20,0,0" FontSize="18" Foreground="Blue" Height="35"
                 Click="createChapters_bt_Click" Content="Create Chapters" HorizontalAlignment="Center" Width="150" />
     </Grid>
 </UserControl>
