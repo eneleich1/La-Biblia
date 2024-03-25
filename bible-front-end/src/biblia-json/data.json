@@ -1,0 +1,129 @@
+{
+    "ChapterName":  "Génesis 1",
+    "Versicles":  [
+                      {
+                          "Index":  "1",
+                          "Text":  "En el principio creó Dios los cielos y la tierra. "
+                      },
+                      {
+                          "Index":  "2",
+                          "Text":  "La tierra era caos y confusión y oscuridad por encima del abismo, y un viento de Dios aleteaba por encima de las aguas. "
+                      },
+                      {
+                          "Index":  "3",
+                          "Text":  "Dijo Dios: «Haya luz», y hubo luz. "
+                      },
+                      {
+                          "Index":  "4",
+                          "Text":  "Vio Dios que la luz estaba bien, y apartó Dios la luz de la oscuridad; "
+                      },
+                      {
+                          "Index":  "5",
+                          "Text":  "y llamó Dios a la luz «día», y a la oscuridad la llamó «noche». Y atardeció y amaneció: día primero. "
+                      },
+                      {
+                          "Index":  "6",
+                          "Text":  "Dijo Dios: «Haya un firmamento por en medio de las aguas, que las aparte unas de otras.» "
+                      },
+                      {
+                          "Index":  "7",
+                          "Text":  "E hizo Dios el firmamento; y apartó las aguas de por debajo del firmamento, de las aguas de por encima del firmamento. Y así fue. "
+                      },
+                      {
+                          "Index":  "8",
+                          "Text":  "Y llamó Dios al firmamento «cielos». Y atardeció y amaneció: día segundo. "
+                      },
+                      {
+                          "Index":  "9",
+                          "Text":  "Dijo Dios: «Acumúlense las aguas de por debajo del firmamento en un solo conjunto, y déjese ver lo seco»; y así fue. "
+                      },
+                      {
+                          "Index":  "10",
+                          "Text":  "Y llamó Dios a lo seco «tierra», y al conjunto de las aguas lo llamó «mares»; y vio Dios que estaba bien. "
+                      },
+                      {
+                          "Index":  "11",
+                          "Text":  "Dijo Dios: «Produzca la tierra vegetación: hierbas que den semillas y árboles frutales que den fruto, de su especie, con su semilla dentro, sobre la tierra.» Y así fue. "
+                      },
+                      {
+                          "Index":  "12",
+                          "Text":  "La tierra produjo vegetación: hierbas que dan semilla, por sus especies, y árboles que dan fruto con la semilla dentro, por sus especies; y vio Dios que estaban bien. "
+                      },
+                      {
+                          "Index":  "13",
+                          "Text":  "Y atardeció y amaneció: día tercero. "
+                      },
+                      {
+                          "Index":  "14",
+                          "Text":  "Dijo Dios: «Haya luceros en el firmamento celeste, para apartar el día de la noche, y valgan de señales para solemnidades, días y años; "
+                      },
+                      {
+                          "Index":  "15",
+                          "Text":  "y valgan de luceros en el firmamento celeste para alumbrar sobre la tierra.» Y así fue. "
+                      },
+                      {
+                          "Index":  "16",
+                          "Text":  "Hizo Dios los dos luceros mayores; el lucero grande para el dominio del día, y el lucero pequeño para el dominio de la noche, y las estrellas; "
+                      },
+                      {
+                          "Index":  "17",
+                          "Text":  "y púsolos Dios en el firmamento celeste para alumbrar sobre la tierra, "
+                      },
+                      {
+                          "Index":  "18",
+                          "Text":  "y para dominar en el día y en la noche, y para apartar la luz de la oscuridad; y vio Dios que estaba bien. "
+                      },
+                      {
+                          "Index":  "19",
+                          "Text":  "Y atardeció y amaneció: día cuarto. "
+                      },
+                      {
+                          "Index":  "20",
+                          "Text":  "Dijo Dios: «Bullan las aguas de animales vivientes, y aves revoloteen sobre la tierra contra el firmamento celeste.» "
+                      },
+                      {
+                          "Index":  "21",
+                          "Text":  "Y creó Dios los grandes monstruos marinos y todo animal viviente, los que serpean, de los que bullen las aguas por sus especies, y todas las aves aladas por sus especies; y vio Dios que estaba bien; "
+                      },
+                      {
+                          "Index":  "22",
+                          "Text":  "y bendíjolos Dios diciendo: «sed fecundos y multiplicaos, y henchid las aguas en los mares, y las aves crezcan en la tierra.» "
+                      },
+                      {
+                          "Index":  "23",
+                          "Text":  "Y atardeció y amaneció: día quinto. "
+                      },
+                      {
+                          "Index":  "24",
+                          "Text":  "Dijo Dios: «Produzca la tierra animales vivientes de cada especie: bestias, sierpes y alimañas terrestres de cada especie.» Y así fue. "
+                      },
+                      {
+                          "Index":  "25",
+                          "Text":  "Hizo Dios las alimañas terrestres de cada especie, y las bestias de cada especie, y toda sierpe del suelo de cada especie: y vio Dios que estaba bien. "
+                      },
+                      {
+                          "Index":  "26",
+                          "Text":  "Y dijo Dios: «Hagamos al ser humano a nuestra imagen, como semejanza nuestra, y manden en los peces del mar y en las aves de los cielos, y en las bestias y en todas las alimañas terrestres, y en todas las sierpes que serpean por la tierra. "
+                      },
+                      {
+                          "Index":  "27",
+                          "Text":  "Creó, pues, Dios al ser humano a imagen suya, a imagen de Dios le creó, macho y hembra los creó. "
+                      },
+                      {
+                          "Index":  "28",
+                          "Text":  "Y bendíjolos Dios, y díjoles Dios: «Sed fecundos y multiplicaos y henchid la tierra y sometedla; mandad en los peces del mar y en las aves de los cielos y en todo animal que serpea sobre la tierra.» "
+                      },
+                      {
+                          "Index":  "29",
+                          "Text":  "Dijo Dios: «Ved que os he dado toda hierba de semilla que existe sobre la haz de toda la tierra, así como todo árbol que lleva fruto de semilla; para vosotros será de alimento. "
+                      },
+                      {
+                          "Index":  "30",
+                          "Text":  "Y a todo animal terrestre, y a toda ave de los cielos y a toda sierpe de sobre la tierra, animada de vida, toda la hierba verde les doy de alimento.» Y así fue. "
+                      },
+                      {
+                          "Index":  "31",
+                          "Text":  "Vio Dios cuanto había hecho, y todo estaba muy bien. Y atardecío y amaneció: día sexto. "
+                      }
+                  ]
+}

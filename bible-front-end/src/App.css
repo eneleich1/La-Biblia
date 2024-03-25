@@ -15,6 +15,10 @@
   background-color: green;
 }
 
+.versicle-index{
+  color: blue;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
