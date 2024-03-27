@@ -1,0 +1,40 @@
+.bg-1 
+{
+    background-color: #eee; /*  */
+    color: #1d1d1d;
+}
+
+.bg-2 {
+    background-color: white; /* */
+    color: #ffffff;
+  }
+
+  .container-fluid {
+    padding-top: 70px;
+    padding-bottom: 70px;
+  }
+
+  body {
+    font: 150%, "Montserrat", sans-serif;
+    line-height: 1.8;
+    color: #1d1d1d;
+  }
+
+  .color1{
+      color: #1d1d1d;
+  }
+
+  .padding1{
+      padding-top: 20px;
+  }
+
+  .margin {margin-bottom: 45px;}
+
+  ul{
+      list-style: none;
+  }
+
+  h1{
+      font-size: 3em;
+     
+  }
