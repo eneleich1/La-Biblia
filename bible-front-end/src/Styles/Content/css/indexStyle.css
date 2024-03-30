@@ -10,7 +10,15 @@
 }
 
 .verticalLine {
-  border-left: 1px solid #4b42f5;
+  width: 180px;
+}
+
+.title-case{
+  text-transform:capitalize;
+}
+
+.a-link {
+  color:#0d6efd;
 }
 
 /*Background===========================*/

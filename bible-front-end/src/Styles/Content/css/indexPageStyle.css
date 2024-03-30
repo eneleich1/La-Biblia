@@ -282,7 +282,6 @@ body {
 	font-weight: 300;
 }
 body {
-	background: #f1f1f1;
 	font-size: 14px;
 	padding-top: 50px;
 }
@@ -299,9 +298,8 @@ body {
 	font-weight: 300;
 }
 body {
-	background: #f1f1f1;
 	font-size: 14px;
-	padding-top: 50px;
+	padding-top: 0px;
 }
 /* @media all and (min-width:0px) */
 body {
