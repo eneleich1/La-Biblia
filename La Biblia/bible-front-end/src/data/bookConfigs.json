@@ -1,250 +1,263 @@
 [
     {
-        "Title":  "Default Book Config",
-        "BooksGroups":  [
-                            {
-                                "Title":  "Antiguo Testamento",
-                                "Books":  null,
-                                "BookIndexes":  [
-                                                    1,
-                                                    2,
-                                                    3,
-                                                    4,
-                                                    5,
-                                                    6,
-                                                    7,
-                                                    8,
-                                                    9,
-                                                    10,
-                                                    11,
-                                                    12,
-                                                    13,
-                                                    14,
-                                                    15,
-                                                    16,
-                                                    17,
-                                                    18,
-                                                    19,
-                                                    20,
-                                                    21,
-                                                    22,
-                                                    23,
-                                                    24,
-                                                    25,
-                                                    26,
-                                                    27,
-                                                    28,
-                                                    29,
-                                                    30,
-                                                    31,
-                                                    32,
-                                                    33,
-                                                    34,
-                                                    35,
-                                                    36,
-                                                    37,
-                                                    38,
-                                                    39,
-                                                    40,
-                                                    41,
-                                                    42,
-                                                    43,
-                                                    44,
-                                                    45,
-                                                    46
-                                                ],
-                                "Testament":  1
-                            },
-                            {
-                                "Title":  "Nuevo Testamento",
-                                "Books":  null,
-                                "BookIndexes":  [
-                                                    1,
-                                                    2,
-                                                    3,
-                                                    4,
-                                                    5,
-                                                    6,
-                                                    7,
-                                                    8,
-                                                    9,
-                                                    10,
-                                                    11,
-                                                    12,
-                                                    13,
-                                                    14,
-                                                    15,
-                                                    16,
-                                                    17,
-                                                    18,
-                                                    19,
-                                                    20,
-                                                    21,
-                                                    22,
-                                                    23,
-                                                    24,
-                                                    25,
-                                                    26,
-                                                    27
-                                                ],
-                                "Testament":  2
-                            }
-                        ]
+        "Title": "Default Book Config",
+        "BooksGroups": [
+            {
+                "Title": "Antiguo Testamento",
+                "Books": null,
+                "BookIndexes": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    21,
+                    22,
+                    23,
+                    24,
+                    25,
+                    26,
+                    27,
+                    28,
+                    29,
+                    30,
+                    31,
+                    32,
+                    33,
+                    34,
+                    35,
+                    36,
+                    37,
+                    38,
+                    39,
+                    40,
+                    41,
+                    42,
+                    43,
+                    44,
+                    45,
+                    46
+                ],
+                "Testament": 1
+            },
+            {
+                "Title": "Nuevo Testamento",
+                "Books": null,
+                "BookIndexes": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    21,
+                    22,
+                    23,
+                    24,
+                    25,
+                    26,
+                    27
+                ],
+                "Testament": 2
+            }
+        ]
     },
     {
-        "Title":  "Detail Book Config",
-        "BooksGroups":  [
-                            {
-                                "Title":  "Pentatéuco",
-                                "Books":  null,
-                                "BookIndexes":  [
-                                                    1,
-                                                    2,
-                                                    3,
-                                                    4,
-                                                    5
-                                                ],
-                                "Testament":  1
-                            },
-                            {
-                                "Title":  "Libros Históricos",
-                                "Books":  null,
-                                "BookIndexes":  [
-                                                    6,
-                                                    7,
-                                                    8,
-                                                    9,
-                                                    10,
-                                                    11,
-                                                    12,
-                                                    13,
-                                                    14,
-                                                    15,
-                                                    16,
-                                                    17,
-                                                    18,
-                                                    19,
-                                                    20,
-                                                    21
-                                                ],
-                                "Testament":  1
-                            },
-                            {
-                                "Title":  "Libros Poéticos o de Sabiduría",
-                                "Books":  null,
-                                "BookIndexes":  [
-                                                    22,
-                                                    23,
-                                                    24,
-                                                    25,
-                                                    26,
-                                                    27,
-                                                    28
-                                                ],
-                                "Testament":  1
-                            },
-                            {
-                                "Title":  "Profetas Mayores",
-                                "Books":  null,
-                                "BookIndexes":  [
-                                                    29,
-                                                    30,
-                                                    31,
-                                                    33,
-                                                    34
-                                                ],
-                                "Testament":  1
-                            },
-                            {
-                                "Title":  "Profetas Menores",
-                                "Books":  null,
-                                "BookIndexes":  [
-                                                    32,
-                                                    35,
-                                                    36,
-                                                    37,
-                                                    38,
-                                                    39,
-                                                    40,
-                                                    41,
-                                                    42,
-                                                    43,
-                                                    44,
-                                                    45,
-                                                    46
-                                                ],
-                                "Testament":  1
-                            },
-                            {
-                                "Title":  "Los Evangelios",
-                                "Books":  null,
-                                "BookIndexes":  [
-                                                    1,
-                                                    2,
-                                                    3,
-                                                    4
-                                                ],
-                                "Testament":  2
-                            },
-                            {
-                                "Title":  "Hechos de los Apóstoles",
-                                "Books":  null,
-                                "BookIndexes":  [
-                                                    5
-                                                ],
-                                "Testament":  2
-                            },
-                            {
-                                "Title":  "Cartas de Pablo",
-                                "Books":  null,
-                                "BookIndexes":  [
-                                                    6
-                                                ],
-                                "Testament":  2
-                            },
-                            {
-                                "Title":  "Santiago",
-                                "Books":  null,
-                                "BookIndexes":  [
-                                                    20
-                                                ],
-                                "Testament":  2
-                            },
-                            {
-                                "Title":  "Pedro",
-                                "Books":  null,
-                                "BookIndexes":  [
-                                                    21,
-                                                    22
-                                                ],
-                                "Testament":  2
-                            },
-                            {
-                                "Title":  "Juan",
-                                "Books":  null,
-                                "BookIndexes":  [
-                                                    23,
-                                                    24,
-                                                    25
-                                                ],
-                                "Testament":  2
-                            },
-                            {
-                                "Title":  "Judas",
-                                "Books":  null,
-                                "BookIndexes":  [
-                                                    26
-                                                ],
-                                "Testament":  2
-                            },
-                            {
-                                "Title":  "Apocalipsis",
-                                "Books":  null,
-                                "BookIndexes":  [
-                                                    27
-                                                ],
-                                "Testament":  2
-                            }
-                        ]
+        "Title": "Detail Book Config",
+        "BooksGroups": [
+            {
+                "Title": "Pentatéuco",
+                "Books": null,
+                "BookIndexes": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ],
+                "Testament": 1
+            },
+            {
+                "Title": "Libros Históricos",
+                "Books": null,
+                "BookIndexes": [
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    21
+                ],
+                "Testament": 1
+            },
+            {
+                "Title": "Libros Poéticos o de Sabiduría",
+                "Books": null,
+                "BookIndexes": [
+                    22,
+                    23,
+                    24,
+                    25,
+                    26,
+                    27,
+                    28
+                ],
+                "Testament": 1
+            },
+            {
+                "Title": "Profetas Mayores",
+                "Books": null,
+                "BookIndexes": [
+                    29,
+                    30,
+                    31,
+                    33,
+                    34
+                ],
+                "Testament": 1
+            },
+            {
+                "Title": "Profetas Menores",
+                "Books": null,
+                "BookIndexes": [
+                    32,
+                    35,
+                    36,
+                    37,
+                    38,
+                    39,
+                    40,
+                    41,
+                    42,
+                    43,
+                    44,
+                    45,
+                    46
+                ],
+                "Testament": 1
+            },
+            {
+                "Title": "Los Evangelios",
+                "Books": null,
+                "BookIndexes": [
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                "Testament": 2
+            },
+            {
+                "Title": "Hechos de los Apóstoles",
+                "Books": null,
+                "BookIndexes": [
+                    5
+                ],
+                "Testament": 2
+            },
+            {
+                "Title": "Cartas de Pablo",
+                "Books": null,
+                "BookIndexes": [
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19
+                ],
+                "Testament": 2
+            },
+            {
+                "Title": "Santiago",
+                "Books": null,
+                "BookIndexes": [
+                    20
+                ],
+                "Testament": 2
+            },
+            {
+                "Title": "Pedro",
+                "Books": null,
+                "BookIndexes": [
+                    21,
+                    22
+                ],
+                "Testament": 2
+            },
+            {
+                "Title": "Juan",
+                "Books": null,
+                "BookIndexes": [
+                    23,
+                    24,
+                    25
+                ],
+                "Testament": 2
+            },
+            {
+                "Title": "Judas",
+                "Books": null,
+                "BookIndexes": [
+                    26
+                ],
+                "Testament": 2
+            },
+            {
+                "Title": "Apocalipsis",
+                "Books": null,
+                "BookIndexes": [
+                    27
+                ],
+                "Testament": 2
+            }
+        ]
     }
 ]
