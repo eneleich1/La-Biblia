@@ -8,7 +8,7 @@ class BibleHome extends Component {
   GroupBookView(gb, testament) {
     return (
       <div className='mt-5 text-start' key={gb.Title}>
-        <h2>{gb.Title != testament.Title ? gb.Title : ""}</h2>
+        <h4>{gb.Title != testament.Title ? gb.Title : ""}</h4>
         <ul>
           {
             gb.BookIndexes.map(i =>
@@ -26,8 +26,39 @@ class BibleHome extends Component {
     )
   }
 
+  TestamentView(booksGroups, testament) {
+    return (
+      <div id="oldTestament_div" className="pb-30 ">
+        <div className="ml-2">
+          <h2 className="pb-30 text-center">{testament.Title}</h2>
+          <div className="mt-5">
+            {
+              booksGroups.map(gb =>
+                  <div className="mt-5" key={gb.Title}>
+                    {this.GroupBookView(gb, testament)}
+                  </div>
+              )
+            }
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  GetBooksGroups(booksConfig){
+    const otg = [];
+    const ntg = [];
+    booksConfig.BooksGroups.forEach(bg => {
+      if(bg.Testament == 1) otg.push(bg)
+      else if(bg.Testament == 2) ntg.push(bg)
+    });
+
+    return {oldTestGroups: otg, newTestGroups: ntg}
+  }
+
   render() {
     const defaultConfig = bookConfigs[1];
+    const booksGroups = this.GetBooksGroups(defaultConfig);
 
     return (
       <div className=" d-flex flex-column flex-fill">
@@ -39,43 +70,9 @@ class BibleHome extends Component {
 
         <div className="d-sm-flex flex-wrap justify-content-center mt-5">
 
-          <div id="oldTestament_div" className="pb-30 ">
-            <div className="ml-2">
-              <h2 className="pb-30 text-center">Antiguo Testamento</h2>
-              <div className="mt-5">
-                {
-                  defaultConfig.BooksGroups.map(gb =>
-                    gb.Testament == 1 ?
-                      <div className="mt-5" key={gb.Title}>
-                        {this.GroupBookView(gb, oldtest)}
-                      </div>
-                      :
-                      ""
-                  )
-                }
-              </div>
-            </div>
-          </div>
-
+          {this.TestamentView(booksGroups.oldTestGroups, oldtest)}
           <div className="verticalLine" />
-
-          <div id="newTestament_div" className="pb-30">
-            <div className="ml-2">
-              <h2 className="pb-30 text-center">Nuevo Testamento</h2>
-              <div className="mt-5">
-                {
-                  defaultConfig.BooksGroups.map(gb =>
-                    gb.Testament == 2 ?
-                      <div className="mt-5" key={gb.Title}>
-                        {this.GroupBookView(gb, newtest)}
-                      </div>
-                      :
-                      ""
-                  )
-                }
-              </div>
-            </div>
-          </div>
+          {this.TestamentView(booksGroups.newTestGroups, newtest)}
 
         </div>
 
