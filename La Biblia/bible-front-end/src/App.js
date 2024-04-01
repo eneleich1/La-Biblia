@@ -1,14 +1,15 @@
 import logo from './logo.svg';
 import './App.css';
-import { Component1 } from './components/Component1';
 import BibleHome from './components/BibleHome';
+import ChapterIndex from './components/ChapterIndex';
 
 
 
 function App() {
   return (
     <div className="App">
-      <BibleHome/>
+      {/* <BibleHome/> */}
+      <ChapterIndex/>
     </div>
   );
 }

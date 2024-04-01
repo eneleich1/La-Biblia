@@ -9,11 +9,6 @@
     color: #ffffff;
   }
 
-  .container-fluid {
-    padding-top: 70px;
-    padding-bottom: 70px;
-  }
-
   body {
     font: 150%, "Montserrat", sans-serif;
     line-height: 1.8;
@@ -25,7 +20,8 @@
   }
 
   .padding1{
-      padding-top: 20px;
+      padding-top: 10px;
+      padding-bottom: 10px;
   }
 
   .margin {margin-bottom: 45px;}
@@ -35,6 +31,5 @@
   }
 
   h1{
-      font-size: 3em;
-     
+      font-size: 36px;
   }
