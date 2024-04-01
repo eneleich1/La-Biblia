@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import newtest from '../data/nuevo-testamento.json'
 import oldtest from '../data/antiguo-testamento.json'
+import "owp.glyphicons/glyphicons.min.css";
 
 class ChapterIndex extends Component {
 
@@ -33,8 +34,8 @@ class ChapterIndex extends Component {
         let bookIndex = 1;
 
         let book = null;
-        if (testament == 1) { book = oldtest.Books[bookIndex - 1]; }
-        else if (testament == 2) { book = newtest.Books[bookIndex - 1]; }
+        if (testament === 1) { book = oldtest.Books[bookIndex - 1]; }
+        else if (testament === 2) { book = newtest.Books[bookIndex - 1]; }
 
         let chaptersCount = book.Chapters.length;
         let indexes = Array.from(Array(chaptersCount).keys()).map(i => i + 1)
