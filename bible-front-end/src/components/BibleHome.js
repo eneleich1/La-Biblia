@@ -8,7 +8,7 @@ class BibleHome extends Component {
   GroupBookView(gb, testament) {
     return (
       <div className='mt-5 text-start' key={gb.Title}>
-        <h4>{gb.Title != testament.Title ? gb.Title : ""}</h4>
+        <h4>{gb.Title !== testament.Title ? gb.Title : ""}</h4>
         <ul>
           {
             gb.BookIndexes.map(i =>
@@ -49,8 +49,8 @@ class BibleHome extends Component {
     const otg = [];
     const ntg = [];
     booksConfig.BooksGroups.forEach(bg => {
-      if(bg.Testament == 1) otg.push(bg)
-      else if(bg.Testament == 2) ntg.push(bg)
+      if(bg.Testament === 1) otg.push(bg)
+      else if(bg.Testament === 2) ntg.push(bg)
     });
 
     return {oldTestGroups: otg, newTestGroups: ntg}
