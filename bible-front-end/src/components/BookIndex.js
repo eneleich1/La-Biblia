@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
+import { Link} from 'react-router-dom';
 import newtest from '../data/nuevo-testamento.json'
 import oldtest from '../data/antiguo-testamento.json'
 import "owp.glyphicons/glyphicons.min.css";
 
-class ChapterIndex extends Component {
+class BookIndex extends Component {
 
     format(num, len) {
         let digits = 0;
@@ -18,24 +19,32 @@ class ChapterIndex extends Component {
         return res;
     }
 
-    IndexesView(indexes) {
+    IndexesView(indexes, bookTitle) {
         return (
             indexes.map(i =>
-                <button type='button' className='btn btn-default chapter' key={i}>
-                    <a className='chapter-a' href='../01- GÉNESIS/Génesis 1.html'>{this.format(i, 2)}</a>
-                </button>
+                <Link to={{pathname:`${bookTitle}/${i}`}}  key={i}>
+                    <button type='button' className='btn btn-default chapter'>
+                        <p className='chapter-a'>{this.format(i, 2)}</p>
+                    </button>
+                </Link>
             )
         )
     }
 
-    render() {
+    render(props) {
 
+        // <Route path="/:testament/:bookname" Component={BookIndex}/>
+        // <Route path="/:chapter/:index" Component={Chapter}/>
         let testament = 1;
         let bookIndex = 1;
+
+        console.log(props)
 
         let book = null;
         if (testament === 1) { book = oldtest.Books[bookIndex - 1]; }
         else if (testament === 2) { book = newtest.Books[bookIndex - 1]; }
+
+        const bookTitle = book.Title.toLocaleLowerCase().substring(4, book.Title.length);
 
         let chaptersCount = book.Chapters.length;
         let indexes = Array.from(Array(chaptersCount).keys()).map(i => i + 1)
@@ -46,10 +55,10 @@ class ChapterIndex extends Component {
                     <div className='col-sm-3'></div>
                     <div className='col-sm-6'>
                         <div className='container-fluid text-start header padding1'>
-                            <h1 className='title-case'>{book.Title.toLocaleLowerCase().substring(3, book.Title.length)}</h1>
+                            <h1 className='title-case'>{bookTitle}</h1>
                         </div>
 
-                        <div className='container-fluid text-start section padding1'>{this.IndexesView(indexes)}</div>
+                        <div className='container-fluid text-start section padding1'>{this.IndexesView(indexes, bookTitle)}</div>
 
                         <div className='container-fluid  text-start footer padding1'>
                             <button type='button' className='btn btn-primary' >
@@ -68,4 +77,4 @@ class ChapterIndex extends Component {
 
 }
 
-export default ChapterIndex;
+export default BookIndex;
