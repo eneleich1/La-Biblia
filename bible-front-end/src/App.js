@@ -1,15 +1,20 @@
 import './App.css';
+import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import BibleHome from './components/BibleHome';
-import ChapterIndex from './components/ChapterIndex';
+import Chapter from './components/Chapter';
+import BookIndex from './components/BookIndex';
 
 
 
 function App() {
   return (
-    <div className="App">
-      {/* <BibleHome/> */}
-      <ChapterIndex/>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" Component={BibleHome}/>
+        <Route path="/:testament/:bookIndex" Component={BookIndex}/>
+        <Route path="/:chapter/:index" Component={Chapter}/>
+      </Routes>
+    </Router>
   );
 }
 
