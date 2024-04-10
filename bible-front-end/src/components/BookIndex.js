@@ -1,8 +1,10 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom';
 import newtest from '../data/nuevo-testamento.json'
 import oldtest from '../data/antiguo-testamento.json'
 import "owp.glyphicons/glyphicons.min.css";
+import { useParams } from 'react-router-dom'
+
 
 export const BookIndex = () => {
 
@@ -29,8 +31,10 @@ export const BookIndex = () => {
         )
     }
 
-    let testament = 1;
-    let bookIndex = 1;
+    const params = useParams();
+    let testament = parseInt(params.testament);
+    let bookIndex = parseInt(params.bookIndex);
+
     let book = testament === 2 ? newtest.Books[bookIndex - 1] : oldtest.Books[bookIndex - 1];
 
     const bookTitle = book.Title.toLocaleLowerCase().substring(4, book.Title.length);
@@ -48,12 +52,16 @@ export const BookIndex = () => {
                     <div className='container-fluid text-start section padding1'>{IndexesView(indexes, bookTitle)}</div>
 
                     <div className='container-fluid  text-start footer padding1'>
-                        <button type='button' className='btn btn-primary' >
-                            <span className='glyphicon glyphicon-home'></span>
-                        </button>
-                        <button type='button' className='btn btn-primary ms-2'>
-                            <span className='glyphicon glyphicon-chevron-right'></span>
-                        </button>
+                        <Link to="/">
+                            <button type='button' className='btn btn-primary' >
+                                <span className='glyphicon glyphicon-home'></span>
+                            </button>
+                        </Link>
+                        <Link to={`/${testament}/${bookIndex + 1}`}>
+                            <button type='button' className='btn btn-primary ms-2'>
+                                <span className='glyphicon glyphicon-chevron-right'></span>
+                            </button>
+                        </Link>
                     </div>
                 </div>
                 <div className='col-sm-3'></div>
