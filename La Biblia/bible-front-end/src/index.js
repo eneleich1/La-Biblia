@@ -5,7 +5,7 @@ import App from './App';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.min.js";
 import './Styles/Content/css/indexPageStyle.css'
-import './Styles/Content/css/indexStyle.css'
+import './Styles/Content/css/homeStyle.css'
 import './Styles/Content/css/mystyle.css'
 import './Styles/Content/css/standarPageStyle.css'
 
