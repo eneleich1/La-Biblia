@@ -17,7 +17,8 @@ function Get-ChildsRecursive {
 
 class Versicle {
     [int] $Index
-    [string] $Text
+    [string]$Text
+    [int]$VersicleNumber
 
     Versicle([int] $index, [string] $text) {
         $this.Index = $index
@@ -29,6 +30,7 @@ class Chapter {
     [string]$Title
     [string]$ShortTitle
     [Versicle[]]$Versicles
+    [int]$ChapterNumber
 
     Chapter([string]$title, [Versicle[]] $versicles) {
         $this.Title = $title
@@ -45,6 +47,7 @@ class Book {
     [string]$Title
     [string]$ShortTitle
     [Chapter[]]$Chapters
+    [int]$BookNumber
 
     Book([string]$title, [Chapter[]]$chapters) {
         $this.Title = $title
@@ -60,6 +63,7 @@ class Book {
 class BookGroup {
     [string] $Title
     [Book[]] $Books
+    [int]$BookGroupNumber
 
     BookGroup([string]$title, [Book[]]$Books) {
         $this.Title = $title
@@ -68,25 +72,30 @@ class BookGroup {
 }
 
 #Parameters
-$source = "D:\Cristianity\La Biblia\01 - Nuevo Testamento"
+$source = "D:\Cristianity\La Biblia\00 - Antiguo Testamento"
 $destiny = "C:\Users\eneleich\Desktop\Biblia Json\"
 
 $testament = [BookGroup]::new("Nuevo Testamento", @())
 
 $dirs = Get-ChildItem -Path $source
 
-foreach ($d in $dirs) 
+for ($i =0; $i -lt $dirs.Length; $i++) 
 {
+    $d = $dirs[$i];
+
     if ($d.Name -eq "00- Indice") { continue }
    
     #We need to pass as an array because could be some books with only one chapter, and $filesInfo could no be an array by default
     $filesInfo = @(Get-ChildItem -Path $d.FullName)
 
     $book = [Book]::new($d.Name, "short title: $($d.Name)", @())
+    $book.BookNumber = $i + 1;
 
     Write-Output "Processing $($book.Title) with $($filesInfo.Length) chapters"
 
-    foreach ($fileInfo in $filesInfo) {
+    for ($j= 0; $j -lt $filesInfo.Length; $j++) {
+        
+        $fileInfo = $filesInfo[$j];
 
         $chapterName = $fileInfo.Name.Remove($fileInfo.Name.Length - 5, 5)
 
@@ -102,12 +111,17 @@ foreach ($d in $dirs)
         $versicles = $childs | Where-Object { $_.nodeNAme -eq "p" }
 
         $chapter = [Chapter]::new($chapterName, "short title: $chapterName", @())
+        $chapter.ChapterNumber = $j + 1;
 
+        $k = 1;
         foreach ($v in $versicles) {
             $a = $v.childNodes[0].innerText
             $text = $v.innerText.Remove(0, $a.Length)
 
             $versicle = [Versicle]::new($a, $text)
+            $versicle.VersicleNumber = $k;
+            $k++;
+
             $chapter.Versicles += $versicle
         }
 
