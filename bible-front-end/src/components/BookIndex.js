@@ -40,6 +40,13 @@ export const BookIndex = () => {
     const bookTitle = book.Title.toLocaleLowerCase().substring(4, book.Title.length);
     let indexes = Array.from(Array(book.Chapters.length).keys()).map(i => i + 1)
 
+    const NextBookIndex = (t, i) =>{
+        return (t === 1 && i === 46) ? `/${testament + 1}/${1}`: `/${testament}/${bookIndex + 1}`
+    }
+    const PrevBookIndex = (t, i) =>{
+        return (t === 2 && i === 1) ? `/${1}/${46}`: `/${testament}/${bookIndex - 1}`
+    }
+
     return (
         <div className='container-fluid text-center'>
             <div className='d-flex row-content'>
@@ -57,11 +64,22 @@ export const BookIndex = () => {
                                 <span className='glyphicon glyphicon-home'></span>
                             </button>
                         </Link>
-                        <Link to={`/${testament}/${bookIndex + 1}`}>
-                            <button type='button' className='btn btn-primary ms-2'>
-                                <span className='glyphicon glyphicon-chevron-right'></span>
-                            </button>
-                        </Link>
+                        {
+                            !(testament === 1 && bookIndex === 1) &&
+                            <Link to={PrevBookIndex(testament, bookIndex)}>
+                                <button type='button' className='btn btn-primary ms-2'>
+                                    <span className='glyphicon glyphicon-chevron-left'></span>
+                                </button>
+                            </Link>
+                        }
+                        {
+                             !(testament === 2 && bookIndex === 27) &&
+                            <Link to={NextBookIndex(testament, bookIndex)}>
+                                <button type='button' className='btn btn-primary ms-2'>
+                                    <span className='glyphicon glyphicon-chevron-right'></span>
+                                </button>
+                            </Link>
+                        }
                     </div>
                 </div>
                 <div className='col-sm-3'></div>
