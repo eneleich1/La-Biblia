@@ -31,6 +31,7 @@ class Chapter {
     [string]$ShortTitle
     [Versicle[]]$Versicles
     [int]$ChapterNumber
+    [string]$FormatedName
 
     Chapter([string]$title, [Versicle[]] $versicles) {
         $this.Title = $title
@@ -71,11 +72,49 @@ class BookGroup {
     }
 }
 
+class MyFileInfo {
+    [string]$FormattedName
+    [System.IO.FileInfo]$fileInfo
+    
+
+    MyFileInfo([string]$formatedName, [System.IO.FileInfo]$fInfo) {
+        $this.FormattedName = $formatedName
+        $this.fileInfo = $fInfo
+    }
+}
+
+function GetFormattedFilesInfo {
+
+    param (
+        $BookPath
+    )
+
+    $res = [MyFileInfo[]]@()
+
+    $files = @(Get-ChildItem -Path $BookPath)
+
+    foreach ($f in $files) {
+        $str = $f.Name;
+        $myFileInfo = [MyFileInfo]::new($f.Name, $f);
+
+        $match = $str -match '(\w+) (\d+).(\w+)'
+        if ($match -and $Matches[2].Length -eq 1) {
+            $str = $str -replace '(\w+) (\d+).(\w+)', '$1 0$2.$3'
+        }
+    
+        $myFileInfo.FormattedName = $str;
+
+        $res += $myFileInfo
+    }
+
+    return $res | Sort-Object -Property FormattedName
+}
+
 #Parameters
 $source = "D:\Cristianity\La Biblia\00 - Antiguo Testamento"
 $destiny = "C:\Users\eneleich\Desktop\Biblia Json\"
 
-$testament = [BookGroup]::new("Nuevo Testamento", @())
+$testament = [BookGroup]::new("Antiguo Testamento", @())
 
 $dirs = Get-ChildItem -Path $source
 
@@ -86,7 +125,9 @@ for ($i =0; $i -lt $dirs.Length; $i++)
     if ($d.Name -eq "00- Indice") { continue }
    
     #We need to pass as an array because could be some books with only one chapter, and $filesInfo could no be an array by default
-    $filesInfo = @(Get-ChildItem -Path $d.FullName)
+    $filesInfo = GetFormattedFilesInfo -BookPath $d.FullName
+
+    $filesInfo = [MyFileInfo[]]@($filesInfo);
 
     $book = [Book]::new($d.Name, "short title: $($d.Name)", @())
     $book.BookNumber = $i + 1;
@@ -95,11 +136,11 @@ for ($i =0; $i -lt $dirs.Length; $i++)
 
     for ($j= 0; $j -lt $filesInfo.Length; $j++) {
         
-        $fileInfo = $filesInfo[$j];
+        $fi = $filesInfo[$j];
 
-        $chapterName = $fileInfo.Name.Remove($fileInfo.Name.Length - 5, 5)
+        $chapterName = $fi.fileInfo.Name.Remove($fi.fileInfo.Name.Length - 5, 5)
 
-        $file = $fileInfo.FullName
+        $file = $fi.fileInfo.FullName
         $Source = Get-Content -path $file -raw -Encoding UTF8
         $html = New-Object -Com "HTMLFile"
         $html.IHTMLDocument2_write($Source)
@@ -111,6 +152,7 @@ for ($i =0; $i -lt $dirs.Length; $i++)
         $versicles = $childs | Where-Object { $_.nodeNAme -eq "p" }
 
         $chapter = [Chapter]::new($chapterName, "short title: $chapterName", @())
+        $chapter.FormatedName = $fi.FormattedName;
         $chapter.ChapterNumber = $j + 1;
 
         $k = 1;
