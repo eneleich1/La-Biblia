@@ -3,6 +3,7 @@ import oldtest from '../data/antiguo-testamento.json'
 import bookConfigs from '../data/bookConfigs.json'
 import { Link } from "react-router-dom";
 import '../Styles/Content/css/homeStyle.css'
+import { HashLink } from 'react-router-hash-link';
 
 function IsBookGroup(gb, testament){
   return gb.Title !== testament.Title;
