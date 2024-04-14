@@ -6,7 +6,22 @@ import "owp.glyphicons/glyphicons.min.css";
 import { useParams } from 'react-router-dom'
 import '../Styles/Content/css/chapterStyle.css'
 
-export const Chapter = () => {
+function ChapterPart(part) {
+	return (
+		part.map((v, i) => {
+			return (
+				<div key={i}>
+					<p className='versicle' id={`V${v.Index}`}>
+						<strong className="vers-id">{v.Index}</strong>
+						{v.Text}
+					</p>
+				</div>
+			);
+		})
+	)
+}
+
+function Chapter() {
 
 	const params = useParams();
 	let testament = parseInt(params.testament);
@@ -59,51 +74,27 @@ export const Chapter = () => {
 				}
 			</div>
 
-			<div className='container-fluid text-center section'>
-				<div className='d-flex row-content'>
-					<div className='col-sm-3'></div>
-					<div className='col-sm-6 text-center'>
-						<div className='row'>
-							<h1 id='chapter01' className='title-case chapter-title'>{chapterName}</h1>
-							<div className='d-flex flex-colum'>
-								<div className='col-sm-6 book-page'>
-									{
-										leftPart.map((v, i) => {
-											return (
-												<div key={i}>
-													<p>
-														<a id={`V${v.Index}`} href='asd'>{v.Index}</a>
-														{v.Text}
-													</p>
-												</div>
-											);
-
-										})
-									}
-								</div>
-								<div className='col-sm-6 book-page'>
-									{
-										rightPart.map((v, i) => {
-											return (
-												<div key={i}>
-													<p>
-														<a id={`V${v.Index}`} href='asdas'>{v.Index}</a>
-														{v.Text}
-													</p>
-												</div>
-											);
-
-										})
-									}
-								</div>
-							</div>
+			<div className="row">
+				<div className="col-3"></div>
+				<div className="col-6">
+					<h1 id='chapter01' className='title-case text-center mb-5'>{chapterName}</h1>
+					<div className='row'>
+						<div className='col-sm-6 book-page'>
+							{
+								ChapterPart(leftPart)
+							}
+						</div>
+						<div className='col-sm-6 book-page'>
+							{
+								ChapterPart(rightPart)
+							}
 						</div>
 					</div>
-					<div className='col-sm-3'></div>
 				</div>
+				<div className="col-3"></div>
 			</div>
 
-			<div className='header'>
+			<div className='footer'>
 				<Link to="/">
 					<button type='button' className='btn btn-primary' >
 						<span className='glyphicon glyphicon-home'></span>

@@ -11,6 +11,34 @@
     padding: 15px;
 }
 
-.bg-yellow{
-    background-color: yellow;
+section {
+    width:350px;
+    float:left;
+    padding:10px; 
+}
+
+/* Original Style */
+/* .vers-id{
+    color: #337ab7;
+    cursor: pointer;
+    font-weight: normal;
+}
+
+.versicle{
+    margin-bottom: 10px !important;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #333;
+    font-size: 18px !important;
+} */
+
+/* New Style */
+.vers-id{
+    color: rgb(66, 66, 246);
+    cursor: pointer;
+    font-weight: normal;
+}
+
+.versicle{
+    margin-bottom: 10px !important;
+    font-size: 1.2rem;
 }
