@@ -4,7 +4,7 @@ import newtest from '../data/nuevo-testamento.json'
 import oldtest from '../data/antiguo-testamento.json'
 import "owp.glyphicons/glyphicons.min.css";
 import { useParams } from 'react-router-dom'
-import '../Styles/Content/css/standarPageStyle.css'
+import '../Styles/Content/css/chapterStyle.css'
 
 export const Chapter = () => {
 
