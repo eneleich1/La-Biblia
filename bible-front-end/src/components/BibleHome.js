@@ -2,6 +2,11 @@ import newtest from '../data/nuevo-testamento.json'
 import oldtest from '../data/antiguo-testamento.json'
 import bookConfigs from '../data/bookConfigs.json'
 import { Link } from "react-router-dom";
+import '../Styles/Content/css/homeStyle.css'
+
+function IsBookGroup(gb, testament){
+  return gb.Title !== testament.Title;
+}
 
 function GetBooksGroups(booksConfig) {
   const otg = [];
@@ -16,14 +21,14 @@ function GetBooksGroups(booksConfig) {
 
 function GroupBookView(gb, testament) {
   return (
-    <div className='mt-5 text-start' key={gb.Title}>
-      <h2>{gb.Title !== testament.Title ? gb.Title : ""}</h2>
+    <div className='text-start' key={gb.Title}>
+      <h3>{IsBookGroup(gb, testament) && gb.Title}</h3>
       <ul>
         {
           gb.BookIndexes.map(i =>
             <li key={i}>
-              <Link to={`/${gb.Testament}/${i}`}>
-                <p className='title-case a-link'>
+              <Link to={`/${gb.Testament}/${i}`} className='text-dec-none'>
+                <p className='title-case a-link mb-1'>
                   {
                     testament.Books[i - 1].Title.toLocaleLowerCase()
                   }
@@ -37,15 +42,15 @@ function GroupBookView(gb, testament) {
   )
 }
 
-function TestamentView(booksGroups, testament) {
+function TestamentView(booksGroups, testament, testId) {
   return (
-    <div id="oldTestament_div" className="pb-30 ">
+    <div id={testId}>
       <div className="ml-2">
-        <h1 className="pb-30 text-center">{testament.Title}</h1>
-        <div className="mt-5">
+        <h2 className="text-center mb-5">{testament.Title}</h2>
+        <div>
           {
             booksGroups.map(gb =>
-              <div className="mt-5" key={gb.Title}>
+              <div key={gb.Title}>
                 {GroupBookView(gb, testament)}
               </div>
             )
@@ -64,15 +69,15 @@ function BibleHome() {
   return (
     <div className=" d-flex flex-column flex-fill">
       <div className="text-center pb-40 pt-30">
-        <h2>La Biblia de Jerusalén</h2>
-        <h3>Edición de 1976</h3>
+        <h1>La Biblia de Jerusalén</h1>
+        <h2>Edición de 1976</h2>
       </div>
 
-      <div className="d-sm-flex flex-wrap justify-content-center mt-5">
+      <div className="d-sm-flex justify-content-center mt-5">
 
-        {TestamentView(booksGroups.oldTestGroups, oldtest)}
+        {TestamentView(booksGroups.oldTestGroups, oldtest, "oldTest_div")}
         <div className="verticalLine" />
-        {TestamentView(booksGroups.newTestGroups, newtest)}
+        {TestamentView(booksGroups.newTestGroups, newtest, "newTest_div")}
 
       </div>
 
