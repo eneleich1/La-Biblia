@@ -4,7 +4,7 @@ import newtest from '../data/nuevo-testamento.json'
 import oldtest from '../data/antiguo-testamento.json'
 import "owp.glyphicons/glyphicons.min.css";
 import { useParams } from 'react-router-dom'
-
+import '../Styles/Content/css/bookIndexStyle.css'
 
 export const BookIndex = () => {
 
@@ -23,7 +23,7 @@ export const BookIndex = () => {
         return (
             indexes.map(i =>
                 <Link to={{ pathname: `${bookTitle}/${i}` }} key={i}>
-                    <button type='button' className='btn btn-default chapter'>
+                    <button type='button' className='chapter btn btn-default '>
                         <p className='chapter-a'>{FormatChapter(i, 2)}</p>
                     </button>
                 </Link>
@@ -40,11 +40,11 @@ export const BookIndex = () => {
     const bookTitle = book.Title.toLocaleLowerCase().substring(4, book.Title.length);
     let indexes = Array.from(Array(book.Chapters.length).keys()).map(i => i + 1)
 
-    const NextBookIndex = (t, i) =>{
-        return (t === 1 && i === 46) ? `/${testament + 1}/${1}`: `/${testament}/${bookIndex + 1}`
+    const NextBookIndex = (t, i) => {
+        return (t === 1 && i === 46) ? `/${testament + 1}/${1}` : `/${testament}/${bookIndex + 1}`
     }
-    const PrevBookIndex = (t, i) =>{
-        return (t === 2 && i === 1) ? `/${1}/${46}`: `/${testament}/${bookIndex - 1}`
+    const PrevBookIndex = (t, i) => {
+        return (t === 2 && i === 1) ? `/${1}/${46}` : `/${testament}/${bookIndex - 1}`
     }
 
     return (
@@ -73,7 +73,7 @@ export const BookIndex = () => {
                             </Link>
                         }
                         {
-                             !(testament === 2 && bookIndex === 27) &&
+                            !(testament === 2 && bookIndex === 27) &&
                             <Link to={NextBookIndex(testament, bookIndex)}>
                                 <button type='button' className='btn btn-primary ms-2'>
                                     <span className='glyphicon glyphicon-chevron-right'></span>

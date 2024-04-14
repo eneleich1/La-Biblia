@@ -1,0 +1,58 @@
+
+.header{
+	background-color: transparent;
+}
+.section{
+	background-color: transparent;
+}
+.footer{
+	background-color: transparent;
+}
+
+.chapter{
+	background: white !important;
+	border-color: gray !important;
+	border-style: solid !important;
+	margin: 3px !important;
+	background-color: white !important;
+}
+
+.chapter:hover{
+	background:wheat !important;
+	border-color: gray !important;
+}
+
+.chapter-a{
+	color: #333;
+	font-size: 24px;
+}
+
+.padding1{
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+Link{
+	text-decoration: none;
+}
+
+p{
+	margin: 0px !important;
+}
+
+.btn-primary{
+	background-color: #337ab7 !important;
+}
+
+.btn-primary:hover{
+	background-color: #265d8d !important;
+}
+
+.header{
+	margin-top: 20px;
+	margin-bottom: 10px;
+}
+
+.footer{
+	margin-top: 20px;
+}
