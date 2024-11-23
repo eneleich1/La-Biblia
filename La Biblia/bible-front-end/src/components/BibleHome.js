@@ -5,6 +5,14 @@ import { Link } from "react-router-dom";
 import '../Styles/Content/css/homeStyle.css'
 import { HashLink } from 'react-router-hash-link';
 
+function formatBookTitleWithRomanAfterDash(title) {
+  return title.replace(/(\d+-\s*)([ivxlcdm]+)/g, (match, prefix, roman) => {
+    return prefix + roman.toUpperCase();
+  }).replace(/(\d+-\s*)([IVXLCDM]+)(\b.*)/g, (match, prefix, roman, rest) => {
+    return prefix + roman.toUpperCase() + rest.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+  });
+}
+
 function IsBookGroup(gb, testament){
   return gb.Title !== testament.Title;
 }
@@ -31,7 +39,7 @@ function GroupBookView(gb, testament) {
               <Link to={`/${gb.Testament}/${i}`} className='text-dec-none'>
                 <p className='title-case a-link mb-1'>
                   {
-                    testament.Books[i - 1].Title.toLocaleLowerCase()
+                    formatBookTitleWithRomanAfterDash(testament.Books[i - 1].Title.toLocaleLowerCase())
                   }
                 </p>
               </Link>
@@ -74,7 +82,7 @@ function BibleHome() {
         <h2>Edición de 1976</h2>
       </div>
 
-      <div className="d-sm-flex justify-content-center mt-5">
+      <div className="d-sm-flex justify-content-center mt-5 p-3">
 
         {TestamentView(booksGroups.oldTestGroups, oldtest, "oldTest_div")}
         <div className="verticalLine" />

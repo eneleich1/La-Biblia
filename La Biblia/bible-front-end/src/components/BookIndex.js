@@ -6,6 +6,24 @@ import "owp.glyphicons/glyphicons.min.css";
 import { useParams } from 'react-router-dom'
 import '../Styles/Content/css/bookIndexStyle.css'
 
+function formatBookTitle(title) {
+    const romanPattern = /^[IVXLCDM]+(?=\s)/i;
+    const match = title.match(romanPattern);
+    let formattedTitle = '';
+  
+    if (match && match.index === 0) {
+      // Mantener el número romano en mayúsculas si está al principio del título
+      formattedTitle += match[0].toUpperCase();
+      // Convertir el resto del título a formato de título con la primera letra en mayúscula
+      formattedTitle += title.substring(match[0].length).toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+    } else {
+      // Convertir todo el título a formato de título con la primera letra en mayúscula
+      formattedTitle = title.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+  
+    return formattedTitle;
+  }
+
 export const BookIndex = () => {
 
     const FormatChapter = (num, len) => {
@@ -37,7 +55,7 @@ export const BookIndex = () => {
 
     let book = testament === 2 ? newtest.Books[bookIndex - 1] : oldtest.Books[bookIndex - 1];
 
-    const bookTitle = book.Title.toLocaleLowerCase().substring(4, book.Title.length);
+    const bookTitle = formatBookTitle(book.Title.toLocaleLowerCase().substring(4, book.Title.length));
     let indexes = Array.from(Array(book.Chapters.length).keys()).map(i => i + 1)
 
     const NextBookIndex = (t, i) => {
