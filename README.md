@@ -140,7 +140,7 @@ La Biblia de Jerusalen Project/
 │           ├── Styles/
 │           ├── App.js
 │           └── index.js
-└── Programs/
+└── Tools/
     ├── BibleEditor/
     ├── GetAllChaptersInfo/
     ├── HtmlWriter/
@@ -183,7 +183,9 @@ src/data/bookConfigs.json
 
 ### C# Tools
 
-The `Programs/` folder contains the custom C# tools used during the creation and processing of the Bible content.
+The `Tools/` folder contains the custom C# tools used during the creation and processing of the Bible content.
+
+These tools are now part of the main repository alongside the Bible content. `BibleEditor` keeps its original commit history, while the smaller support tools were imported as historical project additions.
 
 #### BibleEditor
 
