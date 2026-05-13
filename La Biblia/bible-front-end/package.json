@@ -12,7 +12,8 @@
     "db:push": "prisma db push",
     "import:bible": "tsx scripts/import-bible-json.ts",
     "verse-words": "tsx scripts/generate-verse-words.ts",
-    "typesense:sync": "tsx scripts/sync-typesense.ts"
+    "typesense:sync": "tsx scripts/sync-typesense.ts",
+    "setup:local": "node scripts/setup-local.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.3.0",
