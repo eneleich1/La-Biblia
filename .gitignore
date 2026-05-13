@@ -1,3 +1,8 @@
+# Local environment (do not commit secrets)
+.env
+.env.local
+.env.*.local
+
 # Node / frontend dependencies and builds
 node_modules/
 npm-debug.log*

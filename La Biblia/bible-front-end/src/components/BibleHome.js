@@ -1,10 +1,8 @@
-import newtest from '../data/nuevo-testamento.json'
-import oldtest from '../data/antiguo-testamento.json'
-import bookConfigs from '../data/bookConfigs.json'
+import newtest from '../content/nuevo-testamento.json'
+import oldtest from '../content/antiguo-testamento.json'
+import bookConfigs from '../content/bookConfigs.json'
 import { Link } from "react-router-dom";
 import '../Styles/Content/css/homeStyle.css'
-import { HashLink } from 'react-router-hash-link';
-
 function formatBookTitleWithRomanAfterDash(title) {
   return title.replace(/(\d+-\s*)([ivxlcdm]+)/g, (match, prefix, roman) => {
     return prefix + roman.toUpperCase();

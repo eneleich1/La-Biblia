@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
-import newtest from '../data/nuevo-testamento.json'
-import oldtest from '../data/antiguo-testamento.json'
+import newtest from '../content/nuevo-testamento.json'
+import oldtest from '../content/antiguo-testamento.json'
 import "owp.glyphicons/glyphicons.min.css";
 import { useParams } from 'react-router-dom'
 import '../Styles/Content/css/chapterStyle.css'
