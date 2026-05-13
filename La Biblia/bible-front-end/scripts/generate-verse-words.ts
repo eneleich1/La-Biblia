@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { normalizeText, tokenizeNormalized } from "../lib/normalizeText";
+import { extractWordsFromVerseText } from "../lib/normalizeText";
 
 const prisma = new PrismaClient();
 
@@ -7,7 +7,7 @@ async function main() {
   await prisma.verseWord.deleteMany();
 
   const take = 500;
-  let cursor: string | undefined;
+  let skip = 0;
 
   const batch: {
     translationId: string;
@@ -27,43 +27,44 @@ async function main() {
   for (;;) {
     const verses = await prisma.verse.findMany({
       take,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { id: cursor } : undefined,
-      orderBy: { id: "asc" },
+      skip,
+      orderBy: [
+        { book: { testament: "asc" } },
+        { book: { order: "asc" } },
+        { chapterNumber: "asc" },
+        { verseNumber: "asc" },
+      ],
       select: {
-        id: true,
         translationId: true,
         bookId: true,
         chapterNumber: true,
         verseNumber: true,
-        normalizedText: true,
+        text: true,
       },
     });
     if (!verses.length) break;
 
     for (const v of verses) {
-      const tokens = tokenizeNormalized(v.normalizedText);
-      for (const t of tokens) {
-        const normalizedWord = normalizeText(t);
-        if (!normalizedWord) continue;
+      const tokens = extractWordsFromVerseText(v.text);
+      for (const { word, normalizedWord } of tokens) {
         batch.push({
           translationId: v.translationId,
           bookId: v.bookId,
           chapterNumber: v.chapterNumber,
           verseNumber: v.verseNumber,
-          word: t,
+          word,
           normalizedWord,
         });
         if (batch.length >= 2000) await flush();
       }
     }
 
-    cursor = verses[verses.length - 1].id;
-    if (verses.length < take) break;
+    skip += take;
   }
 
   await flush();
-  console.log("VerseWord generation complete.");
+  const count = await prisma.verseWord.count();
+  console.log("VerseWord generation complete. Rows:", count);
 }
 
 main()

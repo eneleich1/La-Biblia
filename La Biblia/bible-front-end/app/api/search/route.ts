@@ -4,6 +4,7 @@ import {
   countExactWordOccurrences,
   runVerseSearch,
 } from "@/lib/search";
+import { normalizeText, tokenizeNormalized } from "@/lib/normalizeText";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,9 @@ export async function GET(req: NextRequest) {
       chapter: Number.isFinite(chapter) ? chapter : undefined,
     });
 
+    const normQ = normalizeText(q);
+    const tokens = tokenizeNormalized(normQ);
+
     let exactCount: number | null = null;
     if (exactWord) {
       exactCount = await countExactWordOccurrences({
@@ -49,17 +53,21 @@ export async function GET(req: NextRequest) {
         testament,
         bookSlug,
       });
-    } else if (mode === "phrase" && !q.includes(" ")) {
+    } else if (tokens.length === 0) {
+      exactCount = null;
+    } else if (tokens.length === 1) {
       exactCount = await countExactWordOccurrences({
-        word: q,
+        word: tokens[0],
         translationId,
         testament,
         bookSlug,
       });
-    } else if (mode === "phrase") {
+    } else {
       exactCount = await countExactPhraseOccurrences({
         phrase: q,
         translationId,
+        testament,
+        bookSlug,
       });
     }
 

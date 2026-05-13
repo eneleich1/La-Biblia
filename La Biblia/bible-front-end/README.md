@@ -32,8 +32,8 @@ User -> Nginx -> Next.js App -> PostgreSQL
 
 - `app/` — App Router pages and API route handlers.
 - `components/` — Shared UI (`layout/`, `search/`, future `bible/`, `audio/`, `content/`).
-- `lib/` — `prisma.ts`, `typesense.ts`, `normalizeText.ts`, `bible.ts`, `search.ts`, `youtube.ts`.
-- `prisma/` — `schema.prisma` and SQL migrations.
+- `lib/` — `prisma.ts`, `typesense.ts`, `normalizeText.ts`, `siteUrl.ts`, `bible.ts`, `search.ts`, `youtube.ts`.
+- `prisma/` — `schema.prisma` and SQL migrations (apply in order).
 - `scripts/` — `import-bible-json.ts`, `generate-verse-words.ts`, `sync-typesense.ts`.
 - `data/import/` — Source JSON (`antiguo-testamento.json`, `nuevo-testamento.json`, `bookConfigs.json`, `chapters.json`) used **only** for import pipelines (not bundled as the runtime Bible source).
 
@@ -41,23 +41,45 @@ User -> Nginx -> Next.js App -> PostgreSQL
 
 Copy `.env.example` to `.env` and adjust (never commit real secrets):
 
-- `DATABASE_URL` — PostgreSQL connection string.
-- `TYPESENSE_HOST`, `TYPESENSE_PORT`, `TYPESENSE_PROTOCOL`, `TYPESENSE_API_KEY` — Typesense connection.
-- `NEXT_PUBLIC_SITE_URL` — Public site URL (used in search result links).
+- `DATABASE_URL` — PostgreSQL connection string (required for Prisma CLI and the app).
+- `TYPESENSE_HOST`, `TYPESENSE_PORT`, `TYPESENSE_PROTOCOL`, `TYPESENSE_API_KEY` — Typesense connection (required for `typesense:sync` and `/api/search`).
+- `NEXT_PUBLIC_SITE_URL` — Public site URL **without a trailing slash** (used in search result links and the Typesense sync script).
+
+On Windows, from `bible-front-end`:
+
+```bat
+copy .env.example .env
+```
 
 ## Local setup (development)
 
-1. Install Node 20+ and npm.
+Run steps **in this order**:
+
+1. Install **Node.js 20+** and npm.
 2. `cd La Biblia/bible-front-end`
-3. `cp .env.example .env` and set variables.
-4. Start databases (see Docker Compose below) or use your own Postgres/Typesense hosts.
+3. Copy `.env.example` to `.env` and set variables (see above).
+4. Start databases: `docker compose up -d` (or point `.env` at your own Postgres and Typesense).
 5. `npm install`
-6. Ensure `DATABASE_URL` is set (Prisma CLI commands read it from `.env`).
-7. `npx prisma migrate deploy` (or `npm run db:migrate` for interactive dev migrations).
-8. `npm run import:bible` — loads JSON from `data/import/` into PostgreSQL.
-9. `npm run verse-words` — builds `VerseWord` rows from normalized verse text.
-10. `npm run typesense:sync` — creates the `bible_verses` collection and indexes verses.
-11. `npm run dev` — Next.js at `http://localhost:3000`.
+6. **Apply all Prisma migrations** (creates tables and adds `Verse.chapterId`, etc.):
+
+   ```bash
+   npx prisma migrate deploy
+   ```
+
+   For **local schema iteration** (creates a *new* migration from `schema.prisma` changes), use:
+
+   ```bash
+   npm run db:migrate
+   ```
+
+   That command is **not** a substitute for `migrate deploy` on a fresh machine: `db:migrate` runs `prisma migrate dev`, which is interactive and dev-oriented.
+
+7. `npm run import:bible` — loads JSON from `data/import/` into PostgreSQL (prints a JSON summary; exits with code `1` if book/chapter/verse counts do not match the source files).
+8. `npm run verse-words` — rebuilds `VerseWord` from verse text (surface `word` + accent-insensitive `normalizedWord`).
+9. `npm run typesense:sync` — (re)creates the `bible_verses` collection and imports every verse document.
+10. `npm run dev` — Next.js at `http://localhost:3000`.
+
+After step 7–9, **`/biblia/es`** lists books for the translation whose `language` is `es` (created by the import script).
 
 ## Docker Compose
 
@@ -78,27 +100,31 @@ An optional `next-app` service is commented in `docker-compose.yml` if you prefe
 
 ## Prisma migrations
 
-- SQL migrations live in `prisma/migrations/`.
-- Apply: `npx prisma migrate deploy` (CI/production) or `npm run db:migrate` during development.
-- After schema changes: `npx prisma migrate dev --name <description>`.
+- SQL migrations live under `prisma/migrations/`.
+- **CI / production / new clone:** `npx prisma migrate deploy`
+- **Changing the schema in development:** `npm run db:migrate` (equivalent to `prisma migrate dev`) to generate a new migration folder.
+- `npm run db:push` — `prisma db push` only; skips migration history. Use sparingly for quick experiments, not as the main workflow.
 
 ## Bible JSON import
 
-- Place/update files under `data/import/` (same structure as the legacy CRA JSON).
-- Run `npm run import:bible` — wipes previous Bible rows for the import path (translations, books, chapters, verses, related words/audio links) and reloads from JSON.
+- Keep/update files under `data/import/`.
+- `npm run import:bible` deletes existing Bible-related rows (`Translation`, `Book`, `Chapter`, `Verse`, `VerseWord`, `AudioLink` for that pipeline) and reloads from JSON. It links each **Verse** to the correct **Chapter** via `chapterId`.
+- The script logs `expectedBooks`, `dbBooks`, chapter counts, verse counts, and `skippedEmptyVerses`.
 - Copyright: verify you have rights to host and distribute the Jerusalem 1976 text in your deployment.
 
 ## Typesense sync
 
-- Ensure Typesense is running and env vars match `docker-compose.yml`.
-- Run `npm run typesense:sync` after imports or when verse text changes.
-- Collection name: `bible_verses` (see `lib/typesense.ts`).
+- Typesense must be running; env vars must match `docker-compose.yml` (especially `TYPESENSE_API_KEY`).
+- `npm run typesense:sync` drops and recreates the **`bible_verses`** collection, then bulk-imports all verses with `action: "upsert"`.
+- If import errors occur, the Typesense client throws (check API key, disk, and logs).
 
 ## Search architecture
 
-- **UI:** `/buscar` posts a client request to `GET /api/search` with query parameters.
-- **Full text:** Typesense query over `text` and `normalizedText` with filters.
-- **Exact counts:** PostgreSQL `VerseWord` for single-token counts; multi-word phrases use a normalized substring match on `Verse.normalizedText` (MVP; can be refined later).
+- **UI (`/buscar`):** the browser issues **`GET /api/search?...`** (query string parameters only).
+- **Snippet / ranking:** **Typesense** on `normalizedText` and `text` (queries are normalized for consistent Spanish matching).
+- **Exact counts:**
+  - **One token:** `COUNT` on `VerseWord.normalizedWord` (PostgreSQL via Prisma).
+  - **Several tokens:** count distinct verses where the **ordered** `VerseWord.normalizedWord` sequence (aggregated with `array_agg(... ORDER BY id)`) contains the normalized phrase as a **space-delimited substring** (implemented in `lib/search.ts` with raw SQL). This uses **only** `VerseWord`, not `ILIKE` on `Verse.text`.
 
 ## Route structure (App Router)
 
@@ -117,15 +143,17 @@ An optional `next-app` service is commented in `docker-compose.yml` if you prefe
 | `/predicaciones`, `/predicaciones/[slug]` | Sermons placeholders. |
 | `/debates`, `/debates/[slug]` | Debates placeholders. |
 | `/admin` | Admin placeholder (no auth yet). |
-| `/api/search`, `/api/contact`, `/api/daily-reading` | APIs (contact and daily reading are stubs). |
+| `/api/search` | `GET` — Typesense hits + `exactCount`. |
+| `/api/contact` | `POST` — stub response. |
+| `/api/daily-reading` | `GET` — stub response. |
 
 ## Deployment notes (e.g. Contabo VPS)
 
-1. Install Docker (for Postgres + Typesense) and Node, or run DBs on managed services.
-2. Build: `npm ci && npx prisma migrate deploy && npm run build`.
-3. Run Next: `npm run start` (often under `systemd`) on port 3000.
-4. Configure **Nginx** `proxy_pass` to `http://127.0.0.1:3000`, enable HTTPS (Let’s Encrypt), set `NEXT_PUBLIC_SITE_URL` to the public URL.
-5. Run import + Typesense sync on the server (or from a secure admin job) after migrations.
+1. Install Docker (for Postgres + Typesense) and Node, or use managed databases.
+2. `npm ci && npx prisma migrate deploy && npm run build`
+3. `npm run import:bible && npm run verse-words && npm run typesense:sync` (or run these as a separate release job).
+4. Run Next: `npm run start` (often under `systemd`) on port 3000.
+5. Configure **Nginx** `proxy_pass` to `http://127.0.0.1:3000`, enable HTTPS (Let’s Encrypt), set `NEXT_PUBLIC_SITE_URL` to the public origin (no trailing slash).
 
 ## Development commands
 
@@ -135,8 +163,8 @@ An optional `next-app` service is commented in `docker-compose.yml` if you prefe
 | `npm run build` | `prisma generate` + production Next build. |
 | `npm run start` | Start production server. |
 | `npm run lint` | ESLint. |
-| `npm run db:migrate` | Prisma migrate (dev). |
-| `npm run db:push` | Push schema without migration files (prototyping only). |
+| `npm run db:migrate` | `prisma migrate dev` (dev; creates migrations). |
+| `npm run db:push` | `prisma db push` (prototyping; skips migration files). |
 | `npm run import:bible` | JSON → Postgres. |
 | `npm run verse-words` | Populate `VerseWord`. |
 | `npm run typesense:sync` | Postgres → Typesense. |

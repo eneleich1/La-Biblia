@@ -48,7 +48,8 @@ model Chapter {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  book   Book    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  verses Verse[]
 
   @@unique([bookId, number])
 }
@@ -57,6 +58,7 @@ model Verse {
   id             String   @id @default(cuid())
   translationId  String
   bookId         String
+  chapterId      String
   chapterNumber  Int
   verseNumber    Int
   text           String
@@ -66,9 +68,11 @@ model Verse {
 
   translation Translation @relation(fields: [translationId], references: [id], onDelete: Cascade)
   book        Book        @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chapter     Chapter     @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   @@unique([translationId, bookId, chapterNumber, verseNumber])
   @@index([translationId, normalizedText])
+  @@index([chapterId])
 }
 
 model VerseWord {

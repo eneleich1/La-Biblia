@@ -82,6 +82,9 @@ async function main() {
   });
 
   const usedSlugs = new Set<string>();
+  let skippedEmptyVerses = 0;
+  let jsonChaptersTotal = 0;
+  let jsonVersesTotal = 0;
 
   async function importTestament(root: JsonRoot, testament: number) {
     let order = 0;
@@ -106,11 +109,20 @@ async function main() {
         bookId: bookRow.id,
         number: i + 1,
       }));
+      jsonChaptersTotal += chapters.length;
       await prisma.chapter.createMany({ data: chapters });
+
+      const dbChapters = await prisma.chapter.findMany({
+        where: { bookId: bookRow.id },
+        orderBy: { number: "asc" },
+        select: { id: true, number: true },
+      });
+      const chapterIdByNumber = new Map(dbChapters.map((c) => [c.number, c.id]));
 
       const verseBatch: {
         translationId: string;
         bookId: string;
+        chapterId: string;
         chapterNumber: number;
         verseNumber: number;
         text: string;
@@ -126,12 +138,25 @@ async function main() {
       for (let ci = 0; ci < book.Chapters.length; ci++) {
         const ch = book.Chapters[ci];
         const chapterNumber = ci + 1;
+        const chapterId = chapterIdByNumber.get(chapterNumber);
+        if (!chapterId) {
+          throw new Error(
+            `Missing Chapter row for book "${nameEs}" (${slug}) chapter ${chapterNumber}`,
+          );
+        }
+
         for (const v of ch.Versicles) {
           const verseNumber = v.VersicleNumber ?? v.Index;
           const text = v.Text.trim();
+          if (!text) {
+            skippedEmptyVerses += 1;
+            continue;
+          }
+          jsonVersesTotal += 1;
           verseBatch.push({
             translationId: translation.id,
             bookId: bookRow.id,
+            chapterId,
             chapterNumber,
             verseNumber,
             text,
@@ -147,7 +172,40 @@ async function main() {
   await importTestament(oldtest, 1);
   await importTestament(newtest, 2);
 
-  console.log("Import finished. Translation id:", translation.id);
+  const [dbBooks, dbChapters, dbVerses] = await Promise.all([
+    prisma.book.count(),
+    prisma.chapter.count(),
+    prisma.verse.count(),
+  ]);
+
+  const expectedBooks = oldtest.Books.length + newtest.Books.length;
+
+  console.log(
+    JSON.stringify(
+      {
+        translationId: translation.id,
+        language: translation.language,
+        expectedBooks,
+        dbBooks,
+        jsonChaptersTotal,
+        dbChapters,
+        jsonVersesTotal,
+        dbVerses,
+        skippedEmptyVerses,
+        ok:
+          expectedBooks === dbBooks &&
+          jsonChaptersTotal === dbChapters &&
+          jsonVersesTotal === dbVerses,
+      },
+      null,
+      2,
+    ),
+  );
+
+  if (expectedBooks !== dbBooks || jsonChaptersTotal !== dbChapters || jsonVersesTotal !== dbVerses) {
+    console.error("Import sanity check failed: counts do not match JSON source.");
+    process.exit(1);
+  }
 }
 
 main()

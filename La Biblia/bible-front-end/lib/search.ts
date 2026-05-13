@@ -1,6 +1,7 @@
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getTypesenseClient, VERSES_COLLECTION } from "@/lib/typesense";
+import { getPublicSiteBase } from "@/lib/siteUrl";
 import { normalizeText, tokenizeNormalized } from "@/lib/normalizeText";
 
 export type SearchHit = {
@@ -18,6 +19,17 @@ export type SearchHit = {
   url: string;
 };
 
+/** Typesense query string: phrase uses quotes; word mode uses normalized tokens (matches `normalizedText`). */
+function buildTypesenseQuery(q: string, mode: "phrase" | "word"): string {
+  const norm = normalizeText(q);
+  if (!norm) return "";
+  if (mode === "phrase") {
+    const escaped = norm.replace(/"/g, '\\"');
+    return `"${escaped}"`;
+  }
+  return norm;
+}
+
 export async function runVerseSearch(params: {
   q: string;
   mode: "phrase" | "word";
@@ -29,8 +41,8 @@ export async function runVerseSearch(params: {
   perPage?: number;
 }): Promise<{ hits: SearchHit[]; found: number }> {
   const client = getTypesenseClient();
-  const q = params.q.trim();
-  if (!q) return { hits: [], found: 0 };
+  const typesenseQuery = buildTypesenseQuery(params.q, params.mode);
+  if (!typesenseQuery) return { hits: [], found: 0 };
 
   const filters: string[] = [];
   if (params.language) filters.push(`language:=${params.language}`);
@@ -43,18 +55,15 @@ export async function runVerseSearch(params: {
     filters.push(`chapterNumber:=${params.chapter}`);
   }
 
-  const typesenseQuery =
-    params.mode === "phrase" ? `"${q.replace(/"/g, '\\"')}"` : q;
-
   const res = await client.collections(VERSES_COLLECTION).documents().search({
     q: typesenseQuery,
-    query_by: "text,normalizedText",
+    query_by: "normalizedText,text",
     filter_by: filters.length ? filters.join(" && ") : undefined,
     per_page: params.perPage ?? 25,
     page: 1,
   });
 
-  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const site = getPublicSiteBase();
 
   const hits: SearchHit[] = (res.hits ?? []).map((h) => {
     const d = h.document as Record<string, unknown>;
@@ -121,9 +130,15 @@ export async function countExactWordOccurrences(params: {
   return prisma.verseWord.count({ where });
 }
 
+/**
+ * Exact multi-word phrase: consecutive normalized tokens in `VerseWord` for the same verse
+ * (order preserved by insertion / `id` order from `verse-words` script).
+ */
 export async function countExactPhraseOccurrences(params: {
   phrase: string;
   translationId?: string;
+  testament?: number;
+  bookSlug?: string;
 }): Promise<number> {
   const norm = normalizeText(params.phrase);
   const tokens = tokenizeNormalized(norm);
@@ -133,15 +148,27 @@ export async function countExactPhraseOccurrences(params: {
     return countExactWordOccurrences({
       word: tokens[0],
       translationId: params.translationId,
+      testament: params.testament,
+      bookSlug: params.bookSlug,
     });
   }
 
-  const whereVerse: Prisma.VerseWhereInput = {
-    normalizedText: { contains: norm },
-    ...(params.translationId
-      ? { translationId: params.translationId }
-      : {}),
-  };
+  const needle = ` ${norm} `;
 
-  return prisma.verse.count({ where: whereVerse });
+  const rows = await prisma.$queryRaw<{ count: bigint }[]>`
+    SELECT COUNT(*)::bigint AS "count"
+    FROM (
+      SELECT vw."translationId", vw."bookId", vw."chapterNumber", vw."verseNumber"
+      FROM "VerseWord" vw
+      INNER JOIN "Book" b ON b.id = vw."bookId"
+      WHERE 1 = 1
+        ${params.translationId ? Prisma.sql`AND vw."translationId" = ${params.translationId}` : Prisma.empty}
+        ${params.testament === 1 || params.testament === 2 ? Prisma.sql`AND b."testament" = ${params.testament}` : Prisma.empty}
+        ${params.bookSlug ? Prisma.sql`AND b."slug" = ${params.bookSlug}` : Prisma.empty}
+      GROUP BY vw."translationId", vw."bookId", vw."chapterNumber", vw."verseNumber"
+      HAVING POSITION(${needle} IN CONCAT(' ', array_to_string(array_agg(vw."normalizedWord" ORDER BY vw."id"), ' '), ' ')) > 0
+    ) sub
+  `;
+
+  return Number(rows[0]?.count ?? 0);
 }
