@@ -36,9 +36,9 @@ services:
   #     TYPESENSE_PORT: "8108"
   #     TYPESENSE_PROTOCOL: http
   #     TYPESENSE_API_KEY: xyz
-  #     NEXT_PUBLIC_SITE_URL: http://localhost:3000
+  #     NEXT_PUBLIC_SITE_URL: http://localhost:3020
   #   ports:
-  #     - "3000:3000"
+  #     - "3020:3000"
   #   depends_on:
   #     - postgres
   #     - typesense
