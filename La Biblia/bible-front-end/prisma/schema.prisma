@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Translation {
+  id            String   @id @default(cuid())
+  name          String
+  language      String
+  abbreviation  String
+  copyrightNote String?
+  isPublic      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  verses     Verse[]
+  verseWords VerseWord[]
+  audioLinks AudioLink[]
+}
+
+model Book {
+  id        String   @id @default(cuid())
+  testament Int
+  order     Int
+  slug      String   @unique
+  nameEs    String
+  nameEn    String?
+  category  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chapters   Chapter[]
+  verses     Verse[]
+  verseWords VerseWord[]
+  audioLinks AudioLink[]
+
+  @@index([testament, order])
+}
+
+model Chapter {
+  id        String   @id @default(cuid())
+  bookId    String
+  number    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([bookId, number])
+}
+
+model Verse {
+  id             String   @id @default(cuid())
+  translationId  String
+  bookId         String
+  chapterNumber  Int
+  verseNumber    Int
+  text           String
+  normalizedText String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  translation Translation @relation(fields: [translationId], references: [id], onDelete: Cascade)
+  book        Book        @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([translationId, bookId, chapterNumber, verseNumber])
+  @@index([translationId, normalizedText])
+}
+
+model VerseWord {
+  id             String @id @default(cuid())
+  translationId  String
+  bookId         String
+  chapterNumber  Int
+  verseNumber    Int
+  word           String
+  normalizedWord String
+
+  translation Translation @relation(fields: [translationId], references: [id], onDelete: Cascade)
+  book        Book        @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@index([translationId, normalizedWord])
+  @@index([bookId, chapterNumber, verseNumber])
+}
+
+model AudioLink {
+  id             String   @id @default(cuid())
+  translationId  String
+  bookId         String
+  chapterNumber  Int
+  youtubeVideoId String
+  startSecond    Int?
+  endSecond      Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  translation Translation @relation(fields: [translationId], references: [id], onDelete: Cascade)
+  book        Book        @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@index([translationId, bookId, chapterNumber])
+}
+
+model Article {
+  id        String   @id @default(cuid())
+  type      String
+  title     String
+  slug      String   @unique
+  excerpt   String?
+  content   String
+  language  String
+  status    String   @default("DRAFT")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Debate {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  topic           String?
+  content         String
+  conclusionMode  String?
+  language        String
+  status          String   @default("DRAFT")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model DailyReading {
+  id           String   @id @default(cuid())
+  date         DateTime @db.Date
+  language     String
+  source       String?
+  title        String?
+  firstReading String?
+  psalm        String?
+  gospel       String?
+  sourceUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([date, language])
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

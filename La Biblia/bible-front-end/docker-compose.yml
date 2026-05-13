@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bible-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bible
+      POSTGRES_PASSWORD: bible
+      POSTGRES_DB: bible
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  typesense:
+    image: typesense/typesense:27.1
+    container_name: bible-typesense
+    restart: unless-stopped
+    environment:
+      TYPESENSE_DATA_DIR: /data
+      TYPESENSE_API_KEY: xyz
+      TYPESENSE_ENABLE_CORS: "true"
+    ports:
+      - "8108:8108"
+    volumes:
+      - typesense_data:/data
+
+  # Optional: run the Next.js app inside Docker (uncomment to use)
+  # next-app:
+  #   build: .
+  #   container_name: bible-next
+  #   restart: unless-stopped
+  #   environment:
+  #     DATABASE_URL: postgresql://bible:bible@postgres:5432/bible?schema=public
+  #     TYPESENSE_HOST: typesense
+  #     TYPESENSE_PORT: "8108"
+  #     TYPESENSE_PROTOCOL: http
+  #     TYPESENSE_API_KEY: xyz
+  #     NEXT_PUBLIC_SITE_URL: http://localhost:3000
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - postgres
+  #     - typesense
+
+volumes:
+  postgres_data:
+  typesense_data:
