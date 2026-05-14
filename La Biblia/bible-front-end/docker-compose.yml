@@ -21,7 +21,8 @@ services:
       TYPESENSE_API_KEY: xyz
       TYPESENSE_ENABLE_CORS: "true"
     ports:
-      - "8108:8108"
+      # Windows often forbids binding 8108 on the host; map a high host port → 8108 in container.
+      - "18108:8108"
     volumes:
       - typesense_data:/data
 

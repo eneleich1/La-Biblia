@@ -92,7 +92,7 @@ docker compose up -d
 Services:
 
 - **postgres** — port `5432`, user/db/password `bible` / `bible` (change for production).
-- **typesense** — port `8108`, API key `xyz` in the sample file (change for production).
+- **typesense** — host port **`18108`** maps to `8108` inside the container (Windows often blocks `8108` on the host). API key `xyz` in the sample file (change for production). Set `TYPESENSE_PORT=18108` in `.env` when Next runs on the host.
 
 Persistent volumes: `postgres_data`, `typesense_data`.
 

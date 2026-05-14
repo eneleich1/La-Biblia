@@ -2,7 +2,7 @@ import Typesense from "typesense";
 
 export function getTypesenseClient() {
   const host = process.env.TYPESENSE_HOST ?? "localhost";
-  const port = Number(process.env.TYPESENSE_PORT ?? "8108");
+  const port = Number(process.env.TYPESENSE_PORT ?? "18108");
   const protocol = (process.env.TYPESENSE_PROTOCOL ?? "http") as "http" | "https";
   const apiKey = process.env.TYPESENSE_API_KEY ?? "xyz";
 
