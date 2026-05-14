@@ -152,7 +152,7 @@ An optional `next-app` service is commented in `docker-compose.yml` if you prefe
 1. Install Docker (for Postgres + Typesense) and Node, or use managed databases.
 2. `npm ci && npx prisma migrate deploy && npm run build`
 3. `npm run import:bible && npm run verse-words && npm run typesense:sync` (or run these as a separate release job).
-4. Run Next: `npm run start` (often under `systemd`) on port **3020** (see `package.json` scripts).
+4. Run Next: `npm run start` (often under `systemd`). Port comes from **`PORT` in `.env`** (default `3020` in `.env.example`).
 5. Configure **Nginx** `proxy_pass` to `http://127.0.0.1:3020`, enable HTTPS (Let’s Encrypt), set `NEXT_PUBLIC_SITE_URL` to the public origin (no trailing slash).
 
 ## Development commands
