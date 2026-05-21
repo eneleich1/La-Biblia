@@ -13,7 +13,18 @@ const config: Config = {
         accent: { DEFAULT: "#2f4a6b", soft: "#c9d6e8" },
       },
       fontFamily: {
-        sans: ["system-ui", "Segoe UI", "sans-serif"],
+        sans: [
+          "var(--font-sans)",
+          "system-ui",
+          "Segoe UI",
+          "sans-serif",
+        ],
+        serifDisplay: [
+          "var(--font-serif)",
+          "ui-serif",
+          "Georgia",
+          "serif",
+        ],
       },
     },
   },

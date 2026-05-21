@@ -130,7 +130,7 @@ An optional `next-app` service is commented in `docker-compose.yml` if you prefe
 
 | Route | Purpose |
 |-------|---------|
-| `/` | Home hub (links to major sections). |
+| `/` | Home hub (“Seek of Truth” landing: hero, featured verses, feature grid). |
 | `/biblia` | Available languages/translations. |
 | `/biblia/[language]` | Book index by testament and category. |
 | `/biblia/[language]/[bookSlug]` | Chapters for a book. |
@@ -168,6 +168,13 @@ An optional `next-app` service is commented in `docker-compose.yml` if you prefe
 | `npm run import:bible` | JSON → Postgres. |
 | `npm run verse-words` | Populate `VerseWord`. |
 | `npm run typesense:sync` | Postgres → Typesense. |
+
+## UI: themes, layout shell, and icons
+
+- **Themes:** Two appearance presets — **Tema azul claro** (airy blue / white) and **Tema cálido** (parchment / gold / navy) — are driven by CSS variables on `.theme-blue` and `.theme-warm` in `app/globals.css`. The root `ThemeProvider` wraps the app in a div with one of those classes, reads/writes the choice in **`localStorage`** under **`sot-theme`**, and defaults to **blue** on first visit.
+- **`PageShell`:** `components/layout/PageShell.tsx` provides optional **`leftRail`** and **`rightRail`** slots plus a centered main column (default **`max-w-[1380px]`** when rails are omitted). On large screens, layout is `[LeftRail?] [Main] [RightRail?]`; below `lg`, rails are hidden so the main column stays a single polished column.
+- **`lucide-react`:** Navigation, homepage cards, and footer use Lucide icons (e.g. `BookOpen`, `Search`, `CalendarDays`); add icons via named imports from `lucide-react`.
+- **Homepage:** `components/home/HomeHero.tsx` uses the photograph **`public/images/bible-mountains-hero.png`** (Biblia abierta / montañas) on the right with theme-aware scrims (`--hero-scrim`, `--hero-image-wash` in `app/globals.css`). Featured verse cards and **`FeatureGrid`** live alongside it on `app/page.tsx`.
 
 ## Roadmap
 
