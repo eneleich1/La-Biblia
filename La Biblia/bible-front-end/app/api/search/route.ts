@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
   const verse = verseRaw ? parseInt(verseRaw, 10) : undefined;
   const exactWord = searchParams.get("exactWord")?.trim() ?? "";
   const translationId = searchParams.get("translationId") ?? undefined;
+  const synonyms = searchParams.get("synonyms")?.trim() ?? "";
 
   if (!q) {
     return NextResponse.json(
@@ -54,6 +55,7 @@ export async function GET(req: NextRequest) {
       bookSlug,
       chapter: Number.isFinite(chapter) ? chapter : undefined,
       verse: Number.isFinite(verse) ? verse : undefined,
+      synonyms,
     });
 
     const exactKeys = new Set(

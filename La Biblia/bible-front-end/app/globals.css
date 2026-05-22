@@ -161,9 +161,9 @@ body {
 .scripture-chapter-heading h1 {
   color: var(--text);
   font-family: var(--font-serif), ui-serif, Georgia, serif;
-  font-size: clamp(2.2rem, 3.8vw, 3.55rem);
+  font-size: clamp(1.9rem, 3vw, 2.85rem);
   font-weight: 650;
-  line-height: 1.04;
+  line-height: 1.06;
 }
 
 .scripture-edition,
@@ -171,7 +171,7 @@ body {
   margin-top: 0.35rem;
   color: var(--scripture-gold);
   font-family: var(--font-serif), ui-serif, Georgia, serif;
-  font-size: clamp(1.45rem, 2.5vw, 2.1rem);
+  font-size: clamp(1.2rem, 2vw, 1.65rem);
   line-height: 1.1;
 }
 
@@ -669,12 +669,12 @@ body {
 @media (max-width: 520px) {
   .scripture-index-heading h1,
   .scripture-chapter-heading h1 {
-    font-size: 2.15rem;
+    font-size: 1.85rem;
   }
 
   .scripture-edition,
   .scripture-chapter-heading p {
-    font-size: 1.45rem;
+    font-size: 1.2rem;
   }
 
   .scripture-open-book-index .scripture-book-page,

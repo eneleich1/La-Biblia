@@ -225,9 +225,23 @@ function tokenWeight(token: string) {
   return 1;
 }
 
-function synonymVariants(token: string) {
+function parseManualSynonymGroups(value?: string) {
+  if (!value?.trim()) return [];
+
+  return value
+    .split(/\r?\n/)
+    .map((line) =>
+      line
+        .split(/\s*(?:=|:|,|;)\s*/)
+        .map((item) => stemApproximateToken(normalizeText(item)))
+        .filter(Boolean),
+    )
+    .filter((group) => group.length > 1);
+}
+
+function synonymVariants(token: string, manualGroups: string[][] = []) {
   const variants = new Set<string>([token]);
-  for (const group of SYNONYM_GROUPS) {
+  for (const group of [...SYNONYM_GROUPS, ...manualGroups]) {
     const normalizedGroup = group.map((item) => stemApproximateToken(normalizeText(item)));
     if (normalizedGroup.includes(token)) {
       for (const item of normalizedGroup) variants.add(item);
@@ -237,6 +251,7 @@ function synonymVariants(token: string) {
 }
 
 type QueryTerm = {
+  surface: string;
   token: string;
   variants: string[];
   weight: number;
@@ -244,12 +259,25 @@ type QueryTerm = {
 
 const WORD_SIMILARITY_CACHE = new Map<string, number>();
 
-function queryTerms(value: string): QueryTerm[] {
-  return uniqueTokens(approximateTokens(value)).map((token) => ({
-    token,
-    variants: synonymVariants(token),
-    weight: tokenWeight(token),
-  }));
+function queryTerms(value: string, synonymText?: string): QueryTerm[] {
+  const manualGroups = parseManualSynonymGroups(synonymText);
+  const seen = new Set<string>();
+  return tokenizeNormalized(normalizeText(value))
+    .map((surface) => ({
+      surface,
+      token: stemApproximateToken(surface),
+    }))
+    .filter(({ token }) => {
+      if (token.length <= 1 || seen.has(token)) return false;
+      seen.add(token);
+      return true;
+    })
+    .map(({ surface, token }) => ({
+      surface,
+      token,
+      variants: synonymVariants(token, manualGroups),
+      weight: tokenWeight(token),
+    }));
 }
 
 function levenshteinDistance(a: string, b: string) {
@@ -309,6 +337,28 @@ function termMatchesVerseToken(term: QueryTerm, verseToken: string) {
   return term.variants.some((variant) => isWordMatch(variant, verseToken));
 }
 
+type VerseTokenPosition = {
+  index: number;
+  surface: string;
+  token: string;
+};
+
+function termVerseSimilarity(term: QueryTerm, verseWord: VerseTokenPosition) {
+  let best = 0;
+
+  if (verseWord.surface === term.surface) best = 1.08;
+
+  for (const variant of term.variants) {
+    if (verseWord.token === term.token) best = Math.max(best, 0.92);
+    else if (verseWord.token === variant) best = Math.max(best, 0.88);
+    else if (isWordMatch(variant, verseWord.token)) {
+      best = Math.max(best, wordSimilarity(variant, verseWord.token) * 0.82);
+    }
+  }
+
+  return best;
+}
+
 function collectMatchedWords(terms: QueryTerm[], text: string) {
   const words = extractWordsFromVerseText(text);
   const matched = new Set<string>();
@@ -324,7 +374,7 @@ function collectMatchedWords(terms: QueryTerm[], text: string) {
   return [...matched];
 }
 
-function tokenPositions(text: string) {
+function tokenPositions(text: string): VerseTokenPosition[] {
   return extractWordsFromVerseText(text)
     .map((word, index) => ({
       index,
@@ -393,6 +443,110 @@ function phraseAlignment(terms: QueryTerm[], text: string) {
   };
 }
 
+function contiguousPhraseScore(terms: QueryTerm[], text: string) {
+  const verseTokens = tokenPositions(text);
+  if (terms.length < 2 || verseTokens.length < 2) return 0;
+
+  let best = 0;
+  const maxLength = Math.min(6, terms.length, verseTokens.length);
+
+  for (let length = 2; length <= maxLength; length += 1) {
+    for (let queryStart = 0; queryStart <= terms.length - length; queryStart += 1) {
+      const querySlice = terms.slice(queryStart, queryStart + length);
+
+      for (let verseStart = 0; verseStart <= verseTokens.length - length; verseStart += 1) {
+        const verseSlice = verseTokens.slice(verseStart, verseStart + length);
+        const similarities = querySlice.map((term, index) =>
+          termVerseSimilarity(term, verseSlice[index]),
+        );
+        if (similarities.some((similarity) => similarity <= 0)) continue;
+
+        const average = similarities.reduce((sum, value) => sum + value, 0) / length;
+        const surfaceExactRatio =
+          querySlice.filter((term, index) => term.surface === verseSlice[index].surface).length /
+          length;
+        const stemExactRatio =
+          similarities.filter((similarity) => similarity >= 0.99).length / length;
+        const lengthStrength = length === 2 ? 0.35 : length === 3 ? 0.85 : 1;
+        const queryShare = 0.72 + (length / terms.length) * 0.28;
+        const phraseScore =
+          average *
+          lengthStrength *
+          queryShare *
+          (0.7 + stemExactRatio * 0.08 + surfaceExactRatio * 0.22);
+        best = Math.max(best, phraseScore);
+      }
+    }
+  }
+
+  return best;
+}
+
+function compactPhraseScore(terms: QueryTerm[], text: string) {
+  const verseTokens = tokenPositions(text);
+  if (!terms.length || !verseTokens.length) return 0;
+
+  const totalWeight = terms.reduce((sum, term) => sum + term.weight, 0);
+  let best = 0;
+  const maxWindow = Math.min(12, Math.max(terms.length + 3, 5), verseTokens.length);
+
+  for (let start = 0; start < verseTokens.length; start += 1) {
+    for (
+      let end = start;
+      end < verseTokens.length && end - start + 1 <= maxWindow;
+      end += 1
+    ) {
+      const window = verseTokens.slice(start, end + 1);
+      const matches = terms
+        .map((term, queryIndex) => {
+          let bestMatch: { queryIndex: number; position: number; similarity: number } | null =
+            null;
+
+          for (const verseWord of window) {
+            const similarity = termVerseSimilarity(term, verseWord);
+            if (similarity <= 0) continue;
+            if (!bestMatch || similarity > bestMatch.similarity) {
+              bestMatch = { queryIndex, position: verseWord.index, similarity };
+            }
+          }
+
+          return bestMatch;
+        })
+        .filter(
+          (match): match is { queryIndex: number; position: number; similarity: number } =>
+            match !== null,
+        );
+
+      if (matches.length < (terms.length <= 2 ? 2 : 3)) continue;
+
+      const matchedWeight = matches.reduce(
+        (sum, match) => sum + terms[match.queryIndex].weight * Math.min(match.similarity, 1),
+        0,
+      );
+      const coverage = matchedWeight / totalWeight;
+      const density = matches.length / window.length;
+      const averageSimilarity =
+        matches.reduce((sum, match) => sum + Math.min(match.similarity, 1), 0) / matches.length;
+
+      let orderedPairs = 0;
+      let totalPairs = 0;
+      for (let i = 0; i < matches.length; i += 1) {
+        for (let j = i + 1; j < matches.length; j += 1) {
+          totalPairs += 1;
+          if (matches[i].position < matches[j].position) orderedPairs += 1;
+        }
+      }
+
+      const orderQuality = totalPairs > 0 ? orderedPairs / totalPairs : 1;
+      const score =
+        coverage * 0.8 + density * 0.12 + averageSimilarity * 0.06 + orderQuality * 0.02;
+      best = Math.max(best, score);
+    }
+  }
+
+  return best;
+}
+
 function approximateScore(terms: QueryTerm[], text: string) {
   const verseTokens = uniqueTokens(approximateTokens(text));
   if (!terms.length || !verseTokens.length) {
@@ -411,15 +565,19 @@ function approximateScore(terms: QueryTerm[], text: string) {
   const coverage = matchedWeight / totalWeight;
   const precision = matchedVerseTokens.length / verseTokens.length;
   const phrase = phraseAlignment(terms, text);
+  const contiguous = contiguousPhraseScore(terms, text);
+  const compact = compactPhraseScore(terms, text);
 
   return {
     score:
-      coverage * 0.4 +
-      precision * 0.08 +
-      phrase.orderedCoverage * 0.14 +
-      phrase.orderQuality * 0.22 +
-      phrase.density * 0.1 +
-      phrase.adjacency * 0.06,
+      coverage * 0.2 +
+      precision * 0.03 +
+      phrase.orderedCoverage * 0.06 +
+      phrase.orderQuality * 0.04 +
+      phrase.density * 0.05 +
+      phrase.adjacency * 0.05 +
+      contiguous * 0.36 +
+      compact * 0.32,
     matchedWords: collectMatchedWords(terms, text),
   };
 }
@@ -436,8 +594,161 @@ function candidateFragments(token: string) {
   return [...fragments].filter((fragment) => fragment.length >= 3);
 }
 
-function hasCandidateFragment(text: string, fragments: string[]) {
-  return fragments.some((fragment) => text.includes(fragment));
+function exactCandidateWords(terms: QueryTerm[], synonymText?: string) {
+  const words = new Set<string>();
+  for (const term of terms) words.add(term.surface);
+
+  for (const group of SYNONYM_GROUPS) {
+    const normalizedGroup = group.map((item) => normalizeText(item)).filter(Boolean);
+    const stems = normalizedGroup.map(stemApproximateToken);
+    if (terms.some((term) => stems.includes(term.token))) {
+      for (const item of normalizedGroup) words.add(item);
+    }
+  }
+
+  if (synonymText?.trim()) {
+    for (const line of synonymText.split(/\r?\n/)) {
+      const normalizedGroup = line
+        .split(/\s*(?:=|:|,|;)\s*/)
+        .map((item) => normalizeText(item))
+        .filter(Boolean);
+      const stems = normalizedGroup.map(stemApproximateToken);
+      if (terms.some((term) => stems.includes(term.token))) {
+        for (const item of normalizedGroup) words.add(item);
+      }
+    }
+  }
+
+  return [...words];
+}
+
+function prefixCandidateWords(terms: QueryTerm[]) {
+  return uniqueTokens(
+    terms
+      .filter((term) => term.weight >= 0.34)
+      .flatMap((term) => term.variants)
+      .flatMap(candidateFragments),
+  ).slice(0, 24);
+}
+
+type CandidateReference = {
+  translationId: string;
+  bookId: string;
+  chapterNumber: number;
+  verseNumber: number;
+};
+
+function referenceKey(reference: CandidateReference) {
+  return [
+    reference.translationId,
+    reference.bookId,
+    reference.chapterNumber,
+    reference.verseNumber,
+  ].join(":");
+}
+
+async function queryIndexedCandidateReferences(params: {
+  exactWords: string[];
+  prefixes: string[];
+  language?: string;
+  translationId?: string;
+  testament?: number;
+  bookSlug?: string;
+  chapter?: number;
+  verse?: number;
+  limit: number;
+}) {
+  if (!params.exactWords.length && !params.prefixes.length) return [];
+
+  const exactPredicate = params.exactWords.length
+    ? Prisma.sql`vw."normalizedWord" IN (${Prisma.join(params.exactWords)})`
+    : Prisma.empty;
+  const prefixPredicate = params.prefixes.length
+    ? Prisma.join(
+        params.prefixes.map((prefix) => Prisma.sql`vw."normalizedWord" LIKE ${`${prefix}%`}`),
+        " OR ",
+      )
+    : Prisma.empty;
+
+  const wordPredicate =
+    params.exactWords.length && params.prefixes.length
+      ? Prisma.sql`(${exactPredicate} OR ${prefixPredicate})`
+      : Prisma.sql`(${exactPredicate}${prefixPredicate})`;
+
+  const matchScoreExpr = params.exactWords.length
+    ? Prisma.sql`SUM(CASE WHEN vw."normalizedWord" IN (${Prisma.join(params.exactWords)}) THEN 100 ELSE 62 END)`
+    : Prisma.sql`SUM(62)`;
+
+  return prisma.$queryRaw<CandidateReference[]>`
+    SELECT
+      vw."translationId",
+      vw."bookId",
+      vw."chapterNumber",
+      vw."verseNumber"
+    FROM "VerseWord" vw
+    INNER JOIN "Book" b ON b."id" = vw."bookId"
+    INNER JOIN "Translation" t ON t."id" = vw."translationId"
+    WHERE ${wordPredicate}
+      AND t."isPublic" = true
+      ${params.translationId ? Prisma.sql`AND vw."translationId" = ${params.translationId}` : Prisma.empty}
+      ${params.language ? Prisma.sql`AND t."language" = ${params.language}` : Prisma.empty}
+      ${params.testament === 1 || params.testament === 2 ? Prisma.sql`AND b."testament" = ${params.testament}` : Prisma.empty}
+      ${params.bookSlug ? Prisma.sql`AND b."slug" = ${params.bookSlug}` : Prisma.empty}
+      ${params.chapter && params.chapter > 0 ? Prisma.sql`AND vw."chapterNumber" = ${params.chapter}` : Prisma.empty}
+      ${params.verse && params.verse > 0 ? Prisma.sql`AND vw."verseNumber" = ${params.verse}` : Prisma.empty}
+    GROUP BY vw."translationId", vw."bookId", vw."chapterNumber", vw."verseNumber", b."testament", b."order"
+    ORDER BY
+      COUNT(DISTINCT vw."normalizedWord") DESC,
+      ${matchScoreExpr} DESC,
+      MAX(LENGTH(vw."normalizedWord")) DESC,
+      COUNT(*) DESC,
+      b."testament" ASC,
+      b."order" ASC,
+      vw."chapterNumber" ASC,
+      vw."verseNumber" ASC
+    LIMIT ${params.limit}
+  `;
+}
+
+async function findIndexedCandidateReferences(params: {
+  terms: QueryTerm[];
+  synonyms?: string;
+  language?: string;
+  translationId?: string;
+  testament?: number;
+  bookSlug?: string;
+  chapter?: number;
+  verse?: number;
+  limit: number;
+}) {
+  const strongTerms = params.terms.filter((term) => term.weight >= 1);
+  const exactTerms = strongTerms.length ? strongTerms : params.terms;
+  const exactWords = exactCandidateWords(exactTerms, params.synonyms);
+  const exactReferences = await queryIndexedCandidateReferences({
+    ...params,
+    exactWords,
+    prefixes: [],
+  });
+
+  const fallbackThreshold = Math.min(Math.max(params.limit * 2, 16), 40);
+  if (exactReferences.length >= fallbackThreshold) return exactReferences;
+
+  const prefixes = prefixCandidateWords(strongTerms.length ? strongTerms : params.terms);
+  const prefixReferences = await queryIndexedCandidateReferences({
+    ...params,
+    exactWords: [],
+    prefixes,
+    limit: params.limit - exactReferences.length,
+  });
+  const seen = new Set(exactReferences.map(referenceKey));
+  for (const reference of prefixReferences) {
+    if (!seen.has(referenceKey(reference))) {
+      seen.add(referenceKey(reference));
+      exactReferences.push(reference);
+    }
+  }
+
+  return exactReferences;
 }
 
 function insertTopHit(topHits: SearchHit[], hit: SearchHit, limit: number) {
@@ -480,36 +791,62 @@ export async function runApproximateVerseSearch(params: {
   chapter?: number;
   verse?: number;
   limit?: number;
+  synonyms?: string;
 }): Promise<{ hits: SearchHit[]; found: number }> {
-  const terms = queryTerms(params.q);
+  const terms = queryTerms(params.q, params.synonyms);
   if (!terms.length) return { hits: [], found: 0 };
 
-  const candidateTokens = uniqueTokens(
-    terms.flatMap((term) => term.variants).filter((token) => tokenWeight(token) >= 0.34),
-  );
-  const candidateFragmentList = uniqueTokens(
-    candidateTokens.slice(0, 14).flatMap((token) => candidateFragments(token)),
-  );
-  const tokenFilters = candidateFragmentList.map((fragment) => ({
-    normalizedText: { contains: fragment, mode: "insensitive" as const },
-  }));
+  const topLimit = Math.max(params.limit ?? 10, 20);
+  const candidateLimit = Math.min(Math.max((params.limit ?? 10) * 8, 80), 160);
+  const candidateReferences = await findIndexedCandidateReferences({
+    terms,
+    synonyms: params.synonyms,
+    language: params.language,
+    translationId: params.translationId,
+    testament: params.testament,
+    bookSlug: params.bookSlug,
+    chapter: params.chapter,
+    verse: params.verse,
+    limit: candidateLimit,
+  });
+
+  if (!candidateReferences.length) return { hits: [], found: 0 };
+
+  const chapterKeys = new Set<string>();
+  const chapterFilters = candidateReferences.map((reference) => {
+    const key = [reference.translationId, reference.bookId, reference.chapterNumber].join(":");
+    if (chapterKeys.has(key)) return null;
+    chapterKeys.add(key);
+    return {
+      translationId: reference.translationId,
+      bookId: reference.bookId,
+      chapterNumber: reference.chapterNumber,
+    };
+  }).filter((filter): filter is {
+    translationId: string;
+    bookId: string;
+    chapterNumber: number;
+  } => filter !== null);
+
+  const candidateStartKeys = new Set<string>();
+  for (const reference of candidateReferences) {
+    candidateStartKeys.add(referenceKey(reference));
+    if (!params.verse) {
+      for (let offset = 1; offset <= 2; offset += 1) {
+        const verseNumber = reference.verseNumber - offset;
+        if (verseNumber > 0) {
+          candidateStartKeys.add(referenceKey({ ...reference, verseNumber }));
+        }
+      }
+    }
+  }
 
   const verses = await prisma.verse.findMany({
     where: {
-      ...(params.translationId ? { translationId: params.translationId } : {}),
-      ...(params.chapter && params.chapter > 0 ? { chapterNumber: params.chapter } : {}),
-      ...(params.verse && params.verse > 0 ? { verseNumber: params.verse } : {}),
+      OR: chapterFilters,
       translation: {
-        ...(params.language ? { language: params.language } : {}),
         isPublic: true,
       },
-      book: {
-        ...(params.testament === 1 || params.testament === 2
-          ? { testament: params.testament }
-          : {}),
-        ...(params.bookSlug ? { slug: params.bookSlug } : {}),
-      },
-      ...(tokenFilters.length ? { OR: tokenFilters } : {}),
     },
     include: {
       book: true,
@@ -524,11 +861,12 @@ export async function runApproximateVerseSearch(params: {
   });
 
   const topHits: SearchHit[] = [];
-  const topLimit = Math.max(params.limit ?? 10, 20);
   const site = getPublicSiteBase();
 
   for (let i = 0; i < verses.length; i += 1) {
     const first = verses[i];
+    if (!candidateStartKeys.has(referenceKey(first))) continue;
+
     const grouped = [first];
 
     for (let j = i + 1; j < verses.length && grouped.length < 3; j += 1) {
@@ -548,8 +886,6 @@ export async function runApproximateVerseSearch(params: {
     for (let size = 1; size <= grouped.length; size += 1) {
       const chunk = grouped.slice(0, size);
       const text = chunk.map((verse) => verse.text.trim()).join(" ");
-      const normalizedWindow = normalizeText(text);
-      if (!hasCandidateFragment(normalizedWindow, candidateFragmentList)) continue;
 
       const { score, matchedWords } = approximateScore(terms, text);
       if (score <= 0) continue;
