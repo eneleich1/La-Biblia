@@ -1,16 +1,25 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Palette, Settings } from "lucide-react";
-import { useSiteTheme, type SiteTheme } from "@/components/theme/ThemeProvider";
+import { BookOpen, Check, Palette, Settings } from "lucide-react";
+import {
+  useSiteTheme,
+  type BibleIndexMode,
+  type SiteTheme,
+} from "@/components/theme/ThemeProvider";
 
 const options: { id: SiteTheme; label: string }[] = [
   { id: "blue", label: "Tema azul claro" },
-  { id: "warm", label: "Tema cálido" },
+  { id: "warm", label: "Tema calido" },
+];
+
+const bibleIndexOptions: { id: BibleIndexMode; label: string }[] = [
+  { id: "natural", label: "Orden natural" },
+  { id: "grouped", label: "Agrupado por categorias" },
 ];
 
 export function ThemeSettings() {
-  const { theme, setTheme } = useSiteTheme();
+  const { theme, setTheme, bibleIndexMode, setBibleIndexMode } = useSiteTheme();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -61,6 +70,28 @@ export function ThemeSettings() {
             >
               {opt.label}
               {theme === opt.id && (
+                <Check className="h-4 w-4 text-[var(--accent)]" strokeWidth={2} />
+              )}
+            </button>
+          ))}
+
+          <div className="mt-1 flex items-center gap-2 border-b border-t border-[var(--border)] px-3 py-2 text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
+            <BookOpen className="h-3.5 w-3.5" strokeWidth={2} />
+            Indice biblico
+          </div>
+          {bibleIndexOptions.map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setBibleIndexMode(opt.id);
+                setOpen(false);
+              }}
+              className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-sm text-[var(--text)] transition hover:bg-[var(--background-soft)]"
+            >
+              {opt.label}
+              {bibleIndexMode === opt.id && (
                 <Check className="h-4 w-4 text-[var(--accent)]" strokeWidth={2} />
               )}
             </button>

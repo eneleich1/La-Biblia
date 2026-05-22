@@ -10,14 +10,20 @@ import {
 } from "react";
 
 export type SiteTheme = "warm" | "blue";
+export type BibleIndexMode = "natural" | "grouped";
 
 export const THEME_STORAGE_KEY = "sot-theme";
 export const THEME_COOKIE_KEY = "sot-theme";
 export const DEFAULT_THEME: SiteTheme = "blue";
+export const BIBLE_INDEX_MODE_STORAGE_KEY = "sot-bible-index-mode";
+export const BIBLE_INDEX_MODE_COOKIE_KEY = "sot-bible-index-mode";
+export const DEFAULT_BIBLE_INDEX_MODE: BibleIndexMode = "natural";
 
 type ThemeContextValue = {
   theme: SiteTheme;
   setTheme: (t: SiteTheme) => void;
+  bibleIndexMode: BibleIndexMode;
+  setBibleIndexMode: (mode: BibleIndexMode) => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -30,6 +36,16 @@ function readStoredTheme(): SiteTheme | null {
   } catch {
     /* ignore */
   }
+  return null;
+}
+
+function readStoredBibleIndexMode(): BibleIndexMode | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(
+    new RegExp(`(?:^|; )${BIBLE_INDEX_MODE_COOKIE_KEY}=([^;]*)`),
+  );
+  const raw = match ? decodeURIComponent(match[1]) : null;
+  if (raw === "natural" || raw === "grouped") return raw;
   return null;
 }
 
@@ -51,14 +67,31 @@ function persistTheme(theme: SiteTheme) {
   }
 }
 
+function persistBibleIndexMode(mode: BibleIndexMode) {
+  try {
+    localStorage.setItem(BIBLE_INDEX_MODE_STORAGE_KEY, mode);
+  } catch {
+    /* ignore */
+  }
+  try {
+    document.cookie = `${BIBLE_INDEX_MODE_COOKIE_KEY}=${mode}; Path=/; Max-Age=31536000; SameSite=Lax`;
+  } catch {
+    /* ignore */
+  }
+}
+
 export function ThemeProvider({
   children,
   initialTheme = DEFAULT_THEME,
+  initialBibleIndexMode = DEFAULT_BIBLE_INDEX_MODE,
 }: {
   children: React.ReactNode;
   initialTheme?: SiteTheme;
+  initialBibleIndexMode?: BibleIndexMode;
 }) {
   const [theme, setThemeState] = useState<SiteTheme>(() => readStoredTheme() ?? initialTheme);
+  const [bibleIndexMode, setBibleIndexModeState] =
+    useState<BibleIndexMode>(initialBibleIndexMode);
 
   useLayoutEffect(() => {
     const stored = readStoredTheme();
@@ -68,13 +101,26 @@ export function ThemeProvider({
     if (nextTheme !== theme) setThemeState(nextTheme);
   }, [initialTheme, theme]);
 
+  useLayoutEffect(() => {
+    const nextMode = readStoredBibleIndexMode() ?? initialBibleIndexMode;
+    if (nextMode !== bibleIndexMode) setBibleIndexModeState(nextMode);
+  }, [bibleIndexMode, initialBibleIndexMode]);
+
   const setTheme = useCallback((t: SiteTheme) => {
     setThemeState(t);
     applyTheme(t);
     persistTheme(t);
   }, []);
 
-  const value = useMemo(() => ({ theme, setTheme }), [theme, setTheme]);
+  const setBibleIndexMode = useCallback((mode: BibleIndexMode) => {
+    setBibleIndexModeState(mode);
+    persistBibleIndexMode(mode);
+  }, []);
+
+  const value = useMemo(
+    () => ({ theme, setTheme, bibleIndexMode, setBibleIndexMode }),
+    [bibleIndexMode, setBibleIndexMode, theme, setTheme],
+  );
 
   return (
     <ThemeContext.Provider value={value}>
