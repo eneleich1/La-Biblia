@@ -11,23 +11,20 @@ const footerLinks = [
 export function SiteFooter() {
   return (
     <footer className="mt-auto px-1">
-      <div className="mx-auto grid max-w-[1840px] grid-cols-1 gap-8 border-t border-[var(--border)] bg-[var(--background-soft)] px-6 py-8 sm:px-8 md:grid-cols-[1fr_auto_1fr_auto] md:items-center lg:px-12">
-        <div className="flex items-start gap-3 text-[var(--text)]">
+      <div className="mx-auto flex max-w-[1840px] flex-col gap-3 border-t border-[var(--border)] bg-[var(--background-soft)] px-6 py-4 sm:px-8 md:flex-row md:items-center md:justify-between md:gap-6 lg:px-12">
+        <div className="flex min-w-0 items-center gap-2.5 text-[var(--text)]">
           <BookOpenCheck
-            className="mt-0.5 h-10 w-10 shrink-0 text-[var(--text-muted)]"
+            className="h-8 w-8 shrink-0 text-[var(--text-muted)]"
             strokeWidth={1.45}
             aria-hidden
           />
-          <div>
-            <p className="font-serif-display text-base italic leading-snug text-[var(--text-muted)]">
-              “Tu palabra es verdad”
-            </p>
-            <p className="mt-1 text-sm text-[var(--text-muted)]">Juan 17:17</p>
-          </div>
+          <p className="font-serif-display text-sm italic leading-none text-[var(--text-muted)] sm:text-[0.95rem]">
+            “Tu palabra es verdad” · Juan 17:17
+          </p>
         </div>
 
         <nav
-          className="flex flex-wrap items-center justify-start gap-x-5 gap-y-2 text-sm text-[var(--text-muted)] md:justify-center"
+          className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-[var(--text-muted)] md:justify-center"
           aria-label="Pie de página"
         >
           {footerLinks.map((l, i) => (
@@ -40,17 +37,8 @@ export function SiteFooter() {
           ))}
         </nav>
 
-        <div className="text-left md:text-left">
-          <p className="text-sm font-medium leading-relaxed text-[var(--text)]">
-            Seek of Truth - Plataforma Bíblica Cristiana
-          </p>
-          <p className="mt-1 max-w-xs text-sm leading-relaxed text-[var(--text-muted)]">
-            Jerusalem Bible Platform - datos bíblicos importados desde fuentes JSON locales.
-          </p>
-        </div>
-
         <span
-          className="font-serif-display text-6xl leading-none text-[var(--accent)]"
+          className="hidden font-serif-display text-4xl leading-none text-[var(--accent)] md:block"
           aria-hidden
         >
           ✝

@@ -100,21 +100,21 @@ export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-[var(--background)]/85 px-1 pt-2 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 bg-[var(--background)]/85 px-1 pt-1 backdrop-blur-xl">
       <div className="mx-auto max-w-[1840px] rounded-lg border border-white/80 bg-white/90 px-4 shadow-[0_12px_36px_-28px_rgba(11,45,97,0.55)] sm:px-8 lg:px-12">
-        <div className="flex min-h-[86px] flex-wrap items-center justify-between gap-x-5 gap-y-3 py-3 lg:min-h-[92px] lg:flex-nowrap lg:gap-y-0">
+        <div className="flex min-h-[62px] flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2 lg:min-h-[68px] lg:flex-nowrap lg:gap-y-0">
           <Link
             href="/"
-            className="group flex max-w-full shrink-0 items-center gap-3.5 text-[var(--text)] no-underline sm:gap-4 lg:max-w-[22rem]"
+            className="group flex max-w-full shrink-0 items-center gap-2.5 text-[var(--text)] no-underline sm:gap-3 lg:max-w-[20rem]"
           >
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-none text-[var(--accent)] transition sm:h-14 sm:w-14">
-              <BookOpenCheck className="h-11 w-11 sm:h-12 sm:w-12" strokeWidth={1.65} aria-hidden />
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none text-[var(--accent)] transition sm:h-11 sm:w-11">
+              <BookOpenCheck className="h-9 w-9 sm:h-10 sm:w-10" strokeWidth={1.65} aria-hidden />
             </span>
             <span className="min-w-0 leading-tight">
-              <span className="font-serif-display block text-[1.55rem] font-semibold tracking-normal text-[var(--text)] sm:text-[2rem] lg:text-[2rem] xl:text-[2.15rem]">
+              <span className="font-serif-display block text-[1.28rem] font-semibold tracking-normal text-[var(--text)] sm:text-[1.48rem] lg:text-[1.55rem] xl:text-[1.62rem]">
                 Seek of Truth
               </span>
-              <span className="mt-0.5 block text-[9px] font-semibold uppercase leading-snug tracking-[0.19em] text-[var(--accent)] sm:text-[11px] sm:tracking-[0.2em]">
+              <span className="mt-0.5 block text-[8px] font-semibold uppercase leading-snug tracking-[0.17em] text-[var(--accent)] sm:text-[10px] sm:tracking-[0.18em]">
                 Plataforma Bíblica Cristiana
               </span>
             </span>

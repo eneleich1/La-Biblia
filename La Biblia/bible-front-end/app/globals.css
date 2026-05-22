@@ -128,11 +128,34 @@ body {
   font-family: var(--font-serif), ui-serif, Georgia, serif;
 }
 
+.scripture-index-page,
 .scripture-index-shell,
 .scripture-reader-shell {
   position: relative;
-  min-height: calc(100vh - 12rem);
-  padding: 1.25rem 0 0.75rem;
+  padding: 0 0 1.5rem;
+}
+
+.scripture-index-page {
+  margin-block: -1rem -0.75rem;
+  padding-bottom: 0;
+}
+
+.scripture-index-content {
+  box-sizing: border-box;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 0.75rem;
+}
+
+.scripture-index-content .scripture-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.32rem;
+  color: var(--accent);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
 }
 
 .scripture-back-link {
@@ -152,12 +175,71 @@ body {
 
 .scripture-index-heading,
 .scripture-chapter-heading {
-  margin: -0.5rem auto 0.65rem;
   max-width: 68rem;
   text-align: center;
 }
 
-.scripture-index-heading h1,
+.scripture-index-heading {
+  margin: 0 auto 0.68rem;
+}
+
+@keyframes scripture-book-open {
+  from {
+    opacity: 0;
+    transform: translateY(0.7rem) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes scripture-page-settle-left {
+  from {
+    transform: rotateY(4deg);
+  }
+  to {
+    transform: rotateY(0deg);
+  }
+}
+
+@keyframes scripture-page-settle-right {
+  from {
+    transform: rotateY(-4deg);
+  }
+  to {
+    transform: rotateY(0deg);
+  }
+}
+
+@keyframes scripture-page-settle {
+  from {
+    transform: translateY(0.25rem);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scripture-open-book-index,
+  .scripture-open-book-index .scripture-book-page {
+    animation: none;
+  }
+}
+
+.scripture-chapter-heading {
+  margin: -0.5rem auto 0.65rem;
+}
+
+.scripture-index-heading h1 {
+  color: var(--text);
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-size: clamp(1.5rem, 2.2vw, 2.05rem);
+  font-weight: 650;
+  line-height: 1.05;
+}
+
 .scripture-chapter-heading h1 {
   color: var(--text);
   font-family: var(--font-serif), ui-serif, Georgia, serif;
@@ -166,20 +248,20 @@ body {
   line-height: 1.06;
 }
 
-.scripture-edition,
+.scripture-edition {
+  margin-top: 0.2rem;
+  color: var(--scripture-gold);
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-size: clamp(0.92rem, 1.25vw, 1.12rem);
+  line-height: 1.1;
+}
+
 .scripture-chapter-heading p {
   margin-top: 0.35rem;
   color: var(--scripture-gold);
   font-family: var(--font-serif), ui-serif, Georgia, serif;
   font-size: clamp(1.2rem, 2vw, 1.65rem);
   line-height: 1.1;
-}
-
-.scripture-instruction {
-  margin-top: 0.55rem;
-  color: var(--text-muted);
-  font-family: var(--font-serif), ui-serif, Georgia, serif;
-  font-size: clamp(1rem, 1.4vw, 1.25rem);
 }
 
 .scripture-chapter-heading p {
@@ -230,6 +312,21 @@ body {
   filter: drop-shadow(0 18px 26px rgba(11, 45, 97, 0.14));
 }
 
+.scripture-open-book.scripture-open-book-index {
+  filter:
+    drop-shadow(0 8px 14px rgba(11, 45, 97, 0.06))
+    drop-shadow(0 16px 28px rgba(11, 45, 97, 0.05));
+}
+
+.scripture-open-book-index {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  animation: scripture-book-open 680ms cubic-bezier(0.2, 0.72, 0.22, 1) both;
+  perspective: 1600px;
+  transform-origin: center 58%;
+}
+
 .scripture-open-book::before {
   content: "";
   position: absolute;
@@ -240,6 +337,20 @@ body {
   border-radius: 999px;
   background: radial-gradient(ellipse at center, rgba(18, 34, 58, 0.22), transparent 68%);
   pointer-events: none;
+}
+
+.scripture-open-book.scripture-open-book-index::before {
+  bottom: -1.35rem;
+  left: 3%;
+  right: 3%;
+  height: 2.35rem;
+  background: radial-gradient(
+    ellipse 95% 100% at 50% 0%,
+    rgba(18, 34, 58, 0.18) 0%,
+    rgba(18, 34, 58, 0.09) 32%,
+    rgba(18, 34, 58, 0.03) 58%,
+    transparent 82%
+  );
 }
 
 .scripture-open-book::after {
@@ -253,6 +364,10 @@ body {
   border-radius: 0 0 100% 100%;
   background: linear-gradient(180deg, var(--scripture-paper-soft), rgba(197, 138, 41, 0.18));
   transform: translateX(-50%);
+}
+
+.scripture-open-book-index::after {
+  display: none;
 }
 
 .scripture-book-page,
@@ -299,8 +414,72 @@ body {
 }
 
 .scripture-open-book-index .scripture-book-page {
-  min-height: 41rem;
-  padding: clamp(1.6rem, 3vw, 2.6rem) clamp(1.7rem, 3.3vw, 3.25rem) 2.25rem;
+  min-height: 0;
+  padding: 1.38rem 1.82rem 1.72rem;
+  transform-origin: center;
+  animation: scripture-page-settle 760ms cubic-bezier(0.2, 0.72, 0.22, 1) both;
+}
+
+.scripture-open-book-index .scripture-book-page:first-child {
+  animation-name: scripture-page-settle-left;
+}
+
+.scripture-open-book-index .scripture-book-page:last-child {
+  animation-name: scripture-page-settle-right;
+}
+
+.scripture-open-book-index .scripture-flourish {
+  margin-bottom: 0.28rem;
+}
+
+.scripture-open-book-index .scripture-flourish span {
+  height: 0.95rem;
+  width: 2.35rem;
+}
+
+.scripture-open-book-index .scripture-flourish span::before {
+  font-size: 1.32rem;
+  inset: -0.32rem 0 auto;
+}
+
+.scripture-open-book-index .scripture-testament-title {
+  font-size: 1.2rem;
+  line-height: 1.08;
+}
+
+.scripture-open-book-index .scripture-title-rule {
+  margin: 0.4rem auto 0.6rem;
+  width: 8.9rem;
+}
+
+.scripture-open-book-index .scripture-group-stack {
+  gap: 0.59rem;
+}
+
+.scripture-open-book-index .scripture-index-group {
+  padding-bottom: 0.54rem;
+}
+
+.scripture-open-book-index .scripture-index-group h3 {
+  margin-bottom: 0.3rem;
+  font-size: 0.9rem;
+  line-height: 1.12;
+}
+
+.scripture-open-book-index .scripture-index-group ul {
+  gap: 0.46rem 0.78rem;
+}
+
+.scripture-open-book-index .scripture-index-group a {
+  grid-template-columns: 1.7rem minmax(0, 1fr);
+  column-gap: 0.3rem;
+  font-size: 0.8rem;
+  line-height: 1.16;
+}
+
+.scripture-open-book-index .scripture-index-group .scripture-book-number {
+  padding-top: 0.08rem;
+  font-size: 0.78rem;
 }
 
 .scripture-testament-title {
@@ -360,7 +539,7 @@ body {
 .scripture-index-group ul {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.32rem 1.1rem;
+  gap: 0.62rem 1.1rem;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -368,25 +547,24 @@ body {
 
 .scripture-index-group a {
   display: grid;
-  grid-template-columns: 0.75rem 2rem minmax(0, 1fr);
-  align-items: baseline;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  align-items: start;
+  column-gap: 0.35rem;
   color: var(--text);
   font-family: var(--font-serif), ui-serif, Georgia, serif;
   font-size: 0.91rem;
-  line-height: 1.18;
+  line-height: 1.22;
   text-decoration: none;
+}
+
+.scripture-index-group .scripture-book-number {
+  padding-top: 0.14rem;
 }
 
 .scripture-index-group a:hover {
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-
-.scripture-dash {
-  height: 1px;
-  width: 0.6rem;
-  background: var(--scripture-gold);
 }
 
 .scripture-book-number,
@@ -610,12 +788,21 @@ body {
 }
 
 @media (max-width: 820px) {
+  .scripture-index-page,
   .scripture-index-shell,
   .scripture-reader-shell {
     padding-top: 0.5rem;
   }
 
-  .scripture-index-heading,
+  .scripture-index-heading {
+    margin-top: 0;
+    margin-bottom: 0.9rem;
+  }
+
+  .scripture-open-book-index {
+    max-width: 100%;
+  }
+
   .scripture-chapter-heading {
     margin-top: 1.2rem;
   }
@@ -667,12 +854,18 @@ body {
 }
 
 @media (max-width: 520px) {
-  .scripture-index-heading h1,
+  .scripture-index-heading h1 {
+    font-size: 1.55rem;
+  }
+
   .scripture-chapter-heading h1 {
     font-size: 1.85rem;
   }
 
-  .scripture-edition,
+  .scripture-edition {
+    font-size: 0.95rem;
+  }
+
   .scripture-chapter-heading p {
     font-size: 1.2rem;
   }

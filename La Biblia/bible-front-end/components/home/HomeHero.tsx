@@ -5,7 +5,7 @@ const HERO_IMAGE = "/images/bible-mountains-hero.png";
 
 export function HomeHero() {
   return (
-    <section className="relative z-0 -mx-4 -mt-2 mb-4 min-h-[34rem] overflow-hidden sm:-mx-6 md:min-h-[35rem] lg:-mx-8 lg:min-h-[34rem] xl:-mx-12 xl:min-h-[32rem] 2xl:min-h-[30rem]">
+    <section className="relative z-0 -mx-4 -mt-2 mb-4 min-h-[36rem] overflow-hidden sm:-mx-6 md:min-h-[38rem] lg:-mx-8 lg:min-h-[37rem] xl:-mx-12 xl:min-h-[35rem] 2xl:min-h-[33rem]">
       <div className="pointer-events-none absolute inset-0 bg-[var(--background)]" aria-hidden />
 
       <div

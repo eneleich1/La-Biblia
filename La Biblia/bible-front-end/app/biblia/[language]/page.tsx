@@ -60,7 +60,6 @@ function TestamentPage({
               {[...g.books].sort((a, b) => a.order - b.order).map((b) => (
                 <li key={b.slug}>
                   <Link href={`/biblia/${language}/${b.slug}`}>
-                    <span className="scripture-dash" aria-hidden />
                     <span className="scripture-book-number">
                       {String(b.order).padStart(2, "0")}.
                     </span>
@@ -102,20 +101,21 @@ export default async function BibliaLanguagePage({
   const { ot, nt } = buildGroups(books);
 
   return (
-    <div className="scripture-index-shell">
-      <Link href="/biblia" className="scripture-back-link">
-        ← Traducciones
-      </Link>
+    <div className="scripture-index-page">
+      <div className="scripture-index-content">
+        <Link href="/biblia" className="scripture-back-link">
+          ← Traducciones
+        </Link>
 
-      <header className="scripture-index-heading">
-        <h1>{translation.name}</h1>
-        <p className="scripture-edition">Edición de 1976</p>
-        <p className="scripture-instruction">Selecciona un libro para comenzar a leer.</p>
-      </header>
+        <header className="scripture-index-heading">
+          <h1>{translation.name}</h1>
+          <p className="scripture-edition">Edición de 1976</p>
+        </header>
 
-      <div className="scripture-open-book scripture-open-book-index">
-        <TestamentPage title="Antiguo Testamento" groups={ot} language={language} />
-        <TestamentPage title="Nuevo Testamento" groups={nt} language={language} />
+        <div className="scripture-open-book scripture-open-book-index">
+          <TestamentPage title="Antiguo Testamento" groups={ot} language={language} />
+          <TestamentPage title="Nuevo Testamento" groups={nt} language={language} />
+        </div>
       </div>
     </div>
   );
