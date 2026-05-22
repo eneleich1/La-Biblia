@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, ArrowRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getAdjacentBooks, getTestamentBookCounts } from "@/lib/bible";
 import { formatBookTitle } from "@/lib/formatTitle";
@@ -106,25 +107,39 @@ export default async function ChapterReadPage({
             <Link href={`/biblia/${language}`} className="scripture-back-link">
               Inicio
             </Link>
-            <div>
+            <div className="scripture-aside-title-block">
               <p className="scripture-aside-kicker">Libro</p>
-              <h2>{bookTitle}</h2>
-            </div>
-            <div className="scripture-aside-actions">
-              {chapterNumber > 1 ? (
-                <Link href={`/biblia/${language}/${bookSlug}/${chapterNumber - 1}`}>
-                  Anterior
-                </Link>
-              ) : (
-                <span>Anterior</span>
-              )}
-              {chapterNumber < totalChapters ? (
-                <Link href={`/biblia/${language}/${bookSlug}/${chapterNumber + 1}`}>
-                  Siguiente
-                </Link>
-              ) : (
-                <span>Siguiente</span>
-              )}
+              <div className="scripture-aside-title-row">
+                <h2>{bookTitle}</h2>
+                <div className="scripture-aside-actions" aria-label="Navegacion de capitulos">
+                  {chapterNumber > 1 ? (
+                    <Link
+                      href={`/biblia/${language}/${bookSlug}/${chapterNumber - 1}`}
+                      aria-label="Capitulo anterior"
+                      title="Capitulo anterior"
+                    >
+                      <ArrowLeft aria-hidden />
+                    </Link>
+                  ) : (
+                    <span aria-label="Capitulo anterior no disponible" title="Capitulo anterior">
+                      <ArrowLeft aria-hidden />
+                    </span>
+                  )}
+                  {chapterNumber < totalChapters ? (
+                    <Link
+                      href={`/biblia/${language}/${bookSlug}/${chapterNumber + 1}`}
+                      aria-label="Capitulo siguiente"
+                      title="Capitulo siguiente"
+                    >
+                      <ArrowRight aria-hidden />
+                    </Link>
+                  ) : (
+                    <span aria-label="Capitulo siguiente no disponible" title="Capitulo siguiente">
+                      <ArrowRight aria-hidden />
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
             <div className="scripture-chapter-grid" aria-label="Capitulos">
               {chapters.map((chapter) => (
@@ -139,10 +154,22 @@ export default async function ChapterReadPage({
             </div>
             <div className="scripture-book-rail">
               {prevSlug ? (
-                <Link href={`/biblia/${language}/${prevSlug}/1`}>Libro anterior</Link>
+                <Link
+                  href={`/biblia/${language}/${prevSlug}/1`}
+                  aria-label="Libro anterior"
+                  title="Libro anterior"
+                >
+                  <ChevronsLeft aria-hidden />
+                </Link>
               ) : null}
               {nextSlug ? (
-                <Link href={`/biblia/${language}/${nextSlug}/1`}>Libro siguiente</Link>
+                <Link
+                  href={`/biblia/${language}/${nextSlug}/1`}
+                  aria-label="Libro siguiente"
+                  title="Libro siguiente"
+                >
+                  <ChevronsRight aria-hidden />
+                </Link>
               ) : null}
             </div>
           </div>
