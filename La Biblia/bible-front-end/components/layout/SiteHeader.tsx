@@ -56,7 +56,7 @@ function MobileMenu({
 
   return (
     <nav
-      className="mx-auto max-w-[1500px] border-t border-[var(--border)]/70 bg-white/95 px-4 py-4 shadow-[0_18px_36px_-32px_rgba(11,45,97,0.55)] lg:hidden"
+      className="mx-auto max-w-[1840px] border-t border-[var(--border)]/70 bg-white/95 px-4 py-4 shadow-[0_18px_36px_-32px_rgba(11,45,97,0.55)] lg:hidden"
       aria-label="Principal"
     >
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -101,7 +101,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 bg-[var(--background)]/85 px-1 pt-2 backdrop-blur-xl">
-      <div className="mx-auto max-w-[1500px] rounded-lg border border-white/80 bg-white/90 px-4 shadow-[0_12px_36px_-28px_rgba(11,45,97,0.55)] sm:px-8 lg:px-12">
+      <div className="mx-auto max-w-[1840px] rounded-lg border border-white/80 bg-white/90 px-4 shadow-[0_12px_36px_-28px_rgba(11,45,97,0.55)] sm:px-8 lg:px-12">
         <div className="flex min-h-[86px] flex-wrap items-center justify-between gap-x-5 gap-y-3 py-3 lg:min-h-[92px] lg:flex-nowrap lg:gap-y-0">
           <Link
             href="/"

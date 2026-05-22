@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   countExactPhraseOccurrences,
   countExactWordOccurrences,
+  runApproximateVerseSearch,
   runVerseSearch,
 } from "@/lib/search";
 import { normalizeText, tokenizeNormalized } from "@/lib/normalizeText";
@@ -21,6 +22,8 @@ export async function GET(req: NextRequest) {
   const bookSlug = searchParams.get("bookSlug") ?? undefined;
   const chapterRaw = searchParams.get("chapter");
   const chapter = chapterRaw ? parseInt(chapterRaw, 10) : undefined;
+  const verseRaw = searchParams.get("verse");
+  const verse = verseRaw ? parseInt(verseRaw, 10) : undefined;
   const exactWord = searchParams.get("exactWord")?.trim() ?? "";
   const translationId = searchParams.get("translationId") ?? undefined;
 
@@ -32,7 +35,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const { hits, found } = await runVerseSearch({
+    const exactSearch = await runVerseSearch({
       q,
       mode,
       language,
@@ -40,7 +43,32 @@ export async function GET(req: NextRequest) {
       testament,
       bookSlug,
       chapter: Number.isFinite(chapter) ? chapter : undefined,
+      verse: Number.isFinite(verse) ? verse : undefined,
     });
+
+    const approximateSearch = await runApproximateVerseSearch({
+      q,
+      language,
+      translationId,
+      testament,
+      bookSlug,
+      chapter: Number.isFinite(chapter) ? chapter : undefined,
+      verse: Number.isFinite(verse) ? verse : undefined,
+    });
+
+    const exactKeys = new Set(
+      exactSearch.hits.map(
+        (hit) => `${hit.translationId}:${hit.bookId}:${hit.chapterNumber}:${hit.verseNumber}`,
+      ),
+    );
+    const approximateHits = approximateSearch.hits.filter(
+      (hit) =>
+        !exactKeys.has(
+          `${hit.translationId}:${hit.bookId}:${hit.chapterNumber}:${hit.verseNumber}`,
+        ),
+    );
+    const hits = [...exactSearch.hits, ...approximateHits].slice(0, 35);
+    const found = exactSearch.found + approximateHits.length;
 
     const normQ = normalizeText(q);
     const tokens = tokenizeNormalized(normQ);

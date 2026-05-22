@@ -1,31 +1,17 @@
-export function formatBookTitleWithRomanAfterDash(title: string) {
-  return title
-    .replace(/(\d+-\s*)([ivxlcdm]+)/gi, (match, prefix, roman) => {
-      return prefix + String(roman).toUpperCase();
-    })
-    .replace(/(\d+-\s*)([IVXLCDM]+)(\b.*)/g, (match, prefix, roman, rest) => {
-      return (
-        prefix +
-        String(roman).toUpperCase() +
-        String(rest).toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase())
-      );
-    });
+function capitalizeWord(word: string) {
+  if (/^[ivxlcdm]+$/i.test(word)) return word.toLocaleUpperCase("es");
+
+  const lower = word.toLocaleLowerCase("es");
+  const chars = Array.from(lower);
+  if (!chars.length) return lower;
+
+  return `${chars[0].toLocaleUpperCase("es")}${chars.slice(1).join("")}`;
 }
 
 export function formatBookTitle(title: string) {
-  const romanPattern = /^[IVXLCDM]+(?=\s)/i;
-  const match = title.match(romanPattern);
-  let formattedTitle = "";
+  return title.replace(/\p{L}[\p{L}\p{M}]*/gu, (word) => capitalizeWord(word));
+}
 
-  if (match && match.index === 0) {
-    formattedTitle += match[0].toUpperCase();
-    formattedTitle += title
-      .substring(match[0].length)
-      .toLowerCase()
-      .replace(/\b\w/g, (char) => char.toUpperCase());
-  } else {
-    formattedTitle = title.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-  }
-
-  return formattedTitle;
+export function formatBookTitleWithRomanAfterDash(title: string) {
+  return formatBookTitle(title);
 }

@@ -9,7 +9,7 @@ export function HomeHero() {
       <div className="pointer-events-none absolute inset-0 bg-[var(--background)]" aria-hidden />
 
       <div
-        className="pointer-events-none absolute bottom-0 left-0 top-0 right-4 sm:right-6 lg:right-8 xl:right-12"
+        className="home-hero-image pointer-events-none absolute bottom-0 left-0 top-0 right-4 sm:right-6 lg:right-8 xl:right-12"
         aria-hidden
       >
         <Image
@@ -34,14 +34,14 @@ export function HomeHero() {
 
       <div className="relative z-10 w-full px-4 pb-8 pt-8 sm:px-8 sm:pb-10 sm:pt-10 md:pb-12 md:pt-12 lg:px-16 lg:pt-6 xl:px-[4.25rem] xl:pt-8 2xl:pt-10">
         <div className="max-w-xl md:max-w-[31rem] lg:max-w-[45rem] xl:max-w-[52rem]">
-          <h1 className="font-serif-display text-[2.65rem] font-semibold leading-[1.08] tracking-normal text-[var(--text)] sm:text-5xl lg:text-5xl xl:text-[3.25rem] 2xl:text-[3.55rem]">
+          <h1 className="home-title-reveal font-serif-display text-[2.65rem] font-semibold leading-[1.08] tracking-normal text-[var(--text)] sm:text-5xl lg:text-5xl xl:text-[3.25rem] 2xl:text-[3.55rem]">
             Plataforma bíblica cristiana
           </h1>
           <div
-            className="mt-5 h-[3px] w-12 rounded-full bg-[var(--accent)] sm:w-16"
+            className="home-accent-reveal mt-5 h-[3px] w-12 rounded-full bg-[var(--accent)] sm:w-16"
             aria-hidden
           />
-          <p className="mt-5 max-w-[33rem] text-base font-medium leading-relaxed text-[var(--text)] sm:text-lg lg:mt-6 lg:leading-[1.6]">
+          <p className="home-copy-reveal mt-5 max-w-[33rem] text-base font-medium leading-relaxed text-[var(--text)] sm:text-lg lg:mt-6 lg:leading-[1.6]">
             Un solo lugar para leer la Biblia, estudiar, buscar pasajes, escuchar enseñanzas y
             recursos de apologética que fortalezcan tu fe y tu crecimiento espiritual cada día.
           </p>

@@ -1,16 +1,20 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getAdjacentBooks, getTestamentBookCounts } from "@/lib/bible";
 import { formatBookTitle } from "@/lib/formatTitle";
 
 export const dynamic = "force-dynamic";
 
 export default async function ChapterReadPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ language: string; bookSlug: string; chapter: string }>;
+  searchParams: Promise<{ highlight?: string }>;
 }) {
   const { language, bookSlug, chapter: chapterParam } = await params;
+  const { highlight } = await searchParams;
   const chapterNumber = parseInt(chapterParam, 10);
   if (!Number.isFinite(chapterNumber) || chapterNumber < 1) notFound();
 
@@ -27,75 +31,146 @@ export default async function ChapterReadPage({
   });
   if (!chapterRow) notFound();
 
-  const verses = await prisma.verse.findMany({
-    where: {
-      translationId: translation.id,
-      bookId: book.id,
-      chapterNumber,
-    },
-    orderBy: { verseNumber: "asc" },
-  });
+  const [verses, chapters, testamentCounts] = await Promise.all([
+    prisma.verse.findMany({
+      where: {
+        translationId: translation.id,
+        bookId: book.id,
+        chapterNumber,
+      },
+      orderBy: { verseNumber: "asc" },
+    }),
+    prisma.chapter.findMany({
+      where: { bookId: book.id },
+      select: { number: true },
+      orderBy: { number: "asc" },
+    }),
+    getTestamentBookCounts(),
+  ]);
 
-  const totalChapters = await prisma.chapter.count({ where: { bookId: book.id } });
+  const { prevSlug, nextSlug } = await getAdjacentBooks(
+    book.testament,
+    book.order,
+    testamentCounts.otLast,
+    testamentCounts.ntLast,
+  );
 
-  const heading = `${formatBookTitle(book.nameEs.toLocaleLowerCase())} ${chapterNumber}`;
+  const totalChapters = chapters.length;
+  const bookTitle = formatBookTitle(book.nameEs);
+  const highlightParts = (highlight ?? "")
+    .split("-")
+    .map((part) => parseInt(part, 10))
+    .filter((part) => Number.isFinite(part) && part > 0);
+  const highlightStart = highlightParts[0] ?? null;
+  const highlightEnd = highlightParts[1] ?? highlightStart;
   const half = Math.ceil(verses.length / 2);
   const left = verses.slice(0, half);
   const right = verses.slice(half);
 
-  const Nav = () => (
-    <div className="flex flex-wrap gap-2 py-3">
-      <Link
-        href="/"
-        className="rounded-lg border border-accent-soft bg-white px-3 py-1.5 text-sm hover:bg-paper-alt"
-      >
-        Inicio
-      </Link>
-      <Link
-        href={`/biblia/${language}/${bookSlug}`}
-        className="rounded-lg border border-accent-soft bg-white px-3 py-1.5 text-sm hover:bg-paper-alt"
-      >
-        Capítulos
-      </Link>
-      {chapterNumber > 1 && (
-        <Link
-          href={`/biblia/${language}/${bookSlug}/${chapterNumber - 1}`}
-          className="rounded-lg border border-accent-soft bg-white px-3 py-1.5 text-sm hover:bg-paper-alt"
-        >
-          ← Capítulo anterior
-        </Link>
-      )}
-      {chapterNumber < totalChapters && (
-        <Link
-          href={`/biblia/${language}/${bookSlug}/${chapterNumber + 1}`}
-          className="rounded-lg border border-accent-soft bg-white px-3 py-1.5 text-sm hover:bg-paper-alt"
-        >
-          Capítulo siguiente →
-        </Link>
-      )}
-    </div>
-  );
+  const VerseCol = ({ list, firstPage }: { list: typeof verses; firstPage?: boolean }) => (
+    <div className="scripture-verse-column">
+      <div className="scripture-page-mark" aria-hidden>
+        <span />
+      </div>
+      {list.map((v, index) => {
+        const isHighlighted =
+          highlightStart !== null &&
+          highlightEnd !== null &&
+          v.verseNumber >= highlightStart &&
+          v.verseNumber <= highlightEnd;
 
-  const VerseCol = ({ list }: { list: typeof verses }) => (
-    <div className="space-y-3 text-[1.05rem] leading-relaxed">
-      {list.map((v) => (
-        <p key={v.id} id={`V${v.verseNumber}`} className="scroll-mt-24">
-          <span className="me-2 font-semibold text-accent">{v.verseNumber}</span>
-          {v.text}
-        </p>
-      ))}
+        return (
+          <p
+            key={v.id}
+            id={`V${v.verseNumber}`}
+            className={[
+              "scripture-verse",
+              isHighlighted ? "scripture-highlighted" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          >
+            <span className="scripture-verse-number">{v.verseNumber}</span>
+            <span className="scripture-verse-text">{v.text}</span>
+          </p>
+        );
+      })}
     </div>
   );
 
   return (
-    <article>
-      <Nav />
-      <h1 className="mb-8 text-center text-2xl font-semibold text-accent">{heading}</h1>
-      <div className="grid gap-8 md:grid-cols-2">
-        <VerseCol list={left} />
-        <VerseCol list={right} />
+    <article className="scripture-reader-shell">
+      <div className="scripture-reader-layout">
+        <aside className="scripture-reader-aside" aria-label="Navegacion del libro">
+          <div className="scripture-reader-aside-card">
+            <Link href={`/biblia/${language}`} className="scripture-back-link">
+              Inicio
+            </Link>
+            <div>
+              <p className="scripture-aside-kicker">Libro</p>
+              <h2>{bookTitle}</h2>
+            </div>
+            <div className="scripture-aside-actions">
+              {chapterNumber > 1 ? (
+                <Link href={`/biblia/${language}/${bookSlug}/${chapterNumber - 1}`}>
+                  Anterior
+                </Link>
+              ) : (
+                <span>Anterior</span>
+              )}
+              {chapterNumber < totalChapters ? (
+                <Link href={`/biblia/${language}/${bookSlug}/${chapterNumber + 1}`}>
+                  Siguiente
+                </Link>
+              ) : (
+                <span>Siguiente</span>
+              )}
+            </div>
+            <div className="scripture-chapter-grid" aria-label="Capitulos">
+              {chapters.map((chapter) => (
+                <Link
+                  key={chapter.number}
+                  href={`/biblia/${language}/${bookSlug}/${chapter.number}`}
+                  aria-current={chapter.number === chapterNumber ? "page" : undefined}
+                >
+                  {String(chapter.number).padStart(2, "0")}
+                </Link>
+              ))}
+            </div>
+            <div className="scripture-book-rail">
+              {prevSlug ? (
+                <Link href={`/biblia/${language}/${prevSlug}/1`}>Libro anterior</Link>
+              ) : null}
+              {nextSlug ? (
+                <Link href={`/biblia/${language}/${nextSlug}/1`}>Libro siguiente</Link>
+              ) : null}
+            </div>
+          </div>
+        </aside>
+
+        <div className="scripture-reader-main">
+          <header className="scripture-chapter-heading">
+            <div className="scripture-flourish" aria-hidden>
+              <span />
+            </div>
+            <h1>{bookTitle}</h1>
+            <p>
+              <span aria-hidden />
+              Capitulo {chapterNumber}
+              <span aria-hidden />
+            </p>
+          </header>
+
+          <div className="scripture-open-book scripture-reader-book">
+            <section className="scripture-reading-page">
+              <VerseCol list={left} firstPage />
+            </section>
+            <section className="scripture-reading-page">
+              <VerseCol list={right} />
+            </section>
+          </div>
+        </div>
       </div>
-      <Nav />
     </article>
   );
 }

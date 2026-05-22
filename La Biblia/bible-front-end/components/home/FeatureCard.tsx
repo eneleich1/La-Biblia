@@ -7,16 +7,24 @@ export type FeatureCardProps = {
   title: string;
   description: string;
   icon: LucideIcon;
+  animationIndex?: number;
 };
 
-export function FeatureCard({ href, title, description, icon: Icon }: FeatureCardProps) {
+export function FeatureCard({
+  href,
+  title,
+  description,
+  icon: Icon,
+  animationIndex = 0,
+}: FeatureCardProps) {
   return (
     <Link
       href={href}
-      className="group flex min-h-[8.4rem] items-center gap-5 rounded-lg border border-[var(--border)] bg-white px-6 py-5 text-[var(--text)] no-underline shadow-[var(--shadow-card)] transition visited:text-[var(--text)] hover:border-[var(--accent)]/40 hover:shadow-[var(--shadow-card-hover)]"
+      className="feature-card group flex min-h-[8.4rem] items-center gap-5 rounded-lg border border-[var(--border)] bg-white px-6 py-5 text-[var(--text)] no-underline shadow-[var(--shadow-card)] transition visited:text-[var(--text)] hover:border-[var(--accent)]/40 hover:shadow-[var(--shadow-card-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
+      style={{ ["--feature-delay" as string]: `${animationIndex * 70}ms` }}
     >
-      <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--text)] ring-1 ring-[#d8ebff] transition group-hover:ring-[var(--accent)]/25">
-        <Icon className="h-9 w-9" strokeWidth={1.65} aria-hidden />
+      <span className="feature-icon-wrap flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--text)] ring-1 ring-[#d8ebff] transition group-hover:ring-[var(--accent)]/25">
+        <Icon className="feature-icon h-9 w-9" strokeWidth={1.65} aria-hidden />
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-3">

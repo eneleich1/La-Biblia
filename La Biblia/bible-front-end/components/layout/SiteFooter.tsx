@@ -11,7 +11,7 @@ const footerLinks = [
 export function SiteFooter() {
   return (
     <footer className="mt-auto px-1">
-      <div className="mx-auto grid max-w-[1500px] grid-cols-1 gap-8 border-t border-[var(--border)] bg-[var(--background-soft)] px-6 py-8 sm:px-8 md:grid-cols-[1fr_auto_1fr_auto] md:items-center lg:px-12">
+      <div className="mx-auto grid max-w-[1840px] grid-cols-1 gap-8 border-t border-[var(--border)] bg-[var(--background-soft)] px-6 py-8 sm:px-8 md:grid-cols-[1fr_auto_1fr_auto] md:items-center lg:px-12">
         <div className="flex items-start gap-3 text-[var(--text)]">
           <BookOpenCheck
             className="mt-0.5 h-10 w-10 shrink-0 text-[var(--text-muted)]"

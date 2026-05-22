@@ -25,7 +25,7 @@ function buildGroups(
     if (!map.has(key)) map.set(key, { title: key, books: [] });
     map.get(key)!.books.push({
       slug: b.slug,
-      title: formatBookTitleWithRomanAfterDash(b.nameEs.toLowerCase()),
+      title: formatBookTitleWithRomanAfterDash(b.nameEs),
       order: b.order,
     });
   }
@@ -34,6 +34,46 @@ function buildGroups(
     ot: [...otMap.values()],
     nt: [...ntMap.values()],
   };
+}
+
+function TestamentPage({
+  title,
+  groups,
+  language,
+}: {
+  title: string;
+  groups: Group[];
+  language: string;
+}) {
+  return (
+    <section className="scripture-book-page">
+      <div className="scripture-flourish" aria-hidden>
+        <span />
+      </div>
+      <h2 className="scripture-testament-title">{title}</h2>
+      <div className="scripture-title-rule" aria-hidden />
+      <div className="scripture-group-stack">
+        {groups.map((g) => (
+          <div key={g.title} className="scripture-index-group">
+            <h3>{formatBookTitleWithRomanAfterDash(g.title)}</h3>
+            <ul>
+              {[...g.books].sort((a, b) => a.order - b.order).map((b) => (
+                <li key={b.slug}>
+                  <Link href={`/biblia/${language}/${b.slug}`}>
+                    <span className="scripture-dash" aria-hidden />
+                    <span className="scripture-book-number">
+                      {String(b.order).padStart(2, "0")}.
+                    </span>
+                    <span>{b.title}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 export default async function BibliaLanguagePage({
@@ -62,63 +102,20 @@ export default async function BibliaLanguagePage({
   const { ot, nt } = buildGroups(books);
 
   return (
-    <div className="space-y-8">
-      <div>
-        <Link href="/biblia" className="text-sm text-ink-muted hover:text-accent">
-          ← Traducciones
-        </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-accent">{translation.name}</h1>
-        <p className="text-ink-muted">{translation.abbreviation}</p>
-      </div>
+    <div className="scripture-index-shell">
+      <Link href="/biblia" className="scripture-back-link">
+        ← Traducciones
+      </Link>
 
-      <div className="grid gap-10 md:grid-cols-[1fr_auto_1fr]">
-        <section>
-          <h2 className="mb-4 text-center text-lg font-semibold">Antiguo Testamento</h2>
-          <div className="space-y-6">
-            {ot.map((g) => (
-              <div key={g.title}>
-                <h3 className="font-medium text-ink">{g.title}</h3>
-                <ul className="mt-2 list-none space-y-1 ps-0">
-                  {[...g.books].sort((a, b) => a.order - b.order).map((b) => (
-                    <li key={b.slug}>
-                      <Link
-                        href={`/biblia/${language}/${b.slug}`}
-                        className="text-accent hover:underline"
-                      >
-                        {b.title}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </section>
+      <header className="scripture-index-heading">
+        <h1>{translation.name}</h1>
+        <p className="scripture-edition">Edición de 1976</p>
+        <p className="scripture-instruction">Selecciona un libro para comenzar a leer.</p>
+      </header>
 
-        <div className="hidden md:block w-px bg-accent-soft self-stretch" />
-
-        <section>
-          <h2 className="mb-4 text-center text-lg font-semibold">Nuevo Testamento</h2>
-          <div className="space-y-6">
-            {nt.map((g) => (
-              <div key={g.title}>
-                <h3 className="font-medium text-ink">{g.title}</h3>
-                <ul className="mt-2 list-none space-y-1">
-                  {[...g.books].sort((a, b) => a.order - b.order).map((b) => (
-                    <li key={b.slug}>
-                      <Link
-                        href={`/biblia/${language}/${b.slug}`}
-                        className="text-accent hover:underline"
-                      >
-                        {b.title}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </section>
+      <div className="scripture-open-book scripture-open-book-index">
+        <TestamentPage title="Antiguo Testamento" groups={ot} language={language} />
+        <TestamentPage title="Nuevo Testamento" groups={nt} language={language} />
       </div>
     </div>
   );

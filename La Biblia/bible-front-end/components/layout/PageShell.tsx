@@ -30,7 +30,7 @@ export function PageShell({
         className={`flex min-h-0 flex-1 flex-col ${className}`}
       >
         <div
-          className={`mx-auto w-full max-w-[1500px] flex-1 bg-[var(--background)] px-4 py-6 sm:px-6 md:py-8 lg:px-8 xl:px-12 ${mainClassName}`}
+          className={`mx-auto w-full max-w-[1840px] flex-1 bg-[var(--background)] px-4 py-6 sm:px-6 md:py-8 lg:px-8 xl:px-12 ${mainClassName}`}
         >
           {children}
         </div>
@@ -40,7 +40,7 @@ export function PageShell({
 
   return (
     <div
-      className={`mx-auto flex w-full max-w-[1500px] min-h-0 flex-1 flex-col gap-6 bg-[var(--background)] px-4 py-6 sm:px-6 md:py-8 lg:flex-row lg:gap-8 lg:px-8 xl:px-12 ${className}`}
+      className={`mx-auto flex w-full max-w-[1840px] min-h-0 flex-1 flex-col gap-6 bg-[var(--background)] px-4 py-6 sm:px-6 md:py-8 lg:flex-row lg:gap-8 lg:px-8 xl:px-12 ${className}`}
     >
       {leftRail ? (
         <aside className="order-2 hidden w-full shrink-0 lg:order-1 lg:block lg:w-56 xl:w-64">
