@@ -13,6 +13,7 @@
     "import:bible": "tsx scripts/import-bible-json.ts",
     "verse-words": "tsx scripts/generate-verse-words.ts",
     "typesense:sync": "tsx scripts/sync-typesense.ts",
+    "bible:static": "node scripts/generate-static-bible.mjs",
     "setup:local": "node scripts/setup-local.mjs"
   },
   "dependencies": {

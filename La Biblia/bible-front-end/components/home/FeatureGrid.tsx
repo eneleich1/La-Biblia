@@ -1,6 +1,5 @@
 import {
   BookOpen,
-  CalendarDays,
   GraduationCap,
   Headphones,
   MessagesSquare,
@@ -28,12 +27,6 @@ const items = [
     title: "Biblia en audio",
     description: "Escucha la Palabra de Dios por capítulo.",
     icon: Headphones,
-  },
-  {
-    href: "/lecturas-del-dia",
-    title: "Lecturas del día",
-    description: "Lecturas litúrgicas diarias con guía de reflexión.",
-    icon: CalendarDays,
   },
   {
     href: "/apologetica",

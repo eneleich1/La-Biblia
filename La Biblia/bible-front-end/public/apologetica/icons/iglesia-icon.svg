@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="none" role="img" aria-label="Icono iglesia (placeholder)">
+  <circle cx="40" cy="40" r="40" fill="#f5efe6"/>
+  <g stroke="#9a7b4f" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M40 16v5M35 21h10"/>
+    <path d="M26 21v30h28V21"/>
+    <path d="M30 51v5h20v-5"/>
+    <path d="M34 30h12M34 36h12M34 42h12"/>
+    <path d="M40 21v10"/>
+  </g>
+</svg>

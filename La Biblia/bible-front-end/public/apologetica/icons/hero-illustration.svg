@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 168" fill="none" role="img" aria-label="Ilustraci�n hero (placeholder)">
+  <rect x="12" y="24" width="112" height="120" rx="14" fill="#ffffff" stroke="#e8e0d4"/>
+  <g transform="translate(42 52)" stroke="#9a7b4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M28 6v60M14 20h28M18 30h20M18 40h20M18 50h20"/>
+    <path d="M8 20c0-8 8-14 20-14s20 6 20 14"/>
+  </g>
+  <circle cx="228" cy="84" r="62" fill="#ffffff" stroke="#e8e0d4"/>
+  <g transform="translate(228 84)" stroke="#9a7b4f" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M0-36v72M-28-20h56M-22-30l22-16 22 16"/>
+  </g>
+</svg>

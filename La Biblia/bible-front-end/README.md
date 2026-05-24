@@ -137,7 +137,6 @@ An optional `next-app` service is commented in `docker-compose.yml` if you prefe
 | `/biblia/[language]/[bookSlug]/[chapter]` | Chapter reader with `#V{n}` verse anchors. |
 | `/buscar` | Search UI. |
 | `/audio`, `/audio/[language]/[bookSlug]/[chapter]` | Audio placeholders. |
-| `/lecturas-del-dia` | Daily readings placeholder. |
 | `/estudios`, `/estudios/[slug]` | Studies placeholders. |
 | `/apologetica`, `/apologetica/[slug]` | Apologetics placeholders. |
 | `/predicaciones`, `/predicaciones/[slug]` | Sermons placeholders. |

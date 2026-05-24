@@ -6,7 +6,7 @@ export default async function DebatePage({
   const { slug } = await params;
   return (
     <div className="space-y-2">
-      <h1 className="text-xl font-semibold text-accent">Debate: {slug}</h1>
+      <h1 className="page-title">Debate: {slug}</h1>
       <p className="text-ink-muted">Placeholder (modelo Debate).</p>
     </div>
   );

@@ -32,6 +32,10 @@ export const metadata: Metadata = {
   title: "Seek of Truth — Plataforma Bíblica Cristiana",
   description:
     "Plataforma cristiana: Biblia de Jerusalén, búsqueda, audio, estudios, lecturas y recursos de apologética.",
+  icons: {
+    icon: [{ url: "/favicon.png", type: "image/png" }],
+    apple: [{ url: "/favicon.png", type: "image/png" }],
+  },
 };
 
 function normalizeTheme(theme: string | undefined): SiteTheme {

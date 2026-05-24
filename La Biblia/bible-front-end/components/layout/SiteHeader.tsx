@@ -6,7 +6,6 @@ import { useState } from "react";
 import {
   BookOpen,
   BookOpenCheck,
-  CalendarDays,
   GraduationCap,
   Headphones,
   Home,
@@ -31,7 +30,6 @@ const mainNav: NavItem[] = [
   { href: "/biblia", label: "Biblia", icon: BookOpen },
   { href: "/buscar", label: "Buscar", icon: Search },
   { href: "/audio", label: "Audio", icon: Headphones },
-  { href: "/lecturas-del-dia", label: "Lecturas", icon: CalendarDays },
   { href: "/estudios", label: "Estudios", icon: GraduationCap },
   { href: "/apologetica", label: "Apologética", icon: ShieldCheck },
   { href: "/predicaciones", label: "Predicaciones", icon: Mic },

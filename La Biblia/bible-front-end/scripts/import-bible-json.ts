@@ -26,6 +26,12 @@ function stripTitlePrefix(title: string) {
   return title.replace(/^\d+-\s*/, "").trim();
 }
 
+function parseChapterNumber(title: string) {
+  const match = title.match(/(\d+)\s*$/);
+  if (!match) throw new Error(`No se pudo obtener el número de capítulo de: ${title}`);
+  return parseInt(match[1], 10);
+}
+
 function slugify(raw: string, used: Set<string>) {
   let slug =
     normalizeText(raw)
@@ -105,9 +111,9 @@ async function main() {
         },
       });
 
-      const chapters = book.Chapters.map((_, i) => ({
+      const chapters = book.Chapters.map((ch) => ({
         bookId: bookRow.id,
-        number: i + 1,
+        number: parseChapterNumber(ch.Title),
       }));
       jsonChaptersTotal += chapters.length;
       await prisma.chapter.createMany({ data: chapters });
@@ -137,7 +143,7 @@ async function main() {
 
       for (let ci = 0; ci < book.Chapters.length; ci++) {
         const ch = book.Chapters[ci];
-        const chapterNumber = ci + 1;
+        const chapterNumber = parseChapterNumber(ch.Title);
         const chapterId = chapterIdByNumber.get(chapterNumber);
         if (!chapterId) {
           throw new Error(

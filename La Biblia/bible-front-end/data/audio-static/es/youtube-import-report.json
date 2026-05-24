@@ -1,0 +1,91 @@
+{
+  "generatedAt": "2026-05-24T00:28:26.224Z",
+  "source": "C:\\Users\\eneleich\\Desktop\\La Biblia Project\\Scripts\\mis_videos_youtube.txt",
+  "stats": {
+    "totalRows": 1345,
+    "bibleRows": 1329,
+    "imported": 2,
+    "updated": 2,
+    "skippedNonBible": 16,
+    "unmatched": [],
+    "invalidChapter": [
+      {
+        "title": "La Biblia de Jerusalen Audio Es   Eclesiástico 27",
+        "url": "https://www.youtube.com/watch?v=sta4IdHAEXQ",
+        "videoId": "sta4IdHAEXQ",
+        "slug": "eclesiastico",
+        "bookName": "Eclesiástico",
+        "chapter": 27,
+        "maxChapter": 51
+      },
+      {
+        "title": "La Biblia de Jerusalen Audio Es   Eclesiástico 25",
+        "url": "https://www.youtube.com/watch?v=x5VjV67IKYM",
+        "videoId": "x5VjV67IKYM",
+        "slug": "eclesiastico",
+        "bookName": "Eclesiástico",
+        "chapter": 25,
+        "maxChapter": 51
+      }
+    ],
+    "conflicts": [
+      {
+        "slug": "los-salmos",
+        "chapter": 41,
+        "previousId": "6cyhFFJ8bEs",
+        "newId": "fsJY_QuRvpo",
+        "title": "La Biblia de Jerusalen Audio Es   Salmo 41"
+      },
+      {
+        "slug": "los-salmos",
+        "chapter": 41,
+        "previousId": "fsJY_QuRvpo",
+        "newId": "6cyhFFJ8bEs",
+        "title": "La Biblia de Jerusalen Audio Es   Salmo 41"
+      }
+    ],
+    "unmatchedCount": 0,
+    "invalidChapterCount": 2,
+    "conflictCount": 2,
+    "missingBooksCount": 0,
+    "missingChaptersTotal": 0
+  },
+  "missingChapters": [],
+  "unmatched": [],
+  "invalidChapter": [
+    {
+      "title": "La Biblia de Jerusalen Audio Es   Eclesiástico 27",
+      "url": "https://www.youtube.com/watch?v=sta4IdHAEXQ",
+      "videoId": "sta4IdHAEXQ",
+      "slug": "eclesiastico",
+      "bookName": "Eclesiástico",
+      "chapter": 27,
+      "maxChapter": 51
+    },
+    {
+      "title": "La Biblia de Jerusalen Audio Es   Eclesiástico 25",
+      "url": "https://www.youtube.com/watch?v=x5VjV67IKYM",
+      "videoId": "x5VjV67IKYM",
+      "slug": "eclesiastico",
+      "bookName": "Eclesiástico",
+      "chapter": 25,
+      "maxChapter": 51
+    }
+  ],
+  "conflicts": [
+    {
+      "slug": "los-salmos",
+      "chapter": 41,
+      "previousId": "6cyhFFJ8bEs",
+      "newId": "fsJY_QuRvpo",
+      "title": "La Biblia de Jerusalen Audio Es   Salmo 41"
+    },
+    {
+      "slug": "los-salmos",
+      "chapter": 41,
+      "previousId": "fsJY_QuRvpo",
+      "newId": "6cyhFFJ8bEs",
+      "title": "La Biblia de Jerusalen Audio Es   Salmo 41"
+    }
+  ]
+}

@@ -40,7 +40,7 @@ export default async function BuscarPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-accent">Buscar en la Biblia</h1>
+      <h1 className="page-title">Buscar en la Biblia</h1>
       <BibleSearchClient books={bookOptions} />
     </div>
   );
