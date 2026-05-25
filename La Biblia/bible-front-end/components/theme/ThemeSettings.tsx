@@ -222,9 +222,9 @@ export function ThemeSettings() {
               </button>
             </div>
 
-            <div className="flex min-h-0 overflow-y-auto">
+            <div className="flex min-h-[28rem] overflow-y-auto">
               <nav
-                className="flex w-[8.25rem] shrink-0 flex-col gap-0.5 border-r border-[var(--border)] bg-[var(--background-soft)]/40 p-1.5"
+                className="flex w-[8.25rem] shrink-0 flex-col gap-1 border-r border-[var(--border)] bg-[linear-gradient(180deg,var(--background-soft)_0%,color-mix(in_srgb,var(--background-soft)_78%,var(--accent-soft))_100%)] p-1.5"
                 role="tablist"
                 aria-label="Categorias de ajustes"
               >
@@ -240,10 +240,10 @@ export function ThemeSettings() {
                       aria-selected={isActive}
                       aria-controls={`settings-panel-${section.id}`}
                       onClick={() => setActiveSection(section.id)}
-                      className={`flex w-full items-center gap-1.5 rounded-lg px-2 py-1.5 text-left text-xs leading-snug transition ${
+                      className={`relative flex w-full items-center gap-1.5 rounded-lg border px-2 py-1.5 text-left text-xs leading-snug transition ${
                         isActive
-                          ? "bg-[var(--surface)] font-semibold text-[var(--text)] shadow-sm"
-                          : "font-medium text-[var(--text-muted)] hover:bg-[var(--surface)]/70 hover:text-[var(--text)]"
+                          ? "border-[color-mix(in_srgb,var(--accent)_45%,var(--border))] bg-[var(--surface)] font-semibold text-[var(--text)] shadow-[0_8px_18px_-14px_rgba(15,23,42,0.7)] before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:rounded-r-full before:bg-[var(--accent)]"
+                          : "border-transparent font-semibold text-[color-mix(in_srgb,var(--text-muted)_82%,var(--text))] hover:border-[color-mix(in_srgb,var(--accent)_22%,transparent)] hover:bg-[color-mix(in_srgb,var(--surface)_62%,transparent)] hover:text-[var(--text)]"
                       }`}
                     >
                       <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={2} aria-hidden />
@@ -254,7 +254,7 @@ export function ThemeSettings() {
               </nav>
 
               <div
-                className="min-w-0 flex-1 p-3"
+                className="min-w-0 flex-1 bg-[color-mix(in_srgb,var(--surface)_88%,var(--background-soft))] p-3"
                 role="tabpanel"
                 id={`settings-panel-${activeSection}`}
                 aria-labelledby={`settings-tab-${activeSection}`}

@@ -226,6 +226,14 @@ export function BibleReaderClient({
     <article className="scripture-reader-shell">
       <div className="scripture-reader-layout">
         <aside className="scripture-reader-aside" aria-label="Navegacion del libro">
+          <header className="scripture-aside-chapter-heading">
+            <div className="scripture-flourish" aria-hidden>
+              <span />
+            </div>
+            <h1>{bookTitle}</h1>
+            <p>Capitulo {chapterNumber}</p>
+          </header>
+
           <div className="scripture-reader-aside-card">
             <Link href={`/biblia/${language}`} className="scripture-back-link">
               Inicio
@@ -304,18 +312,6 @@ export function BibleReaderClient({
         </aside>
 
         <div className="scripture-reader-main" aria-busy={isPending}>
-          <header className="scripture-chapter-heading">
-            <div className="scripture-flourish" aria-hidden>
-              <span />
-            </div>
-            <h1>{bookTitle}</h1>
-            <p>
-              <span aria-hidden />
-              Capitulo {chapterNumber}
-              <span aria-hidden />
-            </p>
-          </header>
-
           <div className="scripture-open-book scripture-reader-book">
             <section className="scripture-reading-page">
               <VerseCol list={left} />

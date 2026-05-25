@@ -95,29 +95,31 @@ function TestamentPage({
 }) {
   return (
     <section className="scripture-book-page">
-      <div className="scripture-flourish" aria-hidden>
-        <span />
-      </div>
-      <h2 className="scripture-testament-title">{title}</h2>
-      <div className="scripture-title-rule" aria-hidden />
-      <div className="scripture-group-stack">
-        {groups.map((g) => (
-          <div key={g.title} className="scripture-index-group">
-            {g.title !== title && <h3>{formatBookTitleWithRomanAfterDash(g.title)}</h3>}
-            <ul>
-              {[...g.books].sort((a, b) => a.order - b.order).map((b) => (
-                <li key={b.slug}>
-                  <Link href={bookHref(language, b.slug, variant)}>
-                    <span className="scripture-book-number">
-                      {String(b.order).padStart(2, "0")}.
-                    </span>
-                    <span>{b.title}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+      <div className="scripture-book-page-content">
+        <div className="scripture-flourish" aria-hidden>
+          <span />
+        </div>
+        <h2 className="scripture-testament-title">{title}</h2>
+        <div className="scripture-title-rule" aria-hidden />
+        <div className="scripture-group-stack">
+          {groups.map((g) => (
+            <div key={g.title} className="scripture-index-group">
+              {g.title !== title && <h3>{formatBookTitleWithRomanAfterDash(g.title)}</h3>}
+              <ul>
+                {[...g.books].sort((a, b) => a.order - b.order).map((b) => (
+                  <li key={b.slug}>
+                    <Link href={bookHref(language, b.slug, variant)}>
+                      <span className="scripture-book-number">
+                        {String(b.order).padStart(2, "0")}.
+                      </span>
+                      <span>{b.title}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -136,30 +138,32 @@ export function BibleIndexClient({
   const { ot, nt } = buildGroups(books, bibleIndexMode, bookTitleMode);
 
   return (
-    <div
-      className={[
-        "scripture-open-book",
-        "scripture-open-book-index",
-        bibleIndexMode === "natural"
-          ? "scripture-open-book-natural"
-          : "scripture-open-book-grouped",
-        bookTitleMode === "long"
-          ? "scripture-open-book-titles-long"
-          : "scripture-open-book-titles-short",
-      ].join(" ")}
-    >
-      <TestamentPage
-        title="Antiguo Testamento"
-        groups={ot}
-        language={language}
-        variant={variant}
-      />
-      <TestamentPage
-        title="Nuevo Testamento"
-        groups={nt}
-        language={language}
-        variant={variant}
-      />
+    <div className="scripture-book-frame">
+      <div
+        className={[
+          "scripture-open-book",
+          "scripture-open-book-index",
+          bibleIndexMode === "natural"
+            ? "scripture-open-book-natural"
+            : "scripture-open-book-grouped",
+          bookTitleMode === "long"
+            ? "scripture-open-book-titles-long"
+            : "scripture-open-book-titles-short",
+        ].join(" ")}
+      >
+        <TestamentPage
+          title="Antiguo Testamento"
+          groups={ot}
+          language={language}
+          variant={variant}
+        />
+        <TestamentPage
+          title="Nuevo Testamento"
+          groups={nt}
+          language={language}
+          variant={variant}
+        />
+      </div>
     </div>
   );
 }

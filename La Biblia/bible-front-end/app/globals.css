@@ -328,6 +328,13 @@ body {
   filter: drop-shadow(0 18px 26px rgba(11, 45, 97, 0.14));
 }
 
+.scripture-book-frame {
+  height: calc(46rem + 2cm);
+  width: 100%;
+  max-width: 1540px;
+  margin: 0 auto;
+}
+
 .scripture-open-book.scripture-open-book-index {
   filter:
     drop-shadow(0 8px 14px rgba(11, 45, 97, 0.06))
@@ -335,6 +342,7 @@ body {
 }
 
 .scripture-open-book-index {
+  height: 100%;
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
@@ -430,10 +438,20 @@ body {
 }
 
 .scripture-open-book-index .scripture-book-page {
-  min-height: 46rem;
-  padding: 1.38rem 1.82rem calc(2.45rem + 1cm);
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
   transform-origin: center;
   animation: scripture-page-settle 760ms cubic-bezier(0.2, 0.72, 0.22, 1) both;
+}
+
+.scripture-open-book-index .scripture-book-page-content {
+  box-sizing: border-box;
+  height: 100%;
+  overflow: hidden;
+  padding: 1.2rem 1.82rem calc(1.45rem + 0.5cm);
 }
 
 .scripture-open-book-index .scripture-book-page:first-child {
@@ -512,7 +530,7 @@ body {
   display: block;
   column-count: 2;
   column-gap: 2.25rem;
-  padding-left: 0.5cm;
+  padding-left: 1cm;
 }
 
 .scripture-open-book-natural .scripture-index-group li {
@@ -529,6 +547,23 @@ body {
 
 .scripture-open-book-natural .scripture-index-group .scripture-book-number {
   font-size: 0.88rem;
+}
+
+.scripture-open-book-grouped .scripture-group-stack {
+  gap: 0.66rem;
+  margin-top: 0.94cm;
+}
+
+.scripture-open-book-grouped .scripture-index-group {
+  padding-bottom: 0.66rem;
+}
+
+.scripture-open-book-grouped .scripture-index-group h3 {
+  margin-bottom: 0.3rem;
+}
+
+.scripture-open-book-grouped .scripture-index-group ul {
+  gap: 0.46rem 0.82rem;
 }
 
 .scripture-testament-title {
@@ -637,6 +672,44 @@ body {
 .scripture-reader-aside {
   position: sticky;
   top: 1.25rem;
+  display: grid;
+  gap: 0.72rem;
+  justify-items: center;
+}
+
+.scripture-aside-chapter-heading {
+  width: 18rem;
+  max-width: 100%;
+  text-align: center;
+}
+
+.scripture-aside-chapter-heading .scripture-flourish {
+  margin-bottom: 0.42rem;
+}
+
+.scripture-aside-chapter-heading::before {
+  content: "";
+  display: block;
+  height: 1px;
+  margin: 0 0 1.1rem;
+  background: linear-gradient(90deg, transparent, var(--text), transparent);
+}
+
+.scripture-aside-chapter-heading h1 {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-size: clamp(2.1rem, 3.7vw, 2.85rem);
+  font-weight: 650;
+  line-height: 1.02;
+}
+
+.scripture-aside-chapter-heading p {
+  margin: 0.18rem 0 0;
+  color: var(--scripture-gold);
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-size: clamp(1.25rem, 2.1vw, 1.55rem);
+  line-height: 1.08;
 }
 
 .scripture-reader-aside-card {
@@ -795,12 +868,13 @@ body {
 }
 
 .scripture-reader-book {
-  margin-top: 1.2rem;
+  margin-top: 0;
   max-width: 1500px;
+  min-height: clamp(44rem, calc(100vh - 7.25rem), 58rem);
 }
 
 .scripture-reading-page {
-  min-height: 39rem;
+  min-height: inherit;
   padding: clamp(1.8rem, 2.9vw, 3rem) clamp(2.25rem, 3.2vw, 3.85rem);
   color: var(--text);
 }
@@ -883,7 +957,13 @@ body {
   .scripture-reader-aside {
     position: static;
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
+  }
+
+  .scripture-aside-chapter-heading {
+    width: min(100%, 18rem);
   }
 
   .scripture-reader-aside-card {
@@ -930,6 +1010,11 @@ body {
     max-width: 100%;
   }
 
+  .scripture-book-frame,
+  .scripture-open-book-index {
+    height: auto;
+  }
+
   .scripture-chapter-heading {
     margin-top: 1.2rem;
   }
@@ -941,6 +1026,10 @@ body {
   .scripture-open-book {
     display: block;
     border-radius: 22px;
+  }
+
+  .scripture-reader-book {
+    min-height: auto;
   }
 
   .scripture-open-book::after {
@@ -972,7 +1061,14 @@ body {
 
   .scripture-open-book-index .scripture-book-page,
   .scripture-reading-page {
+    height: auto;
     min-height: auto;
+    overflow: visible;
+  }
+
+  .scripture-open-book-index .scripture-book-page-content {
+    height: auto;
+    overflow: visible;
   }
 
   .scripture-index-group ul {
@@ -1003,6 +1099,11 @@ body {
 
   .scripture-open-book-index .scripture-book-page,
   .scripture-reading-page {
+    padding: 0;
+  }
+
+  .scripture-open-book-index .scripture-book-page-content,
+  .scripture-reading-page {
     padding: 1.45rem 1.2rem;
   }
 
@@ -1010,6 +1111,18 @@ body {
     width: min(100%, 17rem);
     max-width: 17rem;
     padding: 0.82rem;
+  }
+
+  .scripture-aside-chapter-heading {
+    width: min(100%, 17rem);
+  }
+
+  .scripture-aside-chapter-heading h1 {
+    font-size: 2.05rem;
+  }
+
+  .scripture-aside-chapter-heading p {
+    font-size: 1.22rem;
   }
 
   .scripture-aside-actions a,
