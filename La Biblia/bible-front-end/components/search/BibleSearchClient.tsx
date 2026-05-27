@@ -2,19 +2,29 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import {
+  ArrowRight,
+  BookOpen,
+  Bookmark,
+  ChevronDown,
+  Cross,
+  Globe2,
+  Hash,
+  Library,
+  ListFilter,
+  RotateCcw,
+  Search,
+  Sparkles,
+  WholeWord,
+} from "lucide-react";
 
-type ChapterOption = {
-  number: number;
-  verseCount: number;
-};
-
+type ChapterOption = { number: number; verseCount: number };
 type BookOption = {
   slug: string;
   title: string;
   testament: number;
   chapters: ChapterOption[];
 };
-
 type Hit = {
   reference: string;
   text: string;
@@ -26,8 +36,8 @@ type Hit = {
   matchType?: "exact" | "approximate";
   matchedWords?: string[];
 };
-
 type ActiveField = "book" | "chapter" | "verse" | null;
+type SearchIntent = "phrase" | "word" | "count";
 
 function normalizeLookup(value: string) {
   return value
@@ -78,13 +88,12 @@ function HighlightedText({
           return (
             <mark
               key={`${part}-${index}`}
-              className="rounded bg-amber-100 px-0.5 text-ink ring-1 ring-amber-200"
+              className="rounded bg-amber-100 px-0.5 text-[var(--text)] ring-1 ring-amber-200"
             >
               {part}
             </mark>
           );
         }
-
         return <span key={`${part}-${index}`}>{part}</span>;
       })}
     </>
@@ -105,12 +114,12 @@ function SuggestionList<T>({
   if (!items.length) return null;
 
   return (
-    <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-56 overflow-auto rounded-lg border border-accent-soft bg-white py-1 shadow-lg">
+    <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-56 overflow-auto rounded-lg border border-[var(--border)] bg-[var(--surface)] py-1 shadow-lg">
       {items.map((item) => (
         <button
           key={getKey(item)}
           type="button"
-          className="block w-full px-3 py-2 text-left text-sm text-ink hover:bg-paper-alt focus:bg-paper-alt focus:outline-none"
+          className="block w-full px-3 py-2 text-left text-sm text-[var(--text)] hover:bg-[var(--background-soft)] focus:bg-[var(--background-soft)] focus:outline-none"
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => onSelect(item)}
         >
@@ -121,9 +130,15 @@ function SuggestionList<T>({
   );
 }
 
+const modeOptions = [
+  { id: "phrase", label: "Frase", icon: BookOpen },
+  { id: "word", label: "Palabra", icon: WholeWord },
+  { id: "count", label: "Conteo exacto", icon: Hash },
+] as const;
+
 export function BibleSearchClient({ books }: { books: BookOption[] }) {
   const [q, setQ] = useState("");
-  const [mode, setMode] = useState<"phrase" | "word">("phrase");
+  const [searchIntent, setSearchIntent] = useState<SearchIntent>("phrase");
   const [language, setLanguage] = useState("es");
   const [testament, setTestament] = useState<string>("");
   const [bookQuery, setBookQuery] = useState("");
@@ -233,13 +248,15 @@ export function BibleSearchClient({ books }: { books: BookOption[] }) {
     try {
       const sp = new URLSearchParams();
       sp.set("q", q);
-      sp.set("mode", mode);
+      sp.set("mode", searchIntent === "phrase" ? "phrase" : "word");
       if (language) sp.set("language", language);
       if (testamentParam) sp.set("testament", testamentParam);
       if (selectedBook) sp.set("bookSlug", selectedBook.slug);
       if (selectedChapter) sp.set("chapter", String(selectedChapter.number));
       if (hasValidVerse && verse.trim()) sp.set("verse", String(verseNumber));
-      if (exactWord.trim()) sp.set("exactWord", exactWord.trim());
+
+      const normalizedExactWord = searchIntent === "count" ? q.trim() : exactWord.trim();
+      if (normalizedExactWord) sp.set("exactWord", normalizedExactWord);
       if (synonymHelp.trim()) sp.set("synonyms", synonymHelp.trim());
 
       const res = await fetch(`/api/search?${sp.toString()}`);
@@ -252,9 +269,7 @@ export function BibleSearchClient({ books }: { books: BookOption[] }) {
       if (!res.ok) throw new Error(data.error ?? "Search failed");
       setHits(data.hits ?? []);
       setFound(data.found ?? 0);
-      setExactCount(
-        typeof data.exactCount === "number" ? data.exactCount : null,
-      );
+      setExactCount(typeof data.exactCount === "number" ? data.exactCount : null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
       setHits([]);
@@ -279,122 +294,227 @@ export function BibleSearchClient({ books }: { books: BookOption[] }) {
     window.setTimeout(() => setActiveField(null), 100);
   }
 
+  function clearSearch() {
+    setQ("");
+    setExactWord("");
+    setSynonymHelp("");
+    setError(null);
+    setHits([]);
+    setFound(0);
+    setExactCount(null);
+  }
+
+  const fieldClass =
+    "h-11 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 text-sm text-[var(--text)] shadow-[0_1px_0_rgba(255,255,255,0.72)_inset] outline-none transition placeholder:text-[var(--text-muted)]/55 focus:border-[var(--accent)]/65 focus:ring-2 focus:ring-[var(--accent)]/10 disabled:bg-[var(--background-soft)] disabled:text-[var(--text-muted)]/70";
+  const selectClass = `${fieldClass} appearance-none pr-9`;
+  const labelClass = "mb-1.5 block text-sm font-medium text-[var(--text)]";
+
   return (
     <div className="space-y-6">
-      <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(340px,420px)]">
-        <section className="flex h-full rounded-xl border border-accent-soft bg-white p-4">
-          <div className="flex w-full flex-col gap-4">
-            <div>
-              <h2 className="text-base font-semibold text-accent">Buscar texto</h2>
-              <p className="mt-1 text-sm text-ink-muted">
-                Busca palabras o frases y limita los resultados por pasaje si lo necesitas.
-              </p>
-            </div>
-
-            <div className="grid flex-1 gap-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(260px,0.75fr)]">
-              <label className="flex min-h-0 flex-col gap-1 text-sm">
-                <span className="text-ink-muted">Consulta</span>
-                <textarea
-                  className="min-h-40 flex-1 resize-y rounded-lg border border-accent-soft px-3 py-2"
-                  rows={7}
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="Frase o palabra..."
-                />
+      <div className="grid items-stretch gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,21.5rem)]">
+        <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] sm:p-5">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_13.5rem]">
+            <div className="min-w-0 space-y-4">
+              <label className="block">
+                <span className={labelClass}>Consulta</span>
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--text-muted)]" strokeWidth={1.75} aria-hidden />
+                  <input
+                    className={`${fieldClass} h-12 pl-10`}
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    placeholder="Escribe una palabra o frase..."
+                  />
+                </div>
               </label>
 
-              <label className="flex min-h-0 flex-col gap-1 text-sm">
-                <span className="text-ink-muted">Sinónimos de ayuda</span>
-                <textarea
-                  className="min-h-40 flex-1 resize-y rounded-lg border border-accent-soft bg-paper-alt/40 px-3 py-2"
-                  rows={7}
-                  value={synonymHelp}
-                  onChange={(e) => setSynonymHelp(e.target.value)}
-                  placeholder={"caridad = amor\nYahveh = Señor\najenos = otros"}
-                />
-                <span className="text-xs text-ink-muted">
-                  Una equivalencia por línea. Se usa solo en esta búsqueda.
-                </span>
-              </label>
-            </div>
+              <div>
+                <span className={labelClass}>Modo de busqueda</span>
+                <div className="grid overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)] sm:grid-cols-3">
+                  {modeOptions.map(({ id, label, icon: Icon }) => {
+                    const isActive = searchIntent === id;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => setSearchIntent(id)}
+                        className={`inline-flex h-11 items-center justify-center gap-2 border-b border-[var(--border)] px-3 text-sm font-semibold transition last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0 ${
+                          isActive
+                            ? "bg-[var(--surface-muted)] text-[var(--scripture-gold)] ring-1 ring-inset ring-[var(--scripture-gold)]/60"
+                            : "text-[var(--text-muted)] hover:bg-[var(--background-soft)] hover:text-[var(--text)]"
+                        }`}
+                        aria-pressed={isActive}
+                      >
+                        <Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="block space-y-1 text-sm">
-                <span className="text-ink-muted">Modo</span>
-                <select
-                  className="w-full rounded-lg border border-accent-soft px-3 py-2"
-                  value={mode}
-                  onChange={(e) => setMode(e.target.value as "phrase" | "word")}
-                >
-                  <option value="phrase">Frase</option>
-                  <option value="word">Palabra (Typesense)</option>
-                </select>
-              </label>
-              <label className="block space-y-1 text-sm">
-                <span className="text-ink-muted">Idioma</span>
-                <input
-                  className="w-full rounded-lg border border-accent-soft px-3 py-2"
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                />
-              </label>
-            </div>
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <label className="block">
+                  <span className={labelClass}>Idioma</span>
+                  <div className="relative">
+                    <Globe2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" strokeWidth={1.75} aria-hidden />
+                    <select
+                      className={`${selectClass} pl-9`}
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value)}
+                    >
+                      <option value="es">Todos</option>
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" strokeWidth={1.75} aria-hidden />
+                  </div>
+                </label>
 
-            <label className="block space-y-1 text-sm">
-              <span className="text-ink-muted">Conteo exacto (palabra normalizada)</span>
-              <input
-                className="w-full rounded-lg border border-accent-soft px-3 py-2"
-                value={exactWord}
-                onChange={(e) => setExactWord(e.target.value)}
-                placeholder="opcional - usa filas VerseWord"
-              />
-            </label>
+                <label className="block">
+                  <span className={labelClass}>Traduccion</span>
+                  <div className="relative">
+                    <BookOpen className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" strokeWidth={1.75} aria-hidden />
+                    <select className={`${selectClass} pl-9`} defaultValue="bj">
+                      <option value="bj">Biblia de Jerusalen</option>
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" strokeWidth={1.75} aria-hidden />
+                  </div>
+                </label>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={runSearch}
-                disabled={loading || !q.trim()}
-                className="rounded-lg bg-accent px-5 py-2 text-sm font-medium text-white disabled:opacity-50"
-              >
-                {loading ? "Buscando..." : "Buscar"}
-              </button>
-              {loading ? (
-                <span className="inline-flex items-center rounded-full border border-accent-soft px-3 py-1 text-xs font-medium text-ink-muted">
-                  Buscando en la Biblia - {elapsedSeconds}s
-                </span>
+                <label className="block">
+                  <span className={labelClass}>Testamento</span>
+                  <div className="relative">
+                    <Cross className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" strokeWidth={1.75} aria-hidden />
+                    <select
+                      className={`${selectClass} pl-9`}
+                      value={testament}
+                      onChange={(e) => setTestament(e.target.value)}
+                    >
+                      <option value="">Todos</option>
+                      <option value="1">Antiguo</option>
+                      <option value="2">Nuevo</option>
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" strokeWidth={1.75} aria-hidden />
+                  </div>
+                </label>
+
+                <label className="block">
+                  <span className={labelClass}>Libro</span>
+                  <div className="relative">
+                    <Library className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" strokeWidth={1.75} aria-hidden />
+                    <select
+                      className={`${selectClass} pl-9`}
+                      value={selectedBook?.slug ?? ""}
+                      onChange={(e) => {
+                        const book = visibleBooks.find((item) => item.slug === e.target.value);
+                        setBookQuery(book?.title ?? "");
+                        setChapter("");
+                        setVerse("");
+                      }}
+                    >
+                      <option value="">Todos</option>
+                      {visibleBooks.map((book) => (
+                        <option key={book.slug} value={book.slug}>
+                          {book.title}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" strokeWidth={1.75} aria-hidden />
+                  </div>
+                </label>
+              </div>
+
+              {searchIntent !== "count" ? (
+                <label className="block">
+                  <span className={labelClass}>Conteo exacto opcional</span>
+                  <input
+                    className={fieldClass}
+                    value={exactWord}
+                    onChange={(e) => setExactWord(e.target.value)}
+                    placeholder="Palabra normalizada para conteo exacto"
+                  />
+                </label>
               ) : null}
+
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={runSearch}
+                  disabled={loading || !q.trim()}
+                  className="inline-flex h-11 min-w-[8.5rem] items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-[var(--accent-foreground)] shadow-[0_10px_22px_-18px_rgba(70,50,24,0.9)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Search className="h-4 w-4" strokeWidth={1.9} aria-hidden />
+                  {loading ? "Buscando..." : "Buscar"}
+                </button>
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="inline-flex h-11 min-w-[8rem] items-center justify-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-5 text-sm font-semibold text-[var(--text-muted)] transition hover:border-[var(--accent)]/35 hover:text-[var(--text)]"
+                >
+                  <RotateCcw className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+                  Limpiar
+                </button>
+                {loading ? (
+                  <span className="inline-flex h-8 items-center rounded-full border border-[var(--border)] bg-[var(--background-soft)] px-3 text-xs font-medium text-[var(--text-muted)]">
+                    Buscando en la Biblia - {elapsedSeconds}s
+                  </span>
+                ) : null}
+              </div>
             </div>
+
+            <label className="block rounded-lg border border-[var(--border)] bg-[var(--surface-muted)]/55 p-4">
+              <span className="flex items-center justify-between gap-3 text-sm font-semibold text-[var(--text)]">
+                <span>Sinonimos de ayuda</span>
+                <Sparkles className="h-4 w-4 text-[var(--scripture-gold)]" strokeWidth={1.75} aria-hidden />
+              </span>
+              <textarea
+                className="mt-3 min-h-28 w-full resize-none border-0 bg-transparent p-0 text-sm leading-7 text-[var(--text-muted)] outline-none placeholder:text-[var(--text-muted)]"
+                value={synonymHelp}
+                onChange={(e) => setSynonymHelp(e.target.value)}
+                placeholder={"caridad = amor\nYahveh = Senor\najenos = otros"}
+              />
+              <span className="mt-2 block text-xs leading-relaxed text-[var(--text-muted)]">
+                Equivalencias por linea. Usalas solo como ayuda en tu busqueda.
+              </span>
+            </label>
           </div>
         </section>
 
-        <section className="flex h-full rounded-xl border border-accent-soft bg-white p-4">
-          <div className="flex w-full flex-col gap-4">
+        <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)]">
+          <div className="mb-5 flex items-start gap-3">
+            <BookOpen className="mt-0.5 h-6 w-6 shrink-0 text-[var(--scripture-gold)]" strokeWidth={1.6} aria-hidden />
             <div>
-              <h2 className="text-base font-semibold text-accent">Ir a pasaje</h2>
-              <p className="mt-1 text-sm text-ink-muted">
-                Elige libro, capitulo y versiculo para abrir una referencia directa.
+              <h2 className="font-serif-display text-xl font-semibold leading-tight text-[var(--text)]">
+                Ir a pasaje
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--text-muted)]">
+                Accede directamente a cualquier referencia biblica.
               </p>
             </div>
+          </div>
 
-            <label className="block space-y-1 text-sm">
-              <span className="text-ink-muted">Testamento</span>
-              <select
-                className="w-full rounded-lg border border-accent-soft px-3 py-2"
-                value={testament}
-                onChange={(e) => setTestament(e.target.value)}
-              >
-                <option value="">Cualquiera</option>
-                <option value="1">Antiguo</option>
-                <option value="2">Nuevo</option>
-              </select>
+          <div className="space-y-3">
+            <label className="block">
+              <span className={labelClass}>Testamento</span>
+              <div className="relative">
+                <BookOpen className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" strokeWidth={1.75} aria-hidden />
+                <select
+                  className={`${selectClass} pl-9`}
+                  value={testament}
+                  onChange={(e) => setTestament(e.target.value)}
+                >
+                  <option value="">Cualquiera</option>
+                  <option value="1">Antiguo</option>
+                  <option value="2">Nuevo</option>
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" strokeWidth={1.75} aria-hidden />
+              </div>
             </label>
 
             <div className="relative text-sm">
-              <label className="block space-y-1">
-                <span className="text-ink-muted">Libro</span>
+              <label className="block">
+                <span className={labelClass}>Libro</span>
                 <input
-                  className="w-full rounded-lg border border-accent-soft px-3 py-2"
+                  className={fieldClass}
                   value={bookQuery}
                   onBlur={closeSuggestions}
                   onChange={(e) => {
@@ -402,7 +522,7 @@ export function BibleSearchClient({ books }: { books: BookOption[] }) {
                     setActiveField("book");
                   }}
                   onFocus={() => setActiveField("book")}
-                  placeholder="ej. Mateo"
+                  placeholder="Ej. Mateo"
                 />
               </label>
               {activeField === "book" && (
@@ -412,7 +532,7 @@ export function BibleSearchClient({ books }: { books: BookOption[] }) {
                   render={(book) => (
                     <span>
                       {book.title}{" "}
-                      <span className="text-xs text-ink-muted">
+                      <span className="text-xs text-[var(--text-muted)]">
                         {book.testament === 1 ? "AT" : "NT"}
                       </span>
                     </span>
@@ -425,12 +545,12 @@ export function BibleSearchClient({ books }: { books: BookOption[] }) {
               )}
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-2">
               <div className="relative text-sm">
-                <label className="block space-y-1">
-                  <span className="text-ink-muted">Capitulo</span>
+                <label className="block">
+                  <span className={labelClass}>Capitulo</span>
                   <input
-                    className="w-full rounded-lg border border-accent-soft px-3 py-2"
+                    className={fieldClass}
                     value={chapter}
                     disabled={!selectedBook}
                     inputMode="numeric"
@@ -440,7 +560,7 @@ export function BibleSearchClient({ books }: { books: BookOption[] }) {
                       setActiveField("chapter");
                     }}
                     onFocus={() => setActiveField("chapter")}
-                    placeholder={selectedBook ? "numero" : "elige libro"}
+                    placeholder="Ej. 3"
                   />
                 </label>
                 {activeField === "chapter" && (
@@ -458,10 +578,10 @@ export function BibleSearchClient({ books }: { books: BookOption[] }) {
               </div>
 
               <div className="relative text-sm">
-                <label className="block space-y-1">
-                  <span className="text-ink-muted">Versiculo</span>
+                <label className="block">
+                  <span className={labelClass}>Versiculo</span>
                   <input
-                    className="w-full rounded-lg border border-accent-soft px-3 py-2"
+                    className={fieldClass}
                     value={verse}
                     disabled={!selectedChapter}
                     inputMode="numeric"
@@ -471,7 +591,7 @@ export function BibleSearchClient({ books }: { books: BookOption[] }) {
                       setActiveField("verse");
                     }}
                     onFocus={() => setActiveField("verse")}
-                    placeholder={selectedChapter ? "opcional" : "elige capitulo"}
+                    placeholder="Ej. 16"
                   />
                 </label>
                 {activeField === "verse" && (
@@ -488,22 +608,23 @@ export function BibleSearchClient({ books }: { books: BookOption[] }) {
               </div>
             </div>
 
-            <p className="min-h-5 text-xs text-ink-muted">
-              {selectedBook
-                ? `${selectedBook.title}: ${selectedBook.chapters.length} capitulos${
-                    selectedChapter ? `, ${selectedChapter.verseCount} versiculos` : ""
-                  }`
-                : "Escribe para ver libros del Antiguo y Nuevo Testamento."}
-            </p>
-
             <button
               type="button"
               onClick={openPassage}
               disabled={!canOpenPassage}
-              className="mt-auto w-full rounded-lg border border-accent bg-white px-5 py-2 text-sm font-medium text-accent disabled:opacity-50"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-[var(--accent-foreground)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Ir al pasaje
+              <BookOpen className="h-4 w-4" strokeWidth={1.85} aria-hidden />
+              Abrir pasaje
             </button>
+
+            <p className="text-center text-xs leading-relaxed text-[var(--text-muted)]">
+              {selectedBook
+                ? `${selectedBook.title}: ${selectedBook.chapters.length} capitulos${
+                    selectedChapter ? `, ${selectedChapter.verseCount} versiculos` : ""
+                  }`
+                : "Acceso directo a una referencia biblica."}
+            </p>
           </div>
         </section>
       </div>
@@ -514,33 +635,78 @@ export function BibleSearchClient({ books }: { books: BookOption[] }) {
         </p>
       )}
 
-      <div className="text-sm text-ink-muted">
-        Resultados: <strong>{found}</strong>
-        {exactCount !== null && (
-          <>
-            {" "}
-            - Conteo exacto (PostgreSQL): <strong>{exactCount}</strong>
-          </>
-        )}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--scripture-gold)]/60 pb-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 className="font-serif-display text-2xl font-semibold leading-none text-[var(--text)]">
+            Resultados
+          </h2>
+          <span className="inline-flex h-7 items-center rounded-full bg-[var(--background-soft)] px-3 text-xs font-semibold text-[var(--text)]">
+            {found} resultado{found === 1 ? "" : "s"}
+          </span>
+          {exactCount !== null ? (
+            <span className="inline-flex h-7 items-center rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 text-xs font-semibold text-[var(--text-muted)]">
+              Conteo exacto: {exactCount}
+            </span>
+          ) : null}
+        </div>
+        <button
+          type="button"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 text-xs font-semibold text-[var(--text)]"
+        >
+          <ListFilter className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.75} aria-hidden />
+          Mas relevantes
+          <ChevronDown className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.75} aria-hidden />
+        </button>
       </div>
 
-      <ul className="space-y-4">
+      <ul className="space-y-2.5">
         {hits.map((h) => (
-          <li key={`${h.reference}-${h.text.slice(0, 12)}`} className="rounded-xl border border-accent-soft bg-white p-4">
-            <a href={h.url} className="font-semibold text-accent hover:underline">
-              {h.reference}
-            </a>
-            {h.matchType === "approximate" && typeof h.score === "number" ? (
-              <span className="ml-2 rounded-full border border-accent-soft px-2 py-0.5 text-xs font-medium text-ink-muted">
-                parecido {h.score}%
+          <li
+            key={`${h.reference}-${h.text.slice(0, 12)}`}
+            className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] sm:grid-cols-[auto_minmax(0,1fr)_auto]"
+          >
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--surface-muted)] text-[var(--scripture-gold)]">
+              <Cross className="h-5 w-5" strokeWidth={1.6} aria-hidden />
+            </span>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <a
+                  href={h.url}
+                  className="font-serif-display text-lg font-semibold leading-tight text-[var(--text)] hover:text-[var(--accent)] hover:underline"
+                >
+                  {h.reference}
+                </a>
+                {h.matchType === "approximate" && typeof h.score === "number" ? (
+                  <span className="rounded-full border border-[var(--border)] px-2 py-0.5 text-xs font-medium text-[var(--text-muted)]">
+                    parecido {h.score}%
+                  </span>
+                ) : null}
+              </div>
+              <p className="mt-1 text-sm leading-relaxed text-[var(--text)]">
+                <HighlightedText text={h.text} matchedWords={h.matchedWords} />
+              </p>
+            </div>
+            <div className="hidden items-center gap-4 sm:flex">
+              <a
+                href={h.url}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--scripture-gold)] hover:underline"
+              >
+                Leer pasaje
+                <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+              </a>
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--surface-muted)] text-[var(--scripture-gold)]">
+                <Bookmark className="h-4 w-4" strokeWidth={1.7} aria-hidden />
               </span>
-            ) : null}
-            <p className="mt-2 text-ink">
-              <HighlightedText text={h.text} matchedWords={h.matchedWords} />
-            </p>
+            </div>
           </li>
         ))}
       </ul>
+
+      {!hits.length && !loading ? (
+        <div className="rounded-lg border border-dashed border-[var(--border)] bg-[var(--surface)] px-5 py-8 text-center text-sm text-[var(--text-muted)]">
+          Escribe una consulta para ver resultados.
+        </div>
+      ) : null}
     </div>
   );
 }

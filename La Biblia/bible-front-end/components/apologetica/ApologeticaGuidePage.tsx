@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
+  Bookmark,
   BookOpen,
   Clock,
   Download,
@@ -18,34 +19,29 @@ type Props = {
 
 function HeroIllustration() {
   return (
-    <div
-      className="relative h-full min-h-[7rem] w-full overflow-hidden"
-      aria-hidden
-    >
+    <div className="relative h-full min-h-[7rem] w-full overflow-hidden" aria-hidden>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/apologetica/hero.png"
         alt=""
         className="absolute inset-0 h-full w-full object-cover object-center"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#f7f1e8]/95 via-[#f7f1e8]/55 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#f7f1e8]/90 via-[#f7f1e8]/45 to-transparent" />
     </div>
   );
 }
 
 function SectionQuote({ text, reference }: { text: string; reference: string }) {
   return (
-    <aside className="guide-section-quote hidden w-full max-w-[17.5rem] shrink-0 lg:block xl:max-w-[19rem]">
+    <aside className="guide-section-quote hidden w-full max-w-[19rem] shrink-0 border-l border-[var(--accent)]/35 pl-5 xl:block">
       <span
-        className="font-serif-display text-4xl leading-none text-[var(--accent)]/40"
+        className="font-serif-display text-4xl leading-none text-[var(--accent)]/55"
         aria-hidden
       >
-        “
+        "
       </span>
-      <p className="-mt-3 border-l-2 border-[var(--accent)]/35 pl-3 text-sm italic leading-relaxed text-[var(--text)]">
-        {text}
-      </p>
-      <p className="mt-2 pl-3 text-xs font-semibold text-[var(--accent)]">{reference}</p>
+      <p className="-mt-3 text-[13px] leading-relaxed text-[var(--text)]/80">{text}</p>
+      <p className="mt-2 text-xs font-semibold text-[var(--accent)]">{reference}</p>
     </aside>
   );
 }
@@ -62,14 +58,14 @@ function GuideSidebar({
   onSelectSection: (id: string) => void;
 }) {
   return (
-    <div className="space-y-4">
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)]">
-        <div className="flex items-center gap-2 border-b border-[var(--border)] pb-3">
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)]">
+      <div>
+        <div className="flex items-center gap-2">
           <ListTree className="h-4 w-4 text-[var(--accent)]" strokeWidth={1.75} aria-hidden />
           <h2 className="text-sm font-semibold text-[var(--text)]">En esta guía</h2>
         </div>
-        <nav className="mt-3" aria-label="Secciones de la guía">
-          <ul className="space-y-0.5">
+        <nav className="mt-4" aria-label="Secciones de la guía">
+          <ul className="relative space-y-1 pl-2 before:absolute before:bottom-3 before:left-[0.44rem] before:top-3 before:w-px before:bg-[var(--border)]">
             {guide.sections.map((section) => {
               const isActive = activeSectionId === section.id;
               return (
@@ -77,21 +73,21 @@ function GuideSidebar({
                   <button
                     type="button"
                     onClick={() => onSelectSection(section.id)}
-                    className={`flex w-full items-start gap-2.5 rounded-lg px-2 py-2 text-left text-[13px] leading-snug transition ${
+                    className={`relative flex w-full items-start gap-3 rounded-md px-2 py-2 text-left text-[13px] leading-snug transition ${
                       isActive
-                        ? "bg-[var(--accent-soft)] font-semibold text-[var(--text)]"
+                        ? "font-semibold text-[var(--accent)]"
                         : "text-[var(--text-muted)] hover:bg-[var(--background-soft)] hover:text-[var(--text)]"
                     }`}
                   >
                     <span
-                      className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
-                        isActive ? "bg-[var(--accent)]" : "bg-[var(--border)]"
+                      className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full border bg-[var(--surface)] ${
+                        isActive
+                          ? "border-[var(--accent)] ring-2 ring-[var(--accent-soft)]"
+                          : "border-[var(--accent)]/45"
                       }`}
                       aria-hidden
                     />
-                    <span>
-                      {section.number}. {section.title}
-                    </span>
+                    <span>{section.title}</span>
                   </button>
                 </li>
               );
@@ -100,12 +96,16 @@ function GuideSidebar({
         </nav>
       </div>
 
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)]">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">
-          Tu lectura
-        </p>
+      <div className="mt-5 border-t border-[var(--border)] pt-5">
+        <div className="flex items-center gap-2">
+          <BookOpen className="h-5 w-5 text-[var(--accent)]" strokeWidth={1.65} aria-hidden />
+          <p className="font-serif-display text-base font-semibold text-[var(--text)]">
+            Tu lectura
+          </p>
+        </div>
+        <p className="mt-3 text-xs text-[var(--text-muted)]">{progress}% completado</p>
         <div
-          className="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--background-soft)]"
+          className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--background-soft)]"
           role="progressbar"
           aria-valuenow={progress}
           aria-valuemin={0}
@@ -116,12 +116,73 @@ function GuideSidebar({
             style={{ width: `${progress}%` }}
           />
         </div>
-        <p className="mt-2 text-xs text-[var(--text-muted)]">{progress}% completado</p>
-        <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
-          <Clock className="h-3.5 w-3.5 text-[var(--accent)]" strokeWidth={1.75} aria-hidden />
+        <p className="mt-5 inline-flex items-center gap-2 text-xs text-[var(--text-muted)]">
+          <Clock className="h-3.5 w-3.5 text-[var(--text-muted)]" strokeWidth={1.75} aria-hidden />
           Tiempo estimado: {guide.readingMinutes} min
         </p>
       </div>
+    </div>
+  );
+}
+
+function KeyPassages({ guide }: { guide: ApologeticaGuidePageData }) {
+  return (
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)]">
+      <div className="flex items-center gap-2">
+        <Bookmark className="h-5 w-5 text-[var(--accent)]" strokeWidth={1.65} aria-hidden />
+        <h3 className="font-serif-display text-lg font-semibold text-[var(--text)]">
+          Pasajes clave
+        </h3>
+      </div>
+      <ul className="mt-4 space-y-3.5">
+        {guide.keyPassages.map((passage) => (
+          <li key={passage.href}>
+            <Link
+              href={passage.href}
+              className="group flex gap-3 rounded-md py-0.5 transition hover:bg-[var(--background-soft)] no-underline"
+            >
+              <BookOpen
+                className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]"
+                strokeWidth={1.65}
+                aria-hidden
+              />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold leading-snug text-[var(--accent)] group-hover:underline">
+                  {passage.reference}
+                </p>
+                <p className="mt-0.5 text-xs leading-snug text-[var(--text-muted)]">
+                  {passage.description}
+                </p>
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function DownloadGuide() {
+  return (
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)]">
+      <div className="flex items-center gap-2">
+        <Download className="h-5 w-5 text-[var(--accent)]" strokeWidth={1.65} aria-hidden />
+        <h3 className="font-serif-display text-lg font-semibold text-[var(--text)]">
+          Descargar guía
+        </h3>
+      </div>
+      <p className="mt-2 text-sm leading-relaxed text-[var(--text-muted)]">
+        Guía completa en PDF. Para estudio y referencia personal.
+      </p>
+      <button
+        type="button"
+        disabled
+        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-md border border-[var(--accent)]/55 bg-transparent px-4 py-2 text-sm font-semibold text-[var(--accent)] opacity-70"
+        title="Próximamente"
+      >
+        Descargar PDF
+        <Download className="h-4 w-4" strokeWidth={2} aria-hidden />
+      </button>
     </div>
   );
 }
@@ -173,7 +234,7 @@ export function ApologeticaGuidePage({ guide }: Props) {
   };
 
   return (
-    <div className="apologetica-guide mx-auto w-full max-w-6xl pb-12">
+    <div className="apologetica-guide mx-auto w-full max-w-[1640px] pb-8">
       <nav className="text-sm text-[var(--text-muted)]" aria-label="Migas de pan">
         <ol className="flex flex-wrap items-center gap-1.5">
           <li>
@@ -198,32 +259,33 @@ export function ApologeticaGuidePage({ guide }: Props) {
 
       <Link
         href="/apologetica"
-        className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--accent)] transition hover:underline"
+        className="mt-8 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--accent)] transition hover:underline"
       >
         <ArrowLeft className="h-4 w-4" strokeWidth={2} aria-hidden />
         Volver a guías bíblicas
       </Link>
 
-      <header className="mt-2 grid gap-4 lg:mt-3 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,28rem)] lg:items-start lg:gap-8">
+      <header className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(25rem,34rem)] lg:items-start lg:gap-12">
         <div className="flex min-w-0 flex-col space-y-2 pt-0 lg:pr-4">
-          <h1 className="page-title">
-            {guide.title}
-          </h1>
+          <h1 className="page-title">{guide.title}</h1>
           <p className="max-w-2xl text-base leading-relaxed text-[var(--text-muted)] sm:text-lg">
             {guide.description}
           </p>
         </div>
 
-        <div className="guide-hero-quote flex h-[7.5rem] overflow-hidden rounded-md border border-[var(--border)] bg-[#f7f1e8] shadow-[var(--shadow-card)] sm:h-[8rem]">
-          <div className="flex min-w-0 flex-1 flex-col justify-center px-4 py-3 sm:px-5 sm:py-3.5">
-            <p className="text-sm font-semibold leading-tight text-[var(--accent)]">
+        <div className="guide-hero-quote flex h-[10rem] overflow-hidden rounded-lg border border-[var(--border)] bg-[#f7f1e8] shadow-[var(--shadow-card)] sm:h-[11.25rem]">
+          <div className="flex min-w-0 flex-1 flex-col justify-center px-7 py-5">
+            <span className="font-serif-display text-5xl leading-none text-[var(--accent)]/35" aria-hidden>
+              "
+            </span>
+            <p className="-mt-2 text-base font-semibold leading-tight text-[var(--accent)]">
               {guide.heroQuote.reference}
             </p>
-            <p className="mt-1.5 line-clamp-3 font-serif-display text-[14px] italic leading-snug text-[var(--text)] sm:text-[15px]">
+            <p className="mt-2 line-clamp-3 font-serif-display text-[15px] leading-relaxed text-[var(--text)] sm:text-[17px]">
               {guide.heroQuote.text}
             </p>
           </div>
-          <div className="hidden w-[46%] min-w-[12.75rem] max-w-[15.5rem] shrink-0 self-stretch border-l border-[var(--border)]/70 sm:block sm:min-w-[14rem] sm:max-w-[16.5rem]">
+          <div className="hidden w-[43%] min-w-[13.5rem] shrink-0 self-stretch sm:block">
             <HeroIllustration />
           </div>
         </div>
@@ -238,7 +300,7 @@ export function ApologeticaGuidePage({ guide }: Props) {
         />
       </div>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[14.5rem_minmax(0,1fr)_15.5rem] lg:items-start xl:gap-8">
+      <div className="mt-8 grid gap-8 lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start xl:grid-cols-[18rem_minmax(0,1fr)_15rem] xl:gap-8">
         <aside className="hidden lg:block">
           <div className="sticky top-24">
             <GuideSidebar
@@ -251,7 +313,7 @@ export function ApologeticaGuidePage({ guide }: Props) {
         </aside>
 
         <main className="min-w-0">
-          <ol className="rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)]">
+          <ol className="overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)]">
             {guide.sections.map((section, index) => {
               const Icon = getGuideSectionIcon(section.icon);
               return (
@@ -261,14 +323,14 @@ export function ApologeticaGuidePage({ guide }: Props) {
                   ref={(el) => {
                     sectionRefs.current[section.id] = el;
                   }}
-                  className={`scroll-mt-28 px-5 py-7 sm:px-7 sm:py-8 ${
+                  className={`scroll-mt-28 px-5 py-5 sm:px-7 sm:py-5 ${
                     index < guide.sections.length - 1 ? "border-b border-[var(--border)]" : ""
                   }`}
                 >
                   <article>
-                    <div className="flex gap-4 sm:gap-5">
-                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--accent)]/45 bg-[var(--surface)] text-[var(--accent)] sm:h-12 sm:w-12">
-                        <Icon className="h-5 w-5 sm:h-[1.35rem] sm:w-[1.35rem]" strokeWidth={1.45} aria-hidden />
+                    <div className="grid gap-5 sm:grid-cols-[4.25rem_minmax(0,1fr)] sm:items-start xl:grid-cols-[4.5rem_minmax(0,1fr)_21rem]">
+                      <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-[var(--accent)]/20 bg-[var(--background-soft)] text-[var(--accent)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.7)] sm:h-16 sm:w-16">
+                        <Icon className="h-7 w-7 sm:h-8 sm:w-8" strokeWidth={1.45} aria-hidden />
                       </span>
                       <div className="min-w-0 flex-1">
                         <h2 className="font-serif-display text-xl font-semibold leading-snug text-[var(--text)] sm:text-[1.65rem]">
@@ -276,42 +338,43 @@ export function ApologeticaGuidePage({ guide }: Props) {
                         </h2>
 
                         {section.tags.length > 0 ? (
-                          <div className="mt-3 flex flex-wrap gap-2">
+                          <div className="mt-2 flex flex-wrap gap-2">
                             {section.tags.map((tag) => (
                               <Link
                                 key={tag.href}
                                 href={tag.href}
-                                className="inline-flex rounded-md border border-[var(--accent)]/20 bg-[var(--background-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--accent)] transition hover:border-[var(--accent)]/40 hover:bg-[var(--accent-soft)] no-underline"
+                                className="inline-flex rounded-full border border-[var(--accent)]/35 bg-transparent px-3 py-0.5 text-xs font-semibold text-[var(--accent)] transition hover:border-[var(--accent)]/55 hover:bg-[var(--accent-soft)] no-underline"
                               >
                                 {tag.label}
                               </Link>
                             ))}
                           </div>
                         ) : null}
-                      </div>
-                    </div>
 
-                    <div className="mt-5 flex flex-col gap-5 lg:ml-[3.75rem] lg:flex-row lg:items-start lg:gap-8">
-                      <p className="min-w-0 flex-1 text-[15px] leading-relaxed text-[var(--text)]/90">
-                        {section.body}
-                      </p>
+                        <p className="mt-3 text-[15px] leading-relaxed text-[var(--text)]/90">
+                          {section.body}
+                        </p>
+                      </div>
+
                       {section.quote ? (
                         <SectionQuote
                           text={section.quote.text}
                           reference={section.quote.reference}
                         />
-                      ) : null}
+                      ) : (
+                        <span className="hidden xl:block" />
+                      )}
                     </div>
 
                     {section.quote ? (
-                      <blockquote className="guide-section-quote mt-4 rounded-lg border border-[var(--border)] bg-[var(--background-soft)] px-4 py-3.5 lg:hidden lg:ml-[3.75rem]">
+                      <blockquote className="guide-section-quote mt-4 rounded-lg border border-[var(--border)] bg-[var(--background-soft)] px-4 py-3.5 xl:hidden sm:ml-[5.5rem]">
                         <span
                           className="font-serif-display text-3xl leading-none text-[var(--accent)]/40"
                           aria-hidden
                         >
-                          “
+                          "
                         </span>
-                        <p className="-mt-2 text-sm italic leading-relaxed text-[var(--text)]">
+                        <p className="-mt-2 text-sm leading-relaxed text-[var(--text)]">
                           {section.quote.text}
                         </p>
                         <footer className="mt-2 text-xs font-semibold text-[var(--accent)]">
@@ -326,59 +389,10 @@ export function ApologeticaGuidePage({ guide }: Props) {
           </ol>
         </main>
 
-        <aside className="min-w-0 space-y-4">
+        <aside className="min-w-0 space-y-4 lg:col-span-2 xl:col-span-1">
           <div className="lg:sticky lg:top-24 lg:space-y-4">
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] sm:p-5">
-              <h3 className="font-serif-display text-lg font-semibold text-[var(--text)]">
-                Pasajes clave
-              </h3>
-              <ul className="mt-4 space-y-3.5">
-                {guide.keyPassages.map((passage) => (
-                  <li key={passage.href}>
-                    <Link
-                      href={passage.href}
-                      className="group flex gap-3 rounded-lg py-0.5 transition hover:bg-[var(--background-soft)] no-underline"
-                    >
-                      <BookOpen
-                        className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]"
-                        strokeWidth={1.65}
-                        aria-hidden
-                      />
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold leading-snug text-[var(--accent)] group-hover:underline">
-                          {passage.reference}
-                        </p>
-                        <p className="mt-0.5 text-xs leading-snug text-[var(--text-muted)]">
-                          {passage.description}
-                        </p>
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] sm:p-5">
-              <div className="flex items-center gap-2">
-                <Download className="h-5 w-5 text-[var(--accent)]" strokeWidth={1.65} aria-hidden />
-                <h3 className="font-serif-display text-lg font-semibold text-[var(--text)]">
-                  Descargar guía
-                </h3>
-              </div>
-              <p className="mt-2 text-sm leading-relaxed text-[var(--text-muted)]">
-                Lleva esta guía en PDF para estudiarla sin conexión o compartirla en tu congregación.
-              </p>
-              <button
-                type="button"
-                disabled
-                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-[var(--accent)]/50 bg-transparent px-4 py-2.5 text-sm font-semibold text-[var(--accent)] opacity-60"
-                title="Próximamente"
-              >
-                <Download className="h-4 w-4" strokeWidth={2} aria-hidden />
-                Descargar PDF
-              </button>
-              <p className="mt-2 text-center text-xs text-[var(--text-muted)]">Próximamente</p>
-            </div>
+            <KeyPassages guide={guide} />
+            <DownloadGuide />
           </div>
         </aside>
       </div>

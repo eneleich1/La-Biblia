@@ -10,6 +10,7 @@ import {
   SAINTS_SECTION_ICONS,
   type ApologeticaGuidePageData,
   type GuideKeyPassage,
+  type GuideSectionIconName,
   type GuideSectionOverride,
 } from "@/lib/parseApologeticaGuide";
 
@@ -18,7 +19,7 @@ type GuidePageMeta = {
   heroQuote: { reference: string; text: string };
   readingMinutes: string;
   sectionIndexes?: number[];
-  icons: typeof CHURCH_SECTION_ICONS;
+  icons: GuideSectionIconName[];
   sectionOverrides?: GuideSectionOverride[];
   keyPassages?: GuideKeyPassage[];
 };
@@ -29,9 +30,9 @@ const guidePageMeta: Record<string, GuidePageMeta> = {
       "Recorrido bíblico sobre la alianza, la infidelidad de Israel, el llamado al arrepentimiento y la promesa del remanente fiel.",
     heroQuote: {
       reference: "Jeremías 31:33",
-      text: "Pondré mi ley en su interior y sobre sus corazones la escribiré, y yo seré su Dios y ellos serán mi pueblo.",
+      text: "Pondré mi Ley en su interior y sobre sus corazones la escribiré, y yo seré su Dios y ellos serán mi pueblo.",
     },
-    readingMinutes: "15–20",
+    readingMinutes: "15-20",
     sectionIndexes: CHURCH_GUIDE_SECTION_INDEXES,
     icons: CHURCH_SECTION_ICONS,
     sectionOverrides: iglesiaGuideSectionOverrides,
@@ -44,7 +45,7 @@ const guidePageMeta: Record<string, GuidePageMeta> = {
       reference: "Éxodo 20:3-5",
       text: "No tendrás otros dioses delante de mí. No te harás escultura ni imagen alguna para postrarte ante ella.",
     },
-    readingMinutes: "12–18",
+    readingMinutes: "12-18",
     icons: SAINTS_SECTION_ICONS,
   },
 };

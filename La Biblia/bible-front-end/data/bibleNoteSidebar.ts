@@ -24,7 +24,7 @@ export type SidebarCategory = {
   label: string;
   icon: LucideIcon;
   testament: 1 | 2;
-  /** Matches `Book.category` from the database import */
+  /** Matches the Bible book category in the static manifest. */
   dbCategories: string[];
 };
 

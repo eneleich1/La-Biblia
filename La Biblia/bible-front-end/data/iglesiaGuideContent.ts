@@ -2,39 +2,49 @@ import type { GuideKeyPassage, GuideSectionOverride } from "@/lib/parseApologeti
 
 export const iglesiaGuideKeyPassages: GuideKeyPassage[] = [
   {
-    reference: "Génesis 17:7",
-    description: "Alianza eterna entre Dios y su pueblo.",
-    href: "/biblia/es/genesis/17?highlight=7#V7",
+    reference: "Génesis 22:17-18",
+    description: "La promesa a Abraham.",
+    href: "/biblia/es/genesis/22?highlight=17-18#V17",
   },
   {
-    reference: "Éxodo 24:5-6",
-    description: "Ceremonia de la alianza en el Antiguo Testamento.",
-    href: "/biblia/es/exodo/24?highlight=5-6#V5",
+    reference: "Éxodo 32:4-6",
+    description: "El becerro de oro.",
+    href: "/biblia/es/exodo/32?highlight=4-6#V4",
   },
   {
-    reference: "Jeremías 31:33",
-    description: "Nuevo pacto: ley escrita en el corazón.",
-    href: "/biblia/es/jeremias/31?highlight=33#V33",
+    reference: "Jeremías 44:17",
+    description: "La desobediencia del pueblo.",
+    href: "/biblia/es/jeremias/44?highlight=17#V17",
   },
   {
-    reference: "Mateo 16:18",
-    description: "La roca y las llaves del Reino.",
-    href: "/biblia/es/evangelio-segun-san-mateo/16?highlight=18#V18",
+    reference: "2 Crónicas 24:18-19",
+    description: "Profetas enviados.",
+    href: "/biblia/es/libro-segundo-de-las-cronicas/24?highlight=18-19#V18",
   },
   {
-    reference: "Hechos 2:42-47",
-    description: "La Iglesia primitiva en comunión.",
-    href: "/biblia/es/hechos-de-los-apostoles/2?highlight=42-47#V42",
+    reference: "Levítico 26:3-4, 14",
+    description: "Bendiciones y maldiciones.",
+    href: "/biblia/es/levitico/26?highlight=3-4,14#V3",
+  },
+  {
+    reference: "Jeremías 31:33-34",
+    description: "Nuevo pacto prometido.",
+    href: "/biblia/es/jeremias/31?highlight=33-34#V33",
+  },
+  {
+    reference: "Romanos 11:3-5",
+    description: "Un remanente por gracia.",
+    href: "/biblia/es/epistola-a-los-romanos/11?highlight=3-5#V3",
   },
 ];
 
 export const iglesiaGuideSectionOverrides: GuideSectionOverride[] = [
   {
     body:
-      "Dios promete a Abraham tierra, descendencia y bendición para todas las naciones. La promesa no depende de la perfección humana, sino de la fidelidad de Dios.",
+      "Dios hizo promesas incondicionales a Abraham acerca de su descendencia y la bendición a todas las naciones a través de ella.",
     quote: {
-      text: "Por tu descendencia se bendecirán todas las naciones de la tierra.",
-      reference: "Génesis 22:18",
+      text: "Haré tu descendencia como el polvo de la tierra... y en tu descendencia se bendecirán todas las naciones de la tierra.",
+      reference: "Génesis 22:17-18",
     },
     tags: [
       { label: "Génesis 13", href: "/biblia/es/genesis/13" },
@@ -43,10 +53,10 @@ export const iglesiaGuideSectionOverrides: GuideSectionOverride[] = [
   },
   {
     body:
-      "Israel quebranta la alianza con idolatría —como el becerro de oro—, injusticia y desobediencia reiterada, provocando el juicio de Dios.",
+      "El pueblo de Israel se apartó de Yahveh: fabricaron ídolos, practicaron maldad, derramaron sangre inocente y desobedecieron los mandamientos.",
     quote: {
-      text: "Ésta es tu gente, la que sacaste de Egipto.",
-      reference: "Éxodo 32:7",
+      text: "Quemar incienso a la Reina de los Cielos, hacer libaciones a otros dioses... y no prestaron oído para que se convirtiesen.",
+      reference: "2 Crónicas 24:18-19",
     },
     tags: [
       { label: "Éxodo 32", href: "/biblia/es/exodo/32" },
@@ -56,28 +66,28 @@ export const iglesiaGuideSectionOverrides: GuideSectionOverride[] = [
   },
   {
     body:
-      "Una y otra vez Dios envía profetas para advertir, llamar al arrepentimiento y apartar al pueblo del juicio inminente.",
+      "Yahveh levantó profetas para advertir, reprender y llamar al pueblo a volver a Él; pero muchos no escucharon.",
     quote: {
-      text: "Por cuanto no escuchasteis mis palabras, he aquí que Dios ha resuelto echaros fuera.",
-      reference: "2 Crónicas 24:20",
+      text: "Les envió profetas que dieron testimonio contra ellos para que se convirtiesen a él, pero no les prestaron oído.",
+      reference: "2 Crónicas 24:19",
     },
-    tags: [{ label: "2 Crónicas 24", href: "/biblia/es/libro-primero-de-los-cronicas/24" }],
+    tags: [{ label: "2 Crónicas 24", href: "/biblia/es/libro-segundo-de-las-cronicas/24" }],
   },
   {
     body:
-      "La alianza mosaica une prosperidad y bendición al arrepentimiento, y maldición a la rebeldía persistente del pueblo.",
+      "Dios establece bendiciones para la obediencia y juicios para la desobediencia, llamando a su pueblo al arrepentimiento.",
     quote: {
-      text: "Si anduviereis en mis preceptos y guardareis mis mandamientos… os daré lluvia a su tiempo.",
-      reference: "Levítico 26:3-4",
+      text: "Si anduviereis en mis estatutos... daré vuestras lluvias en su tiempo... Mas si no me oyereis... yo traeré sobre vosotros pánico.",
+      reference: "Levítico 26:3-4, 14",
     },
     tags: [{ label: "Levítico 26", href: "/biblia/es/levitico/26" }],
   },
   {
     body:
-      "A pesar de la infidelidad nacional, Dios promete un remanente fiel y un nuevo pacto: su ley grabada en el corazón, no solo en tablas de piedra.",
+      "Aun en medio de la infidelidad, Dios promete un nuevo pacto y se reserva un remanente fiel por gracia.",
     quote: {
-      text: "Pondré mi ley en su interior y la escribiré en su corazón.",
-      reference: "Jeremías 31:33",
+      text: "Conoced a Yahveh... y de su pecado no vuelva a acordarme.",
+      reference: "Jeremías 31:34",
     },
     tags: [
       { label: "Jeremías 31", href: "/biblia/es/jeremias/31" },

@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BiblicalNotesPage } from "@/components/estudios/notas-biblicas/BiblicalNotesPage";
 import { getContentPage, studyPages } from "@/data/seekContent";
-import { prisma } from "@/lib/prisma";
 import { parseBiblicalNotesHtml } from "@/lib/parseBiblicalNotes";
+import { getStaticBooks } from "@/lib/staticBible";
 
 export const dynamic = "force-dynamic";
 
@@ -17,17 +17,7 @@ export default async function EstudioArticlePage({
   if (!page) notFound();
 
   if (slug === "notas-biblicas") {
-    const books = await prisma.book.findMany({
-      orderBy: [{ testament: "asc" }, { order: "asc" }],
-      select: {
-        slug: true,
-        nameEs: true,
-        order: true,
-        category: true,
-        testament: true,
-      },
-    });
-
+    const books = await getStaticBooks("es");
     const notes = parseBiblicalNotesHtml(page.html);
 
     return <BiblicalNotesPage notes={notes} books={books} />;

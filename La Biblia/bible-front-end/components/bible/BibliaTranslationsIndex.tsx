@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Lock, Star } from "lucide-react";
+import { ArrowRight, BookOpen, MessageCircle, Star } from "lucide-react";
 import type { StaticTranslation } from "@/lib/staticBible";
 
 function OrnamentLine({ className = "" }: { className?: string }) {
   return <span className={`biblia-ornament-line ${className}`.trim()} aria-hidden />;
 }
 
-/** Rombo delineado (afinado), sin relleno — como en el diseño */
 function OutlineDiamond({ className = "" }: { className?: string }) {
   return (
     <span className={`biblia-outline-diamond ${className}`.trim()} aria-hidden>
@@ -23,7 +22,6 @@ function OutlineDiamond({ className = "" }: { className?: string }) {
   );
 }
 
-/** Rayita corta con rombo delineado en el centro */
 function LineDiamondOrnament({ className = "" }: { className?: string }) {
   return (
     <div className={`biblia-line-diamond ${className}`.trim()} aria-hidden>
@@ -51,8 +49,9 @@ function formatTranslationTitle(translation: StaticTranslation) {
 
 function translationSubtitle(translation: StaticTranslation) {
   if (translation.language === "es") {
-    return "Edición en español para lectura y estudio.";
+    return "Traducción católica realizada a partir de los textos originales en hebreo, arameo y griego.";
   }
+
   return translation.edition
     ? `Edición ${translation.edition} para lectura y estudio.`
     : "Traducción disponible para lectura y estudio.";
@@ -61,26 +60,22 @@ function translationSubtitle(translation: StaticTranslation) {
 function FeaturedTranslationCard({ translation }: { translation: StaticTranslation }) {
   return (
     <article className="biblia-featured-card">
-      <div className="biblia-featured-card-media" aria-hidden>
-        {/* Placeholder: sustituir por imagen cuando esté disponible */}
+      <span className="biblia-available-badge">
+        <Star className="h-3 w-3 shrink-0" fill="currentColor" strokeWidth={2} aria-hidden />
+        Activa
+      </span>
+      <div className="biblia-card-book-mark" aria-hidden>
+        <BookOpen className="biblia-card-book-icon" strokeWidth={1.25} />
       </div>
       <div className="biblia-featured-card-body">
-        <span className="biblia-available-badge">
-          <Star className="h-3 w-3 shrink-0" strokeWidth={2} aria-hidden />
-          Disponible
-        </span>
-        <h2 className="biblia-featured-card-title">{formatTranslationTitle(translation)}</h2>
+        <h3 className="biblia-featured-card-title">{formatTranslationTitle(translation)}</h3>
+        <LineDiamondOrnament className="biblia-card-title-ornament" />
         <p className="biblia-featured-card-subtitle">{translationSubtitle(translation)}</p>
         <div className="biblia-featured-card-action">
           <Link href={`/biblia/${translation.language}`} className="biblia-open-button">
-            <BookOpen className="h-4 w-4 shrink-0" strokeWidth={1.85} aria-hidden />
-            Abrir traducción
+            Leer ahora
+            <ArrowRight className="h-4 w-4 shrink-0" strokeWidth={1.85} aria-hidden />
           </Link>
-          <ArrowRight
-            className="h-5 w-5 shrink-0 text-[var(--accent)]"
-            strokeWidth={1.75}
-            aria-hidden
-          />
         </div>
       </div>
     </article>
@@ -90,12 +85,13 @@ function FeaturedTranslationCard({ translation }: { translation: StaticTranslati
 function ComingSoonCard() {
   return (
     <article className="biblia-soon-card">
-      <Lock className="h-5 w-5 text-[var(--accent)]" strokeWidth={1.65} aria-hidden />
+      <div className="biblia-soon-icon-wrap" aria-hidden>
+        <BookOpen className="biblia-soon-icon" strokeWidth={1.2} />
+      </div>
       <h3 className="biblia-soon-card-title">Próximamente</h3>
       <LineDiamondOrnament className="biblia-soon-card-ornament" />
-      <p className="biblia-soon-card-text">
-        Estamos trabajando para traerte más traducciones.
-      </p>
+      <p className="biblia-soon-card-text">Nuevas traducciones próximamente.</p>
+      <span className="biblia-soon-button">Próximamente</span>
     </article>
   );
 }
@@ -106,39 +102,55 @@ export function BibliaTranslationsIndex({
   translations: StaticTranslation[];
 }) {
   return (
-    <div className="mx-auto w-full max-w-6xl">
-      <div className="biblia-translations-page">
-        <section className="biblia-translations-hero" aria-labelledby="biblia-translations-heading">
+    <div className="biblia-translations-page">
+      <section className="biblia-translations-hero" aria-labelledby="biblia-translations-heading">
+        <div className="biblia-translations-hero-inner">
           <header className="biblia-translations-intro">
             <IntroBookMark />
-            <h1 id="biblia-translations-heading" className="biblia-translations-title">
+            <h1 id="biblia-translations-heading" className="page-title biblia-translations-title">
               La Biblia
             </h1>
-            <LineDiamondOrnament className="biblia-intro-title-ornament" />
             <p className="biblia-translations-lead">
-              Elige un idioma o traducción disponible para comenzar a leer.
+              La Palabra de Dios en tu idioma. Lee, estudia y medita las Escrituras
+              con traducciones confiables y fieles al texto.
             </p>
+            <LineDiamondOrnament className="biblia-intro-title-ornament" />
           </header>
+        </div>
+      </section>
 
-          <div className="biblia-translations-featured">
-            {translations.map((translation) => (
-              <FeaturedTranslationCard key={translation.language} translation={translation} />
-            ))}
-          </div>
-        </section>
+      <section className="biblia-translation-picker" aria-labelledby="biblia-picker-heading">
+        <header className="biblia-picker-heading">
+          <h2 id="biblia-picker-heading">Elige una traducción</h2>
+          <p>
+            Selecciona la traducción que deseas leer. Seguiremos añadiendo más
+            traducciones en el futuro para que tengas acceso a la Palabra en
+            diferentes idiomas y enfoques.
+          </p>
+        </header>
 
-        <div className="biblia-translations-divider" role="presentation">
-          <span>Otras traducciones en preparación</span>
+        <div className="biblia-translations-grid">
+          {translations.map((translation) => (
+            <FeaturedTranslationCard key={translation.language} translation={translation} />
+          ))}
+          <ComingSoonCard />
+          <ComingSoonCard />
         </div>
 
-        <section className="biblia-translations-soon" aria-label="Traducciones próximamente">
-          <div className="biblia-translations-soon-grid">
-            <ComingSoonCard />
-            <ComingSoonCard />
-            <ComingSoonCard />
+        <div className="biblia-suggestion-banner">
+          <div className="biblia-suggestion-icon" aria-hidden>
+            <span>†</span>
           </div>
-        </section>
-      </div>
+          <div className="biblia-suggestion-copy">
+            <p>Nuestro deseo es poner la Palabra de Dios al alcance de todos.</p>
+            <strong>Si tienes sugerencias de traducciones, háznoslo saber.</strong>
+          </div>
+          <Link href="#" className="biblia-suggestion-button">
+            <MessageCircle className="h-4 w-4" strokeWidth={1.7} aria-hidden />
+            Enviar sugerencia
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

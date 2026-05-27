@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 674" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff7e8"/>
+      <stop offset="0.48" stop-color="#f6dfba"/>
+      <stop offset="1" stop-color="#d9b47d"/>
+    </linearGradient>
+    <radialGradient id="wash" cx="0.18" cy="0.18" r="0.72">
+      <stop offset="0" stop-color="#fffdf7" stop-opacity="0.98"/>
+      <stop offset="0.55" stop-color="#fff4df" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#f1d2a1" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mist" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#fff9ea" stop-opacity="0.96"/>
+      <stop offset="0.46" stop-color="#fff0d0" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#dfb574" stop-opacity="0.36"/>
+    </linearGradient>
+    <filter id="soften">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <filter id="paper">
+      <feTurbulence baseFrequency="0.9" numOctaves="2" seed="7" type="fractalNoise"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 0.055"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+
+  <rect width="2048" height="674" fill="url(#sky)"/>
+  <rect width="2048" height="674" fill="url(#wash)"/>
+
+  <g opacity="0.36" filter="url(#soften)">
+    <path d="M0 448 C130 410 214 424 334 394 C470 360 572 406 704 366 C840 326 942 342 1078 324 C1210 306 1306 262 1450 284 C1604 308 1690 246 1834 236 C1940 228 1992 264 2048 282 L2048 674 L0 674 Z" fill="#d1a76b"/>
+    <path d="M0 500 C180 470 302 488 446 456 C616 418 734 458 884 432 C1048 404 1128 386 1296 408 C1466 430 1582 374 1748 370 C1880 366 1962 398 2048 414 L2048 674 L0 674 Z" fill="#c5985c"/>
+  </g>
+
+  <path d="M0 474 C210 424 342 488 558 436 C712 400 812 424 938 408 C1074 390 1164 348 1292 370 C1434 394 1516 328 1656 318 C1812 306 1908 356 2048 372 L2048 674 L0 674 Z" fill="#e8c997" opacity="0.35"/>
+  <path d="M780 528 C914 496 1014 532 1130 500 C1238 470 1338 502 1446 464 C1546 428 1628 420 1736 438 C1834 454 1928 480 2048 448 L2048 674 L780 674 Z" fill="#c89c61" opacity="0.32"/>
+
+  <g opacity="0.38">
+    <path d="M1570 522 C1604 470 1616 424 1662 394 C1706 366 1764 350 1812 360 C1868 372 1916 408 1950 454 C1984 502 2022 522 2048 536 L2048 674 L1504 674 C1508 614 1532 578 1570 522 Z" fill="#b7894f"/>
+    <path d="M1628 488 C1674 454 1710 430 1780 422 C1860 412 1926 430 2048 392 L2048 674 L1554 674 C1576 600 1588 520 1628 488 Z" fill="#d0a36a" opacity="0.52"/>
+    <path d="M1588 552 C1658 536 1716 530 1788 506 C1882 474 1952 502 2048 478 L2048 674 L1520 674 C1538 608 1556 572 1588 552 Z" fill="#ac7d45" opacity="0.28"/>
+  </g>
+
+  <g opacity="0.32" fill="#9b713e">
+    <path d="M1512 552 c18 -46 58 -62 98 -34 c-42 4 -68 20 -98 34z"/>
+    <path d="M1666 534 c28 -46 76 -52 110 -16 c-42 -4 -78 2 -110 16z"/>
+    <path d="M1880 542 c34 -54 92 -66 146 -28 c-54 -4 -98 8 -146 28z"/>
+    <path d="M1720 592 c34 -40 80 -42 124 -10 c-46 -4 -84 0 -124 10z"/>
+  </g>
+
+  <g transform="translate(1794 218)" opacity="0.62">
+    <rect x="38" y="0" width="26" height="154" rx="5" fill="#b88748"/>
+    <rect x="0" y="39" width="102" height="20" rx="4" fill="#b88748"/>
+    <rect x="45" y="0" width="7" height="154" fill="#d5b07a" opacity="0.38"/>
+    <rect x="0" y="44" width="102" height="5" fill="#d5b07a" opacity="0.34"/>
+  </g>
+
+  <rect y="380" width="2048" height="294" fill="url(#mist)"/>
+  <rect width="2048" height="674" filter="url(#paper)" opacity="0.7"/>
+  <rect width="2048" height="674" fill="#fff4dd" opacity="0.2"/>
+</svg>

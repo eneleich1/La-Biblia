@@ -1,9 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, Quote } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
+import { CalendarDays, Quote } from "lucide-react";
+import { FeaturedCardNav } from "@/components/home/FeaturedCardNav";
 import { useSiteTheme } from "@/components/theme/ThemeProvider";
+import {
+  addDaysToDateKey,
+  compareDateKeys,
+  getTodayDateKey,
+  isDateKeyAfterToday,
+} from "@/lib/dailyReading";
 import { formatBibleReference } from "@/lib/formatTitle";
 
 type FeaturedVerseCardsProps = {
@@ -34,6 +41,8 @@ type DailyReading = {
   supplementalSourceUrl?: string;
 };
 
+const DAILY_READING_MIN_DATE = "2000-01-01";
+
 const fallbackVerse: RandomVerse = {
   reference: "Salmo 119:105",
   text: "Lampara es a mis pies tu palabra, y lumbrera a mi camino.",
@@ -57,6 +66,7 @@ const dailyReadingShortLabels: Record<DailyReadingSection["kind"], string> = {
 };
 
 const MAX_RANDOM_VERSE_HISTORY = 6;
+const RANDOM_VERSE_TIMEOUT_MS = 8_000;
 
 export function FeaturedVerseCards({ className = "" }: FeaturedVerseCardsProps) {
   const { randomVerseIntervalMs } = useSiteTheme();
@@ -65,14 +75,132 @@ export function FeaturedVerseCards({ className = "" }: FeaturedVerseCardsProps) 
     index: 0,
   });
   const [dailyReading, setDailyReading] = useState<DailyReading>(fallbackDailyReading);
+  const [selectedDateKey, setSelectedDateKey] = useState(() => getTodayDateKey());
   const [loadingVerse, setLoadingVerse] = useState(false);
+  const [loadingDailyReading, setLoadingDailyReading] = useState(false);
+  const randomVerseRequestRef = useRef<AbortController | null>(null);
+  const dailyReadingRequestRef = useRef<AbortController | null>(null);
+  const dailyDateInputRef = useRef<HTMLInputElement>(null);
   const verse = verseState.items[verseState.index] ?? fallbackVerse;
   const canGoBack = verseState.index > 0;
   const hasForwardVerse = verseState.index < verseState.items.length - 1;
+  const todayDateKey = getTodayDateKey();
+  const canGoForwardDaily = compareDateKeys(selectedDateKey, todayDateKey) < 0;
+  const canGoBackDaily = compareDateKeys(selectedDateKey, DAILY_READING_MIN_DATE) > 0;
 
-  const fetchNextVerse = useCallback(() => {
+  const fetchDailyReading = useCallback((dateKey: string) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey) || isDateKeyAfterToday(dateKey)) {
+      return undefined;
+    }
+
+    if (dailyReadingRequestRef.current) {
+      dailyReadingRequestRef.current.abort();
+    }
+
     const controller = new AbortController();
-    setLoadingVerse(true);
+    dailyReadingRequestRef.current = controller;
+    setLoadingDailyReading(true);
+    setSelectedDateKey(dateKey);
+    setDailyReading((current) => ({
+      ...current,
+      date: dateKey,
+      sections: current.date === dateKey ? current.sections : [],
+    }));
+
+    fetch(`/api/daily-reading?date=${encodeURIComponent(dateKey)}`, {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then(async (res) => {
+        const nextDailyReading = (await res.json()) as DailyReading;
+        const resolvedDate = nextDailyReading.date || dateKey;
+
+        setSelectedDateKey(resolvedDate);
+        setDailyReading({
+          ...nextDailyReading,
+          date: resolvedDate,
+          displayDate: nextDailyReading.displayDate || resolvedDate,
+          celebration:
+            nextDailyReading.celebration ||
+            (nextDailyReading.sections.length
+              ? ""
+              : "Lecturas del dia no disponibles para esta fecha"),
+          sections: nextDailyReading.sections ?? [],
+        });
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setDailyReading({
+          ...fallbackDailyReading,
+          date: dateKey,
+          displayDate: dateKey,
+          celebration: "Lecturas del dia no disponibles para esta fecha",
+          sections: [],
+        });
+      })
+      .finally(() => {
+        if (dailyReadingRequestRef.current === controller) {
+          dailyReadingRequestRef.current = null;
+          setLoadingDailyReading(false);
+        }
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  const showPreviousDailyReading = useCallback(() => {
+    const previousDateKey = addDaysToDateKey(selectedDateKey, -1);
+    if (!previousDateKey || compareDateKeys(previousDateKey, DAILY_READING_MIN_DATE) < 0) {
+      return;
+    }
+
+    fetchDailyReading(previousDateKey);
+  }, [fetchDailyReading, selectedDateKey]);
+
+  const showNextDailyReading = useCallback(() => {
+    if (!canGoForwardDaily) return;
+
+    const nextDateKey = addDaysToDateKey(selectedDateKey, 1);
+    if (!nextDateKey || isDateKeyAfterToday(nextDateKey)) return;
+
+    fetchDailyReading(nextDateKey);
+  }, [canGoForwardDaily, fetchDailyReading, selectedDateKey]);
+
+  const openDailyReadingCalendar = useCallback(() => {
+    const input = dailyDateInputRef.current;
+    if (!input) return;
+
+    if (typeof input.showPicker === "function") {
+      input.showPicker();
+      return;
+    }
+
+    input.click();
+  }, []);
+
+  const handleDailyReadingDateChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const nextDateKey = event.target.value;
+      if (!nextDateKey || isDateKeyAfterToday(nextDateKey)) return;
+
+      fetchDailyReading(nextDateKey);
+    },
+    [fetchDailyReading],
+  );
+
+  const fetchNextVerse = useCallback((options: { showLoading?: boolean } = {}) => {
+    const showLoading = options.showLoading ?? true;
+    if (randomVerseRequestRef.current) {
+      randomVerseRequestRef.current.abort();
+      setLoadingVerse(false);
+    }
+
+    const controller = new AbortController();
+    randomVerseRequestRef.current = controller;
+    const timeoutId = window.setTimeout(() => controller.abort(), RANDOM_VERSE_TIMEOUT_MS);
+
+    if (showLoading) setLoadingVerse(true);
+
     fetch("/api/random-verse", {
       cache: "no-store",
       signal: controller.signal,
@@ -93,7 +221,13 @@ export function FeaturedVerseCards({ className = "" }: FeaturedVerseCardsProps) 
       .catch(() => {
         /* keep current verse */
       })
-      .finally(() => setLoadingVerse(false));
+      .finally(() => {
+        window.clearTimeout(timeoutId);
+        if (randomVerseRequestRef.current === controller) {
+          randomVerseRequestRef.current = null;
+          if (showLoading) setLoadingVerse(false);
+        }
+      });
     return () => controller.abort();
   }, []);
 
@@ -110,40 +244,22 @@ export function FeaturedVerseCards({ className = "" }: FeaturedVerseCardsProps) 
       return undefined;
     }
 
-    return fetchNextVerse();
+    return fetchNextVerse({ showLoading: true });
   }, [fetchNextVerse, verseState.index, verseState.items.length]);
 
   useEffect(() => {
-    const controller = new AbortController();
-
-    fetch("/api/daily-reading", {
-      cache: "no-store",
-      signal: controller.signal,
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Unable to load daily reading");
-        return res.json() as Promise<DailyReading>;
-      })
-      .then((nextDailyReading) => {
-        if (nextDailyReading.displayDate && nextDailyReading.sections) {
-          setDailyReading(nextDailyReading);
-        }
-      })
-      .catch(() => {
-        /* keep fallback reading */
-      });
-
-    return () => controller.abort();
-  }, []);
+    const abort = fetchDailyReading(getTodayDateKey());
+    return abort;
+  }, [fetchDailyReading]);
 
   useEffect(() => {
-    const abort = fetchNextVerse();
+    const abort = fetchNextVerse({ showLoading: false });
     return abort;
   }, [fetchNextVerse]);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
-      fetchNextVerse();
+      fetchNextVerse({ showLoading: false });
     }, randomVerseIntervalMs);
     return () => window.clearInterval(intervalId);
   }, [fetchNextVerse, randomVerseIntervalMs]);
@@ -180,6 +296,9 @@ export function FeaturedVerseCards({ className = "" }: FeaturedVerseCardsProps) 
   };
 
   const formattedVerseReference = formatBibleReference(verse.reference, verse.href, "short");
+  const dailyReadingEmptyMessage = dailyReading.sections.length
+    ? null
+    : dailyReading.celebration || "Lecturas del dia no disponibles para esta fecha";
 
   return (
     <div
@@ -220,12 +339,26 @@ export function FeaturedVerseCards({ className = "" }: FeaturedVerseCardsProps) 
           </svg>
         </div>
         <div className="relative h-full">
-          <span
-            className="daily-icon absolute right-0 top-0 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/8 ring-1 ring-white/25"
+          <input
+            ref={dailyDateInputRef}
+            type="date"
+            value={selectedDateKey}
+            min={DAILY_READING_MIN_DATE}
+            max={todayDateKey}
+            onChange={handleDailyReadingDateChange}
+            className="sr-only"
+            tabIndex={-1}
             aria-hidden
+          />
+          <button
+            type="button"
+            onClick={openDailyReadingCalendar}
+            className="daily-icon absolute right-0 top-0 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/8 ring-1 ring-white/25 transition hover:bg-white/14"
+            aria-label="Elegir fecha de las lecturas"
+            title="Elegir fecha"
           >
             <CalendarDays className="h-3.5 w-3.5 text-white/95" strokeWidth={1.75} />
-          </span>
+          </button>
           <div className="grid h-full min-w-0 grid-rows-[auto_1fr_auto] pr-8">
             <div className="min-w-0">
               <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-[#58a2ff]">
@@ -241,18 +374,32 @@ export function FeaturedVerseCards({ className = "" }: FeaturedVerseCardsProps) 
               </div>
             ) : (
               <p className="mt-2 line-clamp-2 text-sm italic leading-snug text-white/80">
-                Consulta la fuente para ver las lecturas disponibles.
+                {loadingDailyReading ? "Cargando lecturas..." : dailyReadingEmptyMessage}
               </p>
             )}
-            <Link
-              href={dailyReading.sourceUrl}
-              className="mt-2 inline-flex min-h-5 items-center gap-2 self-end text-sm font-semibold text-[#62b0ff] no-underline visited:text-[#62b0ff] underline-offset-4 transition hover:underline"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Ver en {dailyReading.sourceName}
-              <span aria-hidden>{"->"}</span>
-            </Link>
+            <div className="mt-2 flex w-full min-h-7 items-center justify-between gap-2">
+              <Link
+                href={dailyReading.sourceUrl}
+                className="inline-flex min-h-5 min-w-0 flex-1 items-center gap-2 truncate text-sm font-semibold text-[#62b0ff] no-underline visited:text-[#62b0ff] underline-offset-4 transition hover:underline"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span className="truncate">Ver en {dailyReading.sourceName}</span>
+                <span className="shrink-0" aria-hidden>
+                  {"->"}
+                </span>
+              </Link>
+              <FeaturedCardNav
+                variant="daily"
+                onPrevious={showPreviousDailyReading}
+                onNext={showNextDailyReading}
+                previousDisabled={!canGoBackDaily || loadingDailyReading}
+                nextDisabled={!canGoForwardDaily || loadingDailyReading}
+                nextLoading={loadingDailyReading}
+                previousLabel="Dia anterior"
+                nextLabel={canGoForwardDaily ? "Dia siguiente" : "Ya estas en hoy"}
+              />
+            </div>
           </div>
         </div>
       </article>
@@ -323,33 +470,16 @@ export function FeaturedVerseCards({ className = "" }: FeaturedVerseCardsProps) 
           <p className="mt-2 line-clamp-3 max-w-[19rem] overflow-hidden text-sm italic leading-snug text-[var(--text)]">
             {verse.text}
           </p>
-          <div className="mt-2 flex min-h-7 items-center gap-2 self-end">
-            <button
-              type="button"
-              onClick={showPreviousVerse}
-              disabled={!canGoBack}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--border)] bg-white/80 text-[var(--text)] shadow-[0_8px_16px_-12px_rgba(15,23,42,0.45)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-40"
-              aria-label="Versiculo anterior"
-              title="Versiculo anterior"
-            >
-              <ChevronLeft className="h-4 w-4" strokeWidth={2} />
-            </button>
-            <button
-              type="button"
-              onClick={showNextVerse}
-              disabled={loadingVerse}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--border)] bg-white/80 text-[var(--text)] shadow-[0_8px_16px_-12px_rgba(15,23,42,0.45)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] disabled:cursor-wait disabled:opacity-60"
-              aria-label={hasForwardVerse ? "Versiculo siguiente" : "Generar otro versiculo"}
-              title={hasForwardVerse ? "Versiculo siguiente" : "Generar otro versiculo"}
-            >
-              <ChevronRight className="h-4 w-4" strokeWidth={2} />
-            </button>
-            <Link
-              href={verse.href}
-              className="ml-1 text-sm font-semibold text-[var(--accent)] no-underline underline-offset-4 hover:underline"
-            >
-              Leer
-            </Link>
+          <div className="mt-2 flex w-full min-h-7 items-center justify-end">
+            <FeaturedCardNav
+              onPrevious={showPreviousVerse}
+              onNext={showNextVerse}
+              previousDisabled={!canGoBack}
+              nextLoading={loadingVerse}
+              previousLabel="Versiculo anterior"
+              nextLabel={hasForwardVerse ? "Versiculo siguiente" : "Generar otro versiculo"}
+              linkHref={verse.href}
+            />
           </div>
         </div>
       </article>

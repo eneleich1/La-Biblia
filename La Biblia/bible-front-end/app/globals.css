@@ -1660,6 +1660,537 @@ body {
   line-height: 1.5;
 }
 
+/* Biblia - indice de traducciones: seleccion visual */
+.biblia-translations-page {
+  --biblia-ink: #14233a;
+  --biblia-muted: #52637a;
+  --biblia-gold: #b98a3f;
+  --biblia-gold-deep: #9b6b24;
+  --biblia-paper: #fffdf9;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0 0 0.75rem;
+  width: min(100%, 72rem);
+  margin: 0 auto;
+  color: var(--biblia-ink);
+  background: transparent;
+}
+
+.biblia-translations-hero {
+  position: relative;
+  display: block;
+  min-height: clamp(11.5rem, 18vw, 14.75rem);
+  overflow: hidden;
+  border: 1px solid rgba(20, 35, 58, 0.08);
+  border-radius: 0.78rem;
+  background:
+    linear-gradient(90deg, #fffdf9 0%, rgba(255, 253, 249, 0.98) 36%, rgba(255, 253, 249, 0.78) 54%, rgba(255, 253, 249, 0.18) 78%),
+    radial-gradient(ellipse at 88% 18%, rgba(185, 138, 63, 0.16), transparent 40%),
+    url("/images/biblia-translations-hero.png");
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.biblia-translations-hero::after {
+  content: "";
+  position: absolute;
+  right: -8%;
+  bottom: -42%;
+  width: min(44rem, 54vw);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: rgba(185, 138, 63, 0.1);
+  pointer-events: none;
+}
+
+.biblia-translations-hero-inner {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 78rem);
+  height: 100%;
+  margin: 0 auto;
+  padding: clamp(1.55rem, 3.2vw, 2.35rem) clamp(1.25rem, 3vw, 2.25rem);
+}
+
+.biblia-translations-intro {
+  display: flex;
+  max-width: 25rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.biblia-ornament-line {
+  display: block;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(185, 138, 63, 0.42), transparent);
+}
+
+.biblia-intro-mark {
+  display: flex;
+  width: 5.7rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--biblia-gold);
+}
+
+.biblia-intro-mark .biblia-ornament-line {
+  flex: 1;
+  min-width: 1.2rem;
+}
+
+.biblia-intro-book-icon {
+  height: 1.65rem;
+  width: 1.65rem;
+  flex-shrink: 0;
+  color: var(--biblia-gold);
+  filter: drop-shadow(0 6px 18px rgba(185, 138, 63, 0.2));
+}
+
+.biblia-translations-title {
+  margin: 0;
+  color: var(--biblia-ink);
+  font-size: clamp(1.85rem, 3.45vw, 2.55rem);
+  letter-spacing: 0;
+}
+
+.biblia-line-diamond {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+  color: var(--biblia-gold);
+}
+
+.biblia-line-diamond-segment {
+  display: block;
+  width: 1.25rem;
+  height: 1px;
+  background: rgba(185, 138, 63, 0.45);
+}
+
+.biblia-outline-diamond {
+  display: inline-flex;
+  color: currentColor;
+  line-height: 0;
+}
+
+.biblia-outline-diamond-svg {
+  height: 0.58rem;
+  width: 0.52rem;
+}
+
+.biblia-intro-title-ornament {
+  margin-top: 0.35rem;
+}
+
+.biblia-translations-lead {
+  margin: 0.2rem 0 0;
+  max-width: 24rem;
+  color: var(--biblia-muted);
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.biblia-translation-picker {
+  width: min(100%, 66rem);
+  margin: 0 auto;
+  padding: clamp(1.65rem, 3vw, 2.25rem) 0 0.75rem;
+}
+
+.biblia-picker-heading {
+  max-width: 43rem;
+  margin: 0 auto 1.25rem;
+  text-align: center;
+}
+
+.biblia-picker-heading h2 {
+  margin: 0;
+  color: var(--biblia-ink);
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 650;
+  line-height: 1.15;
+}
+
+.biblia-picker-heading p {
+  margin: 0.48rem 0 0;
+  color: var(--biblia-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.biblia-translations-grid {
+  display: grid;
+  gap: 0.95rem;
+}
+
+@media (min-width: 820px) {
+  .biblia-translations-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.biblia-featured-card,
+.biblia-soon-card {
+  position: relative;
+  display: flex;
+  min-height: 15.25rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  border-radius: 0.78rem;
+  text-align: center;
+}
+
+.biblia-featured-card {
+  border: 1px solid rgba(185, 138, 63, 0.92);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(185, 138, 63, 0.12), transparent 54%),
+    var(--biblia-paper);
+  box-shadow:
+    0 18px 38px -32px rgba(112, 75, 24, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.78) inset;
+  padding: 1.8rem 1.15rem 1.1rem;
+}
+
+.biblia-featured-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(185, 138, 63, 0.06), transparent 45%);
+  pointer-events: none;
+}
+
+.biblia-card-book-mark {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.3rem;
+  height: 3.05rem;
+  margin-bottom: 0.48rem;
+  color: var(--biblia-gold);
+}
+
+.biblia-card-book-mark::before {
+  content: "";
+  position: absolute;
+  inset: -0.4rem 0.4rem auto;
+  height: 2.2rem;
+  background: repeating-linear-gradient(
+    82deg,
+    transparent 0 0.54rem,
+    rgba(185, 138, 63, 0.34) 0.56rem 0.59rem
+  );
+  mask-image: radial-gradient(ellipse at center, black 0 58%, transparent 70%);
+  opacity: 0.52;
+}
+
+.biblia-card-book-icon {
+  position: relative;
+  z-index: 1;
+  width: 3.75rem;
+  height: 3.75rem;
+}
+
+.biblia-featured-card-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 0;
+}
+
+.biblia-available-badge {
+  position: absolute;
+  top: 0.78rem;
+  left: 0.78rem;
+  z-index: 2;
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.36rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--biblia-gold);
+  padding: 0.22rem 0.58rem 0.2rem 0.44rem;
+  color: #fffdf8;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.biblia-featured-card-title {
+  margin: 0;
+  max-width: 14rem;
+  color: var(--biblia-ink);
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-size: 1.08rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.biblia-card-title-ornament {
+  margin: 0.52rem 0 0.45rem;
+}
+
+.biblia-featured-card-subtitle {
+  margin: 0;
+  max-width: 13.5rem;
+  color: var(--biblia-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.biblia-featured-card-action {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0;
+  margin-top: auto;
+  padding-top: 0.85rem;
+}
+
+.biblia-open-button {
+  display: inline-flex;
+  min-height: 2.15rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.42rem;
+  border-radius: 0.48rem;
+  background: linear-gradient(180deg, #c89a4a 0%, var(--biblia-gold-deep) 100%);
+  color: #fffdf8;
+  padding: 0.45rem 0.88rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 12px 24px -18px rgba(112, 75, 24, 0.8);
+  transition:
+    filter 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.biblia-open-button:hover {
+  filter: brightness(1.04);
+  box-shadow: 0 16px 26px -18px rgba(112, 75, 24, 0.82);
+  transform: translateY(-1px);
+}
+
+.biblia-open-button:focus-visible,
+.biblia-suggestion-button:focus-visible {
+  outline: 2px solid var(--biblia-gold);
+  outline-offset: 3px;
+}
+
+.biblia-soon-card {
+  border: 1px solid rgba(20, 35, 58, 0.13);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(250, 250, 249, 0.86)),
+    var(--surface);
+  box-shadow:
+    0 12px 28px -28px rgba(20, 35, 58, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  padding: 1.45rem 1.15rem 1.1rem;
+}
+
+.biblia-soon-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.55rem;
+  height: 3.55rem;
+  margin-bottom: 0.58rem;
+  border: 1px dashed rgba(82, 99, 122, 0.28);
+  border-radius: 999px;
+  color: rgba(82, 99, 122, 0.28);
+}
+
+.biblia-soon-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.biblia-soon-card-title {
+  margin: 0;
+  color: rgba(20, 35, 58, 0.64);
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-size: 1.08rem;
+  font-weight: 650;
+  line-height: 1.18;
+}
+
+.biblia-soon-card-ornament {
+  margin: 0.5rem 0 0.44rem;
+  color: rgba(82, 99, 122, 0.38);
+}
+
+.biblia-soon-card-ornament .biblia-line-diamond-segment {
+  background: rgba(82, 99, 122, 0.2);
+}
+
+.biblia-soon-card-text {
+  margin: 0;
+  max-width: 10.8rem;
+  color: rgba(82, 99, 122, 0.82);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.biblia-soon-button {
+  display: inline-flex;
+  min-height: 2.05rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+  border-radius: 0.55rem;
+  background: rgba(20, 35, 58, 0.06);
+  padding: 0.45rem 1.15rem;
+  color: rgba(82, 99, 122, 0.68);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.biblia-suggestion-banner {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.2rem;
+  margin-top: 0.95rem;
+  border-radius: 0.72rem;
+  background:
+    radial-gradient(ellipse at 10% 0%, rgba(185, 138, 63, 0.11), transparent 45%),
+    rgba(247, 242, 234, 0.82);
+  padding: 0.72rem 0.95rem;
+}
+
+.biblia-suggestion-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.05rem;
+  height: 2.65rem;
+  border-right: 1px solid rgba(185, 138, 63, 0.24);
+  color: var(--biblia-gold);
+}
+
+.biblia-suggestion-icon span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(185, 138, 63, 0.62);
+  border-radius: 999px;
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.biblia-suggestion-copy p,
+.biblia-suggestion-copy strong {
+  margin: 0;
+}
+
+.biblia-suggestion-copy p {
+  color: var(--biblia-muted);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.biblia-suggestion-copy strong {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--biblia-gold-deep);
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-size: 0.92rem;
+  font-style: italic;
+  line-height: 1.25;
+}
+
+.biblia-suggestion-button {
+  display: inline-flex;
+  min-height: 2.15rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 1px solid rgba(185, 138, 63, 0.62);
+  border-radius: 0.62rem;
+  background: rgba(255, 253, 249, 0.58);
+  padding: 0.45rem 0.85rem;
+  color: var(--biblia-gold-deep);
+  font-size: 0.8rem;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.biblia-suggestion-button:hover {
+  background: rgba(185, 138, 63, 0.08);
+}
+
+@media (max-width: 820px) {
+  .biblia-translations-hero {
+    background:
+      linear-gradient(90deg, #fffdf9 0%, rgba(255, 253, 249, 0.96) 56%, rgba(255, 253, 249, 0.68) 100%),
+      url("/images/biblia-translations-hero.png");
+    background-position: center right 28%;
+    background-size: cover;
+  }
+
+  .biblia-suggestion-banner {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .biblia-suggestion-button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .biblia-translations-page {
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  .biblia-translations-hero {
+    min-height: 13rem;
+  }
+
+  .biblia-translations-hero-inner,
+  .biblia-translation-picker {
+    padding-inline: 1rem;
+  }
+
+  .biblia-featured-card,
+  .biblia-soon-card {
+    min-height: 14.75rem;
+  }
+
+  .biblia-suggestion-banner {
+    align-items: start;
+    gap: 0.85rem;
+  }
+
+  .biblia-suggestion-icon {
+    width: 2.6rem;
+    border-right: 0;
+  }
+}
+
 @layer utilities {
   .scrollbar-none {
     -ms-overflow-style: none;
@@ -1714,6 +2245,302 @@ body {
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.sermons-index-page {
+  width: min(100%, 76rem);
+  margin: 0 auto;
+  padding: 0.45rem 0 3.25rem;
+}
+
+.sermons-index-header {
+  margin-bottom: 1.35rem;
+}
+
+.sermons-index-header h1 {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-size: clamp(1.85rem, 3.45vw, 2.55rem);
+  font-weight: 650;
+  letter-spacing: 0;
+  line-height: 1.08;
+}
+
+.sermons-index-header p {
+  margin: 0.55rem 0 0;
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 520px) {
+  .sermons-index-header h1 {
+    font-size: 1.7rem;
+  }
+}
+
+.sermons-feature-banner {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: clamp(1.1rem, 2.5vw, 1.8rem);
+  align-items: center;
+  min-height: 11.25rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+  border-radius: 0.72rem;
+  background:
+    linear-gradient(90deg, rgba(255, 250, 241, 0.98) 0%, rgba(255, 250, 241, 0.92) 38%, rgba(255, 250, 241, 0.54) 62%, rgba(255, 250, 241, 0.28) 100%),
+    url("/images/sermon-banner-cross.svg"),
+    var(--scripture-paper);
+  background-position: center center, center center, center center;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-size: 100% 100%, 100% 100%, auto;
+  box-shadow: 0 18px 40px -34px rgba(70, 50, 24, 0.56), 0 0 0 1px rgba(255, 255, 255, 0.64) inset;
+  padding: clamp(1.15rem, 2.7vw, 1.9rem);
+  color: inherit;
+}
+
+.sermons-feature-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 88% 22%, rgba(146, 86, 15, 0.16), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(146, 86, 15, 0.05));
+  pointer-events: none;
+}
+
+.sermons-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.sermons-feature-icon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(4.1rem, 7vw, 5.45rem);
+  height: clamp(4.1rem, 7vw, 5.45rem);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 10%, rgba(255, 255, 255, 0.8));
+  color: var(--scripture-gold);
+}
+
+.sermons-feature-icon svg {
+  width: clamp(2rem, 3.6vw, 2.75rem);
+  height: clamp(2rem, 3.6vw, 2.75rem);
+  stroke-width: 1.7;
+}
+
+.sermons-feature-copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.62rem;
+  max-width: 48rem;
+}
+
+.sermons-feature-title {
+  color: var(--text);
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-size: clamp(1.05rem, 1.8vw, 1.32rem);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.sermons-feature-text {
+  max-width: 41rem;
+  color: var(--text-muted);
+  font-size: clamp(0.9rem, 1.4vw, 1rem);
+  line-height: 1.55;
+}
+
+.sermons-feature-reference {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  color: var(--accent);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.sermons-feature-reference svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke-width: 1.8;
+}
+
+.sermons-list-section {
+  margin-top: clamp(1.8rem, 4vw, 2.45rem);
+}
+
+.sermons-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.15rem;
+}
+
+.sermons-list-heading h2 {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-size: clamp(1rem, 1.4vw, 1.16rem);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.sermons-list-heading span {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.sermons-card-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  max-width: 25.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sermons-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem;
+  min-height: 13.5rem;
+  border: 1px solid color-mix(in srgb, var(--border) 82%, var(--accent));
+  border-radius: 0.72rem;
+  background:
+    radial-gradient(ellipse at 12% 0%, rgba(255, 255, 255, 0.82), transparent 42%),
+    var(--surface);
+  box-shadow: var(--shadow-card);
+  padding: 1.15rem;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.sermons-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-3px);
+}
+
+.sermons-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.15rem;
+  height: 3.15rem;
+  border-radius: 0.64rem;
+  background: var(--surface-muted);
+  color: var(--scripture-gold);
+}
+
+.sermons-card-icon svg {
+  width: 1.65rem;
+  height: 1.65rem;
+  stroke-width: 1.75;
+}
+
+.sermons-card-body {
+  display: grid;
+  min-width: 0;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 0.4rem;
+}
+
+.sermons-card-title {
+  color: var(--text);
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.28;
+}
+
+.sermons-card-reference {
+  color: var(--accent);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.sermons-card-summary {
+  margin-top: 0.3rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.sermons-card-action {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 0.65rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.9rem;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.sermons-card-action svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  stroke-width: 1.9;
+  transition: transform 180ms ease;
+}
+
+.sermons-card:hover .sermons-card-action svg {
+  transform: translateX(3px);
+}
+
+@media (max-width: 720px) {
+  .sermons-index-page {
+    padding-bottom: 2.25rem;
+  }
+
+  .sermons-feature-banner {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    background:
+      linear-gradient(180deg, rgba(255, 250, 241, 0.98) 0%, rgba(255, 250, 241, 0.94) 64%, rgba(255, 250, 241, 0.84) 100%),
+      url("/images/sermon-banner-cross.svg"),
+      var(--scripture-paper);
+    background-position: center center, center center, center center;
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    background-size: 100% 100%, 100% 100%, auto;
+  }
+
+  .sermons-feature-icon {
+    width: 4.1rem;
+    height: 4.1rem;
+  }
+
+  .sermons-list-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .sermons-card-grid {
+    max-width: none;
+  }
+
+  .sermons-card {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
 }
 
 .sermon-sheet {
@@ -2145,6 +2972,7 @@ body {
   .audio-player-wrap {
     min-height: 12rem;
   }
+
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -174,6 +174,24 @@ export function getTodayDateKey(timeZone = DEFAULT_TIME_ZONE) {
   return `${year}-${month}-${day}`;
 }
 
+export function addDaysToDateKey(dateKey: string, days: number) {
+  const dateParts = parseDateKey(dateKey);
+  if (!dateParts) return null;
+
+  const date = new Date(Date.UTC(dateParts.year, dateParts.month - 1, dateParts.day));
+  date.setUTCDate(date.getUTCDate() + days);
+
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
+}
+
+export function compareDateKeys(left: string, right: string) {
+  return left.localeCompare(right);
+}
+
+export function isDateKeyAfterToday(dateKey: string, timeZone = DEFAULT_TIME_ZONE) {
+  return compareDateKeys(dateKey, getTodayDateKey(timeZone)) > 0;
+}
+
 function parseDateKey(dateKey: string) {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateKey);
   if (!match) return null;
