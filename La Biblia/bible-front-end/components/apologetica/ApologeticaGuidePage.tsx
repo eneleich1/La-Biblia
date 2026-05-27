@@ -38,7 +38,7 @@ function SectionQuote({ text, reference }: { text: string; reference: string }) 
         className="font-serif-display text-4xl leading-none text-[var(--accent)]/55"
         aria-hidden
       >
-        "
+        &ldquo;
       </span>
       <p className="-mt-3 text-[13px] leading-relaxed text-[var(--text)]/80">{text}</p>
       <p className="mt-2 text-xs font-semibold text-[var(--accent)]">{reference}</p>
@@ -276,7 +276,7 @@ export function ApologeticaGuidePage({ guide }: Props) {
         <div className="guide-hero-quote flex h-[10rem] overflow-hidden rounded-lg border border-[var(--border)] bg-[#f7f1e8] shadow-[var(--shadow-card)] sm:h-[11.25rem]">
           <div className="flex min-w-0 flex-1 flex-col justify-center px-7 py-5">
             <span className="font-serif-display text-5xl leading-none text-[var(--accent)]/35" aria-hidden>
-              "
+              &ldquo;
             </span>
             <p className="-mt-2 text-base font-semibold leading-tight text-[var(--accent)]">
               {guide.heroQuote.reference}
@@ -372,7 +372,7 @@ export function ApologeticaGuidePage({ guide }: Props) {
                           className="font-serif-display text-3xl leading-none text-[var(--accent)]/40"
                           aria-hidden
                         >
-                          "
+                          &ldquo;
                         </span>
                         <p className="-mt-2 text-sm leading-relaxed text-[var(--text)]">
                           {section.quote.text}
