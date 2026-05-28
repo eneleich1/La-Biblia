@@ -57,12 +57,6 @@ type ResizeState = {
   origin: BlockLayout;
 };
 
-const FONT_FAMILY_STYLES: Record<string, string> = {
-  sans: "font-family:var(--font-sans),system-ui,sans-serif",
-  serif: "font-family:var(--font-serif),Georgia,serif",
-  mono: "font-family:ui-monospace,SFMono-Regular,Menlo,monospace",
-};
-
 function applyStyleToSelection(style: string) {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return;
@@ -96,8 +90,7 @@ function applyTextCommand(command: string, value?: string) {
     return;
   }
   if (command === "fontFamily" && value) {
-    const familyStyle = FONT_FAMILY_STYLES[value];
-    if (familyStyle) applyStyleToSelection(familyStyle);
+    applyStyleToSelection(`font-family:${value}`);
     return;
   }
   document.execCommand(command, false, value);
@@ -336,8 +329,8 @@ function BlockView({
             suppressContentEditableWarning
             onMouseUp={captureSelection}
             onKeyUp={captureSelection}
-            onInput={(event) => onTextInput(block.id, event.currentTarget.innerHTML)}
             onBlur={(event) => onTextInput(block.id, event.currentTarget.innerHTML)}
+            onInput={(event) => onTextInput(block.id, event.currentTarget.innerHTML)}
             className="h-full w-full overflow-auto rounded-md bg-[var(--background-soft)] px-2 py-1 text-[15px] leading-relaxed text-[var(--text)] outline-none ring-1 ring-[var(--accent)]"
           />
         ) : (
