@@ -157,7 +157,7 @@ function FocusCard({ title, icon: Icon }: { title: string; icon: typeof BookOpen
 
 export function EstudiosIndex() {
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-10 pb-4 lg:space-y-12">
+    <div className="sermons-index-page space-y-10 lg:space-y-12">
       <nav className="text-sm text-[var(--text-muted)]" aria-label="Migas de pan">
         <ol className="flex flex-wrap items-center gap-1.5">
           <li>

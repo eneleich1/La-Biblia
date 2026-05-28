@@ -1,36 +1,80 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { ArrowUp, ArrowDown, ImageIcon, Plus, Save, Trash2, Type, ShieldAlert } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Box, ImageIcon, Plus, Save, Trash2, Type, ShieldAlert } from "lucide-react";
 import { readAuthSession } from "@/lib/clientAuth";
+import { readLegacyLocalSitePages, clearLegacyLocalSitePages } from "@/lib/clientSiteBuilder";
 import {
   buildEmptySitePage,
-  readSitePages,
+  createBlock,
+  ensurePageStructure,
+  inferParentForRoute,
   routeToSitePath,
   sanitizePageRoute,
-  saveSitePages,
-  type SiteBlock,
   type SitePage,
-} from "@/lib/clientSiteBuilder";
-
-function createBlock(type: SiteBlock["type"]): SiteBlock {
-  return { id: `block-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`, type, value: "" };
-}
+} from "@/lib/sitePageTypes";
+import {
+  createSitePageApi,
+  deleteSitePageApi,
+  fetchSitePages,
+  migrateLocalSitePages,
+  persistBlocksMedia,
+  updateSitePageApi,
+} from "@/lib/sitePagesApi";
+import { InlinePageEditor } from "@/components/site/InlinePageEditor";
 
 export default function EditSitePage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [pages, setPages] = useState<SitePage[]>([]);
   const [selectedPageId, setSelectedPageId] = useState<string>("");
+  const [saveSuccess, setSaveSuccess] = useState("");
+  const [saveError, setSaveError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const loadPages = useCallback(async () => {
+    setLoading(true);
+    setSaveError("");
+    try {
+      const list = await fetchSitePages(true);
+      setPages(list);
+      setSelectedPageId((current) => current || list[0]?.id || "");
+    } catch (error) {
+      setSaveError(
+        error instanceof Error
+          ? error.message
+          : "No se pudo cargar desde la base de datos. Verifica DATABASE_URL y migraciones.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const admin = readAuthSession()?.role === "admin";
-    setIsAdmin(admin);
-    if (!admin) return;
-    const loaded = readSitePages();
-    setPages(loaded);
-    setSelectedPageId(loaded[0]?.id ?? "");
-  }, []);
+    const session = readAuthSession();
+    setIsAdmin(session?.role === "admin");
+    if (session?.role !== "admin") {
+      setLoading(false);
+      return;
+    }
+
+    (async () => {
+      const legacy = readLegacyLocalSitePages();
+      if (legacy.length) {
+        try {
+          await migrateLocalSitePages(legacy);
+          clearLegacyLocalSitePages();
+          setSaveSuccess(
+            `Se migraron ${legacy.length} pagina(s) del navegador a la base de datos.`,
+          );
+        } catch {
+          // loadPages will surface DB errors
+        }
+      }
+      await loadPages();
+    })();
+  }, [loadPages]);
 
   const selectedPage = useMemo(
     () => pages.find((page) => page.id === selectedPageId) ?? null,
@@ -39,21 +83,64 @@ export default function EditSitePage() {
 
   const updateSelectedPage = (patch: Partial<SitePage>) => {
     if (!selectedPage) return;
-    const nextPages = pages.map((page) =>
-      page.id === selectedPage.id ? { ...page, ...patch, updatedAt: new Date().toISOString() } : page,
+    setSaveSuccess("");
+    setSaveError("");
+    setPages((current) =>
+      current.map((page) =>
+        page.id === selectedPage.id ? { ...page, ...patch, updatedAt: new Date().toISOString() } : page,
+      ),
     );
-    setPages(nextPages);
   };
 
-  const saveAll = () => {
-    const normalized = pages
-      .map((page) => ({ ...page, route: sanitizePageRoute(page.route) }))
-      .filter((page) => page.title.trim() && page.route);
-    saveSitePages(normalized);
-    setPages(normalized);
-    if (!normalized.find((page) => page.id === selectedPageId)) {
-      setSelectedPageId(normalized[0]?.id ?? "");
+  const saveSelectedPage = async () => {
+    if (!selectedPage) return;
+    setSaving(true);
+    setSaveSuccess("");
+    setSaveError("");
+
+    const route = sanitizePageRoute(selectedPage.route);
+    if (!selectedPage.title.trim() || !route) {
+      setSaveError("La página necesita título y ruta.");
+      setSaving(false);
+      return;
     }
+
+    try {
+      const inferred = inferParentForRoute(route);
+      const structured = ensurePageStructure({
+        ...selectedPage,
+        route,
+        parentHref: selectedPage.parentHref ?? inferred?.parentHref ?? null,
+        parentLabel: selectedPage.parentLabel ?? inferred?.parentLabel ?? null,
+      });
+      const blocks = await persistBlocksMedia(structured.blocks);
+      let saved: SitePage;
+      if (selectedPage.id && !selectedPage.id.startsWith("draft-")) {
+        saved = await updateSitePageApi(selectedPage.id, { ...structured, blocks });
+      } else {
+        saved = await createSitePageApi({ ...structured, blocks });
+      }
+      setPages((current) => {
+        const without = current.filter((p) => p.id !== selectedPage.id && sanitizePageRoute(p.route) !== route);
+        return [...without, saved];
+      });
+      setSelectedPageId(saved.id);
+      setSaveSuccess("Cambios guardados en la base de datos. Visible para todos los visitantes.");
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "No se pudo guardar.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const appendBlock = (type: "text" | "image" | "container") => {
+    if (!selectedPage) return;
+    const yOffset =
+      selectedPage.blocks.reduce(
+        (max, block) => Math.max(max, block.layout.y + block.layout.height + 16),
+        24,
+      ) || 24;
+    updateSelectedPage({ blocks: [...selectedPage.blocks, createBlock(type, yOffset)] });
   };
 
   if (!isAdmin) {
@@ -67,7 +154,7 @@ export default function EditSitePage() {
                 Editar el sitio web
               </h1>
               <p className="mt-2 text-sm text-[var(--text-muted)]">
-                Solo administradores pueden acceder a esta sección.
+                Solo administradores pueden acceder. Inicia sesión como administrador (se valida en el servidor).
               </p>
               <Link href="/admin" className="mt-4 inline-flex text-sm font-semibold text-[var(--accent)] hover:underline">
                 Ir a iniciar sesión
@@ -80,207 +167,187 @@ export default function EditSitePage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl">
+    <main className="mx-auto w-full max-w-[1840px] px-4 pb-10 sm:px-6 lg:px-8 xl:px-12">
       <header className="mb-6 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)]">
         <h1 className="font-serif-display text-2xl font-semibold text-[var(--text)]">Editar el sitio web</h1>
         <p className="mt-2 text-sm text-[var(--text-muted)]">
-          Crea páginas con ruta propia, agrega bloques de texto o imagen y guarda para publicarlas.
-        </p>
-        <p className="mt-1 text-xs text-[var(--text-muted)]">
-          Nota: las páginas creadas aquí se publican bajo <span className="font-semibold">/sitio/tu-ruta</span>.
+          Las páginas se guardan en la base de datos del servidor. Cualquier visitante las ve; solo el administrador
+          puede editarlas.
         </p>
       </header>
 
-      <div className="grid gap-5 lg:grid-cols-[18rem_minmax(0,1fr)]">
-        <aside className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)]">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold text-[var(--text)]">Páginas</h2>
-            <button
-              type="button"
-              onClick={() => {
-                const page = buildEmptySitePage();
-                setPages((current) => [...current, page]);
-                setSelectedPageId(page.id);
-              }}
-              className="inline-flex min-h-8 items-center gap-1 rounded-md border border-[var(--accent)]/45 px-2.5 text-xs font-semibold text-[var(--accent)] hover:bg-[var(--accent-soft)]"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Nueva
-            </button>
-          </div>
-
-          <ul className="mt-3 space-y-2">
-            {pages.map((page) => (
-              <li key={page.id}>
-                <button
-                  type="button"
-                  onClick={() => setSelectedPageId(page.id)}
-                  className={`w-full rounded-md border px-2.5 py-2 text-left text-xs transition ${
-                    selectedPageId === page.id
-                      ? "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]"
-                      : "border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--accent)]/35"
-                  }`}
-                >
-                  <p className="truncate font-semibold">{page.title || "Página sin título"}</p>
-                  <p className="mt-1 truncate opacity-80">{routeToSitePath(page.route) || "Sin ruta"}</p>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </aside>
-
-        <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)]">
-          {!selectedPage ? (
-            <p className="text-sm text-[var(--text-muted)]">Selecciona o crea una página para comenzar.</p>
-          ) : (
-            <div className="space-y-4">
-              <div className="grid gap-3 md:grid-cols-2">
-                <label className="grid gap-1 text-xs font-semibold text-[var(--text-muted)]">
-                  Título de la página
-                  <input
-                    value={selectedPage.title}
-                    onChange={(event) => updateSelectedPage({ title: event.target.value })}
-                    className="min-h-10 rounded-md border border-[var(--border)] bg-[var(--background-soft)] px-3 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]"
-                  />
-                </label>
-                <label className="grid gap-1 text-xs font-semibold text-[var(--text-muted)]">
-                  Ruta
-                  <input
-                    value={selectedPage.route}
-                    onChange={(event) => updateSelectedPage({ route: event.target.value })}
-                    placeholder="/mi-nueva-ruta"
-                    className="min-h-10 rounded-md border border-[var(--border)] bg-[var(--background-soft)] px-3 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]"
-                  />
-                </label>
-              </div>
-
-              <p className="text-xs text-[var(--text-muted)]">
-                URL final:{" "}
-                <span className="font-semibold text-[var(--text)]">{routeToSitePath(selectedPage.route) || "-"}</span>
-              </p>
-
-              <div className="rounded-md border border-[var(--border)] p-3">
-                <div className="mb-3 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => updateSelectedPage({ blocks: [...selectedPage.blocks, createBlock("text")] })}
-                    className="inline-flex min-h-8 items-center gap-1 rounded-md border border-[var(--accent)]/45 px-2.5 text-xs font-semibold text-[var(--accent)] hover:bg-[var(--accent-soft)]"
-                  >
-                    <Type className="h-3.5 w-3.5" />
-                    Texto
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => updateSelectedPage({ blocks: [...selectedPage.blocks, createBlock("image")] })}
-                    className="inline-flex min-h-8 items-center gap-1 rounded-md border border-[var(--accent)]/45 px-2.5 text-xs font-semibold text-[var(--accent)] hover:bg-[var(--accent-soft)]"
-                  >
-                    <ImageIcon className="h-3.5 w-3.5" />
-                    Imagen
-                  </button>
-                </div>
-
-                <div className="space-y-3">
-                  {selectedPage.blocks.map((block, index) => (
-                    <div key={block.id} className="rounded-md border border-[var(--border)] bg-[var(--background-soft)] p-3">
-                      <div className="mb-2 flex items-center justify-between gap-2">
-                        <p className="text-xs font-semibold text-[var(--text)]">
-                          Bloque {index + 1} - {block.type === "text" ? "Texto" : "Imagen"}
-                        </p>
-                        <div className="flex gap-1">
-                          <button
-                            type="button"
-                            disabled={index === 0}
-                            onClick={() => {
-                              const blocks = [...selectedPage.blocks];
-                              [blocks[index - 1], blocks[index]] = [blocks[index], blocks[index - 1]];
-                              updateSelectedPage({ blocks });
-                            }}
-                            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--border)] disabled:opacity-40"
-                          >
-                            <ArrowUp className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            disabled={index === selectedPage.blocks.length - 1}
-                            onClick={() => {
-                              const blocks = [...selectedPage.blocks];
-                              [blocks[index + 1], blocks[index]] = [blocks[index], blocks[index + 1]];
-                              updateSelectedPage({ blocks });
-                            }}
-                            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--border)] disabled:opacity-40"
-                          >
-                            <ArrowDown className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateSelectedPage({
-                                blocks: selectedPage.blocks.filter((item) => item.id !== block.id),
-                              })
-                            }
-                            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-red-200 bg-red-50 text-red-700"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {block.type === "text" ? (
-                        <textarea
-                          value={block.value}
-                          onChange={(event) => {
-                            const blocks = selectedPage.blocks.map((item) =>
-                              item.id === block.id ? { ...item, value: event.target.value } : item,
-                            );
-                            updateSelectedPage({ blocks });
-                          }}
-                          rows={4}
-                          className="w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]"
-                        />
-                      ) : (
-                        <input
-                          value={block.value}
-                          onChange={(event) => {
-                            const blocks = selectedPage.blocks.map((item) =>
-                              item.id === block.id ? { ...item, value: event.target.value } : item,
-                            );
-                            updateSelectedPage({ blocks });
-                          }}
-                          placeholder="https://..."
-                          className="min-h-10 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]"
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex flex-wrap justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const nextPages = pages.filter((page) => page.id !== selectedPage.id);
-                    setPages(nextPages);
-                    setSelectedPageId(nextPages[0]?.id ?? "");
-                  }}
-                  className="inline-flex min-h-10 items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Eliminar página
-                </button>
-                <button
-                  type="button"
-                  onClick={saveAll}
-                  className="inline-flex min-h-10 items-center gap-2 rounded-md border border-[var(--accent)] bg-[var(--accent)] px-4 text-sm font-semibold text-[var(--accent-foreground)]"
-                >
-                  <Save className="h-4 w-4" />
-                  Guardar
-                </button>
-              </div>
+      {loading ? (
+        <p className="text-sm text-[var(--text-muted)]">Cargando páginas…</p>
+      ) : (
+        <div className="grid gap-5 lg:grid-cols-[18rem_minmax(0,1fr)]">
+          <aside className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)]">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold text-[var(--text)]">Páginas</h2>
+              <button
+                type="button"
+                onClick={() => {
+                  const page = buildEmptySitePage();
+                  setPages((current) => [...current, page]);
+                  setSelectedPageId(page.id);
+                }}
+                className="inline-flex min-h-8 items-center gap-1 rounded-md border border-[var(--accent)]/45 px-2.5 text-xs font-semibold text-[var(--accent)] hover:bg-[var(--accent-soft)]"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Nueva
+              </button>
             </div>
-          )}
-        </section>
-      </div>
+
+            <ul className="mt-3 space-y-2">
+              {pages.map((page) => (
+                <li key={page.id || page.route}>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPageId(page.id)}
+                    className={`w-full rounded-md border px-2.5 py-2 text-left text-xs transition ${
+                      selectedPageId === page.id
+                        ? "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]"
+                        : "border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--accent)]/35"
+                    }`}
+                  >
+                    <p className="truncate font-semibold">{page.title || "Página sin título"}</p>
+                    <p className="mt-1 truncate opacity-80">{page.route || "Sin ruta"}</p>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </aside>
+
+          <section className="space-y-5">
+            {!selectedPage ? (
+              <p className="text-sm text-[var(--text-muted)]">Selecciona o crea una página.</p>
+            ) : (
+              <>
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)]">
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <label className="grid gap-1 text-xs font-semibold text-[var(--text-muted)]">
+                      Título
+                      <input
+                        value={selectedPage.title}
+                        onChange={(event) => updateSelectedPage({ title: event.target.value })}
+                        className="min-h-10 rounded-md border border-[var(--border)] bg-[var(--background-soft)] px-3 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]"
+                      />
+                    </label>
+                    <label className="grid gap-1 text-xs font-semibold text-[var(--text-muted)]">
+                      Ruta pública
+                      <input
+                        value={selectedPage.route}
+                        onChange={(event) => updateSelectedPage({ route: event.target.value })}
+                        placeholder="/apologetica/mi-tema"
+                        className="min-h-10 rounded-md border border-[var(--border)] bg-[var(--background-soft)] px-3 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]"
+                      />
+                    </label>
+                  </div>
+                  <p className="mt-2 text-xs text-[var(--text-muted)]">
+                    URL: <span className="font-semibold text-[var(--text)]">{selectedPage.route || "-"}</span>
+                    {selectedPage.route ? (
+                      <>
+                        {" "}
+                        · alternativa:{" "}
+                        <span className="font-semibold">{routeToSitePath(selectedPage.route)}</span>
+                      </>
+                    ) : null}
+                  </p>
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    <label className="grid gap-1 text-xs font-semibold text-[var(--text-muted)]">
+                      Enlace «volver» (ruta madre)
+                      <input
+                        value={selectedPage.parentHref ?? ""}
+                        onChange={(event) => updateSelectedPage({ parentHref: event.target.value })}
+                        placeholder="/apologetica/no-conviene-a-la-iglesia-catolica-el-culto-a-los-santos"
+                        className="min-h-10 rounded-md border border-[var(--border)] bg-[var(--background-soft)] px-3 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]"
+                      />
+                    </label>
+                    <label className="grid gap-1 text-xs font-semibold text-[var(--text-muted)]">
+                      Texto del enlace
+                      <input
+                        value={selectedPage.parentLabel ?? ""}
+                        onChange={(event) => updateSelectedPage({ parentLabel: event.target.value })}
+                        placeholder="Volver a la guía principal"
+                        className="min-h-10 rounded-md border border-[var(--border)] bg-[var(--background-soft)] px-3 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]"
+                      />
+                    </label>
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button type="button" onClick={() => appendBlock("text")} className="inline-flex min-h-8 items-center gap-1 rounded-md border border-[var(--accent)]/45 px-2.5 text-xs font-semibold text-[var(--accent)]">
+                      <Type className="h-3.5 w-3.5" /> Texto
+                    </button>
+                    <button type="button" onClick={() => appendBlock("image")} className="inline-flex min-h-8 items-center gap-1 rounded-md border border-[var(--accent)]/45 px-2.5 text-xs font-semibold text-[var(--accent)]">
+                      <ImageIcon className="h-3.5 w-3.5" /> Imagen
+                    </button>
+                    <button type="button" onClick={() => appendBlock("container")} className="inline-flex min-h-8 items-center gap-1 rounded-md border border-[var(--accent)]/45 px-2.5 text-xs font-semibold text-[var(--accent)]">
+                      <Box className="h-3.5 w-3.5" /> Contenedor
+                    </button>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!selectedPage.id) return;
+                        if (!window.confirm("¿Eliminar esta página de la base de datos?")) return;
+                        try {
+                          await deleteSitePageApi(selectedPage.id);
+                          const next = pages.filter((p) => p.id !== selectedPage.id);
+                          setPages(next);
+                          setSelectedPageId(next[0]?.id ?? "");
+                          setSaveSuccess("Página eliminada.");
+                        } catch (error) {
+                          setSaveError(error instanceof Error ? error.message : "No se pudo eliminar.");
+                        }
+                      }}
+                      disabled={!selectedPage.id || selectedPage.id.startsWith("draft-")}
+                      className="inline-flex min-h-10 items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 disabled:opacity-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Eliminar página
+                    </button>
+                    <button
+                      type="button"
+                      onClick={saveSelectedPage}
+                      disabled={saving}
+                      className="inline-flex min-h-10 items-center gap-2 rounded-md border border-[var(--accent)] bg-[var(--accent)] px-4 text-sm font-semibold text-[var(--accent-foreground)] disabled:opacity-60"
+                    >
+                      <Save className="h-4 w-4" />
+                      {saving ? "Guardando…" : "Guardar"}
+                    </button>
+                  </div>
+
+                  {saveSuccess ? (
+                    <p className="mt-3 rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
+                      {saveSuccess}
+                    </p>
+                  ) : null}
+                  {saveError ? (
+                    <p className="mt-3 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
+                      {saveError}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div>
+                  <h2 className="mb-2 text-sm font-semibold text-[var(--text)]">Vista previa editable</h2>
+                  <InlinePageEditor
+                    page={selectedPage}
+                    onPageChange={(next) => {
+                      setPages((current) => current.map((p) => (p.id === selectedPage.id ? next : p)));
+                    }}
+                    onSave={saveSelectedPage}
+                    saving={saving}
+                    saveSuccess={saveSuccess}
+                    saveError={saveError}
+                  />
+                </div>
+              </>
+            )}
+          </section>
+        </div>
+      )}
     </main>
   );
 }

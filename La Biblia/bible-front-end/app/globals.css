@@ -2253,6 +2253,11 @@ body {
   padding: 0.45rem 0 3.25rem;
 }
 
+.site-page-canvas {
+  position: relative;
+  width: 100%;
+}
+
 .sermons-index-header {
   margin-bottom: 1.35rem;
 }

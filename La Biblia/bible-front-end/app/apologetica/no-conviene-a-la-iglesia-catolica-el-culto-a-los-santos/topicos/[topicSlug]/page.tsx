@@ -2,9 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   SAINTS_GUIDE_PARENT_SLUG,
-  getIglesiaGuideTopicPage,
   iglesiaGuideTopicPages,
 } from "@/data/iglesiaGuideTopics";
+import { getSaintsGuideTopicContent } from "@/data/saintsGuideTopicContent";
+import { fixSpanishEncoding } from "@/lib/fixSpanishEncoding";
 
 export function generateStaticParams() {
   return iglesiaGuideTopicPages.map((topic) => ({ topicSlug: topic.slug }));
@@ -16,8 +17,10 @@ export default async function SaintsGuideTopicPage({
   params: Promise<{ topicSlug: string }>;
 }) {
   const { topicSlug } = await params;
-  const topic = getIglesiaGuideTopicPage(topicSlug);
+  const topic = getSaintsGuideTopicContent(topicSlug);
   if (!topic) notFound();
+
+  const html = fixSpanishEncoding(topic.html);
 
   return (
     <article className="mx-auto w-full max-w-4xl space-y-5 pb-8">
@@ -58,21 +61,10 @@ export default async function SaintsGuideTopicPage({
       </Link>
 
       <header className="space-y-2">
-        <h1 className="page-title">{topic.title}</h1>
-        <p className="text-base leading-relaxed text-[var(--text-muted)]">{topic.summary}</p>
+        <h1 className="page-title">{fixSpanishEncoding(topic.title)}</h1>
       </header>
 
-      <section className="space-y-4">
-        {topic.sections.map((section) => (
-          <div
-            key={section.heading}
-            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)]"
-          >
-            <h2 className="font-serif-display text-xl font-semibold text-[var(--text)]">{section.heading}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-[var(--text-muted)]">{section.body}</p>
-          </div>
-        ))}
-      </section>
+      <div className="content-html saints-guide-topic" dangerouslySetInnerHTML={{ __html: html }} />
     </article>
   );
 }

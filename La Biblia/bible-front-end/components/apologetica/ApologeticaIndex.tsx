@@ -313,7 +313,7 @@ export function ApologeticaIndex() {
   const [activeTab, setActiveTab] = useState<ApologeticaTab>("guias");
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-8 pb-6 lg:space-y-10">
+    <div className="sermons-index-page space-y-8 lg:space-y-10">
       <nav className="text-sm text-[var(--text-muted)]" aria-label="Migas de pan">
         <ol className="flex flex-wrap items-center gap-1.5">
           <li>

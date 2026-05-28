@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { ThemeSettings } from "@/components/theme/ThemeSettings";
 import { AUTH_SESSION_EVENT, readAuthSession } from "@/lib/clientAuth";
+import { fetchAdminSession } from "@/lib/sitePagesApi";
 
 type NavItem = {
   href: string;
@@ -122,20 +123,29 @@ export function SiteHeader() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const syncSession = () => {
+    const syncSession = async () => {
       const session = readAuthSession();
-      if (!session) {
+      let serverAdmin = false;
+      try {
+        const data = await fetchAdminSession();
+        serverAdmin = data.isAdmin;
+      } catch {
+        serverAdmin = false;
+      }
+
+      if (!session && !serverAdmin) {
         setAuthLabel("Iniciar sesión");
         setAuthHref("/admin");
         setIsAdmin(false);
         return;
       }
-      setAuthLabel(session.role === "admin" ? "Admin" : session.username);
+      const admin = serverAdmin || session?.role === "admin";
+      setAuthLabel(admin ? "Admin" : session?.username ?? "Usuario");
       setAuthHref("/admin");
-      setIsAdmin(session.role === "admin");
+      setIsAdmin(admin);
     };
 
-    syncSession();
+    void syncSession();
     window.addEventListener("storage", syncSession);
     window.addEventListener(AUTH_SESSION_EVENT, syncSession);
     window.addEventListener("seekoftruth-admin-session", syncSession);

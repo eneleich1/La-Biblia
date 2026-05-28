@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { ApologeticaGuidePage } from "@/components/apologetica/ApologeticaGuidePage";
 import { getApologeticaGuidePage } from "@/data/apologeticaGuidePages";
 import {
@@ -7,6 +6,10 @@ import {
   getContentPage,
   getForumPage,
 } from "@/data/seekContent";
+import { StoredPageClient } from "@/components/site/StoredPageClient";
+import { StoredPageView } from "@/components/site/StoredPageView";
+import { isAdminServer } from "@/lib/adminSessionServer";
+import { getSitePageByRoute } from "@/lib/sitePagesServer";
 import { formatBibleBookTitle } from "@/lib/formatTitle";
 import { fixSpanishEncoding } from "@/lib/fixSpanishEncoding";
 import { getStaticBook, getStaticBooks } from "@/lib/staticBible";
@@ -41,7 +44,19 @@ export default async function ApologeticaArticlePage({
     return <ApologeticaGuidePage guide={guide} bibleBooks={bibleBooks} />;
   }
 
-  if (!page && !forum) notFound();
+  if (!page && !forum) {
+    const admin = await isAdminServer();
+    let sitePage = null;
+    try {
+      sitePage = await getSitePageByRoute(`/apologetica/${slug}`, admin);
+    } catch {
+      sitePage = null;
+    }
+    if (sitePage) {
+      return <StoredPageView page={sitePage} canEdit={admin} />;
+    }
+    return <StoredPageClient route={`/apologetica/${slug}`} />;
+  }
 
   return (
     <article className="mx-auto max-w-5xl space-y-5">

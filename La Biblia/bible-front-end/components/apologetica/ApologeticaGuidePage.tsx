@@ -29,7 +29,6 @@ import {
 } from "@/data/iglesiaGuideTopics";
 import { getGuideSectionIcon } from "@/lib/apologeticaGuideIcons";
 import { AUTH_SESSION_EVENT, readAuthSession } from "@/lib/clientAuth";
-import { readSitePages, routeToSitePath, sanitizePageRoute } from "@/lib/clientSiteBuilder";
 import type {
   ApologeticaGuidePageData,
   GuideContentBlock,
@@ -1574,7 +1573,6 @@ export function ApologeticaGuidePage({ guide, bibleBooks }: Props) {
   );
   const [selectedReference, setSelectedReference] = useState<SelectedGuideReference | null>(null);
   const [progress, setProgress] = useState(0);
-  const [customSiteRoutes, setCustomSiteRoutes] = useState<Set<string>>(new Set());
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const storageKey = `${GUIDE_STORAGE_PREFIX}${guide.slug}`;
   const topicsStorageKey = `${GUIDE_TOPICS_STORAGE_PREFIX}${guide.slug}`;
@@ -1612,16 +1610,6 @@ export function ApologeticaGuidePage({ guide, bibleBooks }: Props) {
     window.addEventListener("scroll", updateProgress, { passive: true });
     return () => window.removeEventListener("scroll", updateProgress);
   }, [updateProgress]);
-
-  useEffect(() => {
-    const syncSiteRoutes = () => {
-      const routes = readSitePages().map((page) => sanitizePageRoute(page.route)).filter(Boolean);
-      setCustomSiteRoutes(new Set(routes));
-    };
-    syncSiteRoutes();
-    window.addEventListener("storage", syncSiteRoutes);
-    return () => window.removeEventListener("storage", syncSiteRoutes);
-  }, []);
 
   useEffect(() => {
     setIsAdmin(readAuthSession()?.role === "admin");
@@ -1792,20 +1780,6 @@ export function ApologeticaGuidePage({ guide, bibleBooks }: Props) {
   };
 
   const canManageGuideTopics = showGuideTopics && isAdmin;
-
-  const resolveTopicHref = useCallback(
-    (href: string) => {
-      if (href.startsWith("http://") || href.startsWith("https://") || href.startsWith("/sitio/")) {
-        return href;
-      }
-      const normalized = sanitizePageRoute(href);
-      if (normalized && customSiteRoutes.has(normalized)) {
-        return routeToSitePath(normalized);
-      }
-      return href;
-    },
-    [customSiteRoutes],
-  );
 
   const startAddingTopic = () => {
     setEditingTopicId("__new__");
@@ -2037,10 +2011,10 @@ export function ApologeticaGuidePage({ guide, bibleBooks }: Props) {
                     {
                       id: "__new__",
                       title: topicDraft.title || "Nuevo topico",
-                      href: resolveTopicHref(topicDraft.href || "/apologetica/"),
+                      href: topicDraft.href || "/apologetica/",
                     },
                   ]
-                : topics.map((topic) => ({ ...topic, href: resolveTopicHref(topic.href) }))
+                : topics
             }
             canManage={canManageGuideTopics}
             editingTopicId={editingTopicId}
@@ -2316,10 +2290,10 @@ export function ApologeticaGuidePage({ guide, bibleBooks }: Props) {
                         {
                           id: "__new__",
                           title: topicDraft.title || "Nuevo topico",
-                          href: resolveTopicHref(topicDraft.href || "/apologetica/"),
+                          href: topicDraft.href || "/apologetica/",
                         },
                       ]
-                    : topics.map((topic) => ({ ...topic, href: resolveTopicHref(topic.href) }))
+                    : topics
                 }
                 canManage={canManageGuideTopics}
                 editingTopicId={editingTopicId}

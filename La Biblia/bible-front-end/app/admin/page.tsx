@@ -11,6 +11,7 @@ import {
   clearAuthSession,
   type AuthRole,
 } from "@/lib/clientAuth";
+import { loginAdmin, logoutAdmin } from "@/lib/sitePagesApi";
 
 const ADMIN_USER = process.env.NEXT_PUBLIC_ADMIN_USER ?? "admin";
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "admin";
@@ -29,7 +30,7 @@ export default function AdminPage() {
     setSessionUser(session?.username ?? "");
   }, []);
 
-  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const cleanUsername = username.trim();
     if (!cleanUsername) {
@@ -38,16 +39,21 @@ export default function AdminPage() {
     }
 
     if (role === "admin") {
-      if (cleanUsername === ADMIN_USER && password === ADMIN_PASSWORD) {
+      if (cleanUsername !== ADMIN_USER || password !== ADMIN_PASSWORD) {
+        setError("Credenciales de administrador incorrectas.");
+        return;
+      }
+      try {
+        await loginAdmin(cleanUsername, password);
         saveAuthSession({ role: "admin", username: cleanUsername });
         setSessionRole("admin");
         setSessionUser(cleanUsername);
         setError("");
         setPassword("");
         notifyAuthSessionChange();
-        return;
+      } catch {
+        setError("No se pudo validar la sesión de administrador en el servidor.");
       }
-      setError("Credenciales de administrador incorrectas.");
       return;
     }
 
@@ -59,7 +65,12 @@ export default function AdminPage() {
     notifyAuthSessionChange();
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logoutAdmin();
+    } catch {
+      // ignore
+    }
     clearAuthSession();
     setSessionRole(null);
     setSessionUser("");

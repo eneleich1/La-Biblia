@@ -91,12 +91,18 @@ docker compose up -d
 
 Services:
 
-- **postgres** — port `5432`, user/db/password `bible` / `bible` (change for production).
+- **postgres** — host port **`15432`** → `5432` in the container; user/db/password `bible` / `bible` (change for production). Use `localhost:15432` in `DATABASE_URL`.
 - **typesense** — host port **`18108`** maps to `8108` inside the container (Windows often blocks `8108` on the host). API key `xyz` in the sample file (change for production). Set `TYPESENSE_PORT=18108` in `.env` when Next runs on the host.
 
 Persistent volumes: `postgres_data`, `typesense_data`.
 
 An optional `next-app` service is commented in `docker-compose.yml` if you prefer running Next inside Docker; otherwise run `npm run start` on the host or behind Nginx.
+
+## Páginas del sitio (CMS)
+
+- Las páginas creadas en **Admin → Editar el sitio web** se guardan en PostgreSQL (`SitePage`).
+- Tras clonar el repo o levantar Docker por primera vez, ejecuta `npx prisma migrate deploy` (incluye la tabla `SitePage`).
+- Si tenías páginas solo en el navegador (`localStorage`), abre **Editar el sitio web** como administrador una vez: se importan automáticamente a la base de datos.
 
 ## Prisma migrations
 

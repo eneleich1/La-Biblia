@@ -157,3 +157,18 @@ model AdminUser {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model SitePage {
+  id          String   @id @default(cuid())
+  route       String   @unique
+  title       String
+  status      String   @default("PUBLISHED")
+  blocks      Json
+  canvas      Json?
+  parentHref  String?
+  parentLabel String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+}
