@@ -109,6 +109,17 @@ function renumberSections(sections: GuideSection[]): GuideSection[] {
   return sections.map((section, index) => ({ ...section, number: index + 1 }));
 }
 
+function ensureUniqueSectionIds(sections: GuideSection[]): GuideSection[] {
+  const used = new Map<string, number>();
+  return sections.map((section, index) => {
+    const baseId = section.id?.trim() || `apartado-${index + 1}`;
+    const seen = used.get(baseId) ?? 0;
+    used.set(baseId, seen + 1);
+    if (seen === 0) return section;
+    return { ...section, id: `${baseId}-${seen + 1}` };
+  });
+}
+
 function slugifySectionTitle(title: string) {
   return title
     .toLowerCase()
@@ -1551,10 +1562,13 @@ export function ApologeticaGuidePage({ guide, bibleBooks }: Props) {
   const isChurchGuide = guide.slug === CHURCH_GUIDE_PARENT_SLUG;
   const isSaintsGuide = guide.slug === SAINTS_GUIDE_PARENT_SLUG;
   const showGuideTopics = isChurchGuide || isSaintsGuide;
-  const [sections, setSections] = useState(() =>
+  const initialSections = ensureUniqueSectionIds(
     renumberSections(guide.sections.map(repairKnownGuideReferences).map(ensureSectionContentBlocks)),
   );
-  const [activeSectionId, setActiveSectionId] = useState(guide.sections[0]?.id ?? "");
+  const [sections, setSections] = useState(() =>
+    initialSections,
+  );
+  const [activeSectionId, setActiveSectionId] = useState(initialSections[0]?.id ?? "");
   const [isAdmin, setIsAdmin] = useState(false);
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [addingBeforeSectionId, setAddingBeforeSectionId] = useState<string | "__end__" | null>(
@@ -1579,7 +1593,7 @@ export function ApologeticaGuidePage({ guide, bibleBooks }: Props) {
 
   const saveSections = useCallback(
     (nextSections: GuideSection[]) => {
-      const numbered = renumberSections(nextSections);
+      const numbered = ensureUniqueSectionIds(renumberSections(nextSections));
       setSections(numbered);
       window.localStorage.setItem(storageKey, JSON.stringify(numbered));
     },
@@ -1619,8 +1633,8 @@ export function ApologeticaGuidePage({ guide, bibleBooks }: Props) {
       try {
         const parsed = JSON.parse(saved) as GuideSection[];
         if (Array.isArray(parsed)) {
-          const repaired = renumberSections(
-            parsed.map(repairKnownGuideReferences).map(ensureSectionContentBlocks),
+          const repaired = ensureUniqueSectionIds(
+            renumberSections(parsed.map(repairKnownGuideReferences).map(ensureSectionContentBlocks)),
           );
           setSections(repaired);
           window.localStorage.setItem(storageKey, JSON.stringify(repaired));
@@ -1953,7 +1967,9 @@ export function ApologeticaGuidePage({ guide, bibleBooks }: Props) {
           <li aria-hidden className="opacity-40">
             /
           </li>
-          <li className="text-[var(--text-muted)]">Guías bíblicas</li>
+          <li className="text-[var(--text-muted)]" aria-current="page">
+            {guide.title}
+          </li>
         </ol>
       </nav>
 
@@ -1962,7 +1978,7 @@ export function ApologeticaGuidePage({ guide, bibleBooks }: Props) {
         className="mt-8 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--accent)] transition hover:underline"
       >
         <ArrowLeft className="h-4 w-4" strokeWidth={2} aria-hidden />
-        Volver a guías bíblicas
+        Volver a Apologética
       </Link>
 
       <header className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(27rem,38rem)] lg:items-start lg:gap-8">

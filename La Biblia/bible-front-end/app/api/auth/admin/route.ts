@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   ADMIN_COOKIE_NAME,
-  createAdminSessionToken,
-  getAdminCredentials,
-  isAdminRequest,
-  verifyAdminSessionToken,
+  createSessionToken,
+  verifySessionToken,
 } from "@/lib/adminSession";
+import {
+  findUserByEmail,
+  hashPassword,
+  isValidEmail,
+  normalizeEmail,
+  toClientRole,
+  verifyPassword,
+} from "@/lib/authUsers";
+import { prisma } from "@/lib/prisma";
 
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 
@@ -20,26 +27,73 @@ function adminCookieOptions() {
 }
 
 export async function GET(req: NextRequest) {
-  return NextResponse.json({ isAdmin: isAdminRequest(req) });
+  const session = verifySessionToken(req.cookies.get(ADMIN_COOKIE_NAME)?.value);
+  return NextResponse.json({
+    isAuthenticated: Boolean(session),
+    isAdmin: session?.role === "admin",
+    email: session?.email ?? null,
+    role: session?.role ?? null,
+  });
 }
 
 export async function POST(req: NextRequest) {
-  let body: { username?: string; password?: string };
+  let body: { email?: string; password?: string };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Solicitud invalida." }, { status: 400 });
   }
 
-  const { user, password } = getAdminCredentials();
-  if (body.username?.trim() !== user || body.password !== password) {
+  const email = normalizeEmail(body.email ?? "");
+  const password = body.password ?? "";
+  if (!isValidEmail(email) || !password) {
+    return NextResponse.json({ error: "Debes indicar correo y contraseña válidos." }, { status: 400 });
+  }
+
+  const user = await findUserByEmail(email);
+  if (!user || !user.passwordHash || !verifyPassword(password, user.passwordHash)) {
     return NextResponse.json({ error: "Credenciales incorrectas." }, { status: 401 });
   }
 
-  const token = createAdminSessionToken();
-  const response = NextResponse.json({ ok: true });
+  const role = toClientRole(user.role);
+  const token = createSessionToken({ role, email: user.email });
+  const response = NextResponse.json({ ok: true, role, email: user.email, isAdmin: role === "admin" });
   response.cookies.set(ADMIN_COOKIE_NAME, token, adminCookieOptions());
   return response;
+}
+
+export async function PUT(req: NextRequest) {
+  let body: { email?: string; password?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Solicitud invalida." }, { status: 400 });
+  }
+
+  const email = normalizeEmail(body.email ?? "");
+  const password = body.password ?? "";
+  if (!isValidEmail(email)) {
+    return NextResponse.json({ error: "El correo electrónico no es válido." }, { status: 400 });
+  }
+  if (password.length < 8) {
+    return NextResponse.json({ error: "La contraseña debe tener al menos 8 caracteres." }, { status: 400 });
+  }
+
+  const exists = await findUserByEmail(email);
+  if (exists) {
+    return NextResponse.json({ error: "Ya existe un usuario con este correo." }, { status: 409 });
+  }
+
+  const created = await prisma.adminUser.create({
+    data: {
+      email,
+      passwordHash: hashPassword(password),
+      role: "USER",
+    },
+  });
+
+  const role = toClientRole(created.role);
+  return NextResponse.json({ ok: true, role, email: created.email, isAdmin: false });
 }
 
 export async function DELETE() {
@@ -51,5 +105,5 @@ export async function DELETE() {
 export function verifyAdminFromCookieHeader(cookieHeader: string | null) {
   if (!cookieHeader) return false;
   const match = cookieHeader.match(new RegExp(`${ADMIN_COOKIE_NAME}=([^;]+)`));
-  return verifyAdminSessionToken(match?.[1]);
+  return verifySessionToken(match?.[1])?.role === "admin";
 }

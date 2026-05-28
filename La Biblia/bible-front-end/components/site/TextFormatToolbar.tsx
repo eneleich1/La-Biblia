@@ -24,9 +24,10 @@ const FONT_FAMILIES = [
 
 type Props = {
   onCommand: (command: string, value?: string) => void;
+  onFontSizeFocusChange?: (focused: boolean) => void;
 };
 
-export function TextFormatToolbar({ onCommand }: Props) {
+export function TextFormatToolbar({ onCommand, onFontSizeFocusChange }: Props) {
   const [fontSizeInput, setFontSizeInput] = useState("16");
   const [showFontSizeMenu, setShowFontSizeMenu] = useState(false);
 
@@ -51,9 +52,11 @@ export function TextFormatToolbar({ onCommand }: Props) {
             const onlyDigits = event.target.value.replace(/[^\d]/g, "");
             setFontSizeInput(onlyDigits);
           }}
+          onFocus={() => onFontSizeFocusChange?.(true)}
           onBlur={() => {
             applyFontSize();
             setShowFontSizeMenu(false);
+            onFontSizeFocusChange?.(false);
           }}
           onKeyDown={(event) => {
             if (event.key === "Enter") {

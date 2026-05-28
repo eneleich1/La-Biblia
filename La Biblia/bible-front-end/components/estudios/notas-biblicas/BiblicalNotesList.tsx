@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { useSiteTheme } from "@/components/theme/ThemeProvider";
 import { getNoteRowIcon } from "@/lib/bibleNoteIcons";
 import { formatBibleReferenceLabel } from "@/lib/formatBibleReference";
 import type { BiblicalNote, TestamentKey } from "@/lib/parseBiblicalNotes";
@@ -38,7 +39,14 @@ function NoteRow({
   booksBySlug: Map<string, BookLookup>;
 }) {
   const Icon = getNoteRowIcon(note.bookSlug);
-  const reference = formatBibleReferenceLabel(note.referenceLabel, note.bookSlug, booksBySlug);
+  const { bookTitleMode } = useSiteTheme();
+  const reference = formatBibleReferenceLabel(
+    note.referenceLabel,
+    note.href,
+    note.bookSlug,
+    booksBySlug,
+    bookTitleMode,
+  );
 
   return (
     <li>

@@ -13,17 +13,26 @@ type StaticAudioManifest = {
 };
 
 const STATIC_AUDIO_ROOT = path.join(process.cwd(), "data", "audio-static");
+const staticManifestCache = new Map<string, Promise<StaticAudioManifest | null>>();
 
 async function loadStaticManifest(language: string): Promise<StaticAudioManifest | null> {
-  try {
-    const text = await readFile(
-      path.join(STATIC_AUDIO_ROOT, language, "manifest.json"),
-      "utf-8",
+  if (!staticManifestCache.has(language)) {
+    staticManifestCache.set(
+      language,
+      (async () => {
+        try {
+          const text = await readFile(
+            path.join(STATIC_AUDIO_ROOT, language, "manifest.json"),
+            "utf-8",
+          );
+          return JSON.parse(text) as StaticAudioManifest;
+        } catch {
+          return null;
+        }
+      })(),
     );
-    return JSON.parse(text) as StaticAudioManifest;
-  } catch {
-    return null;
   }
+  return staticManifestCache.get(language)!;
 }
 
 function staticLink(

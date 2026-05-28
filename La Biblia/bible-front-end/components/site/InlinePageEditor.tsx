@@ -133,6 +133,7 @@ function BlockView({
 }) {
   const textRef = useRef<HTMLDivElement>(null);
   const selectionRef = useRef<Range | null>(null);
+  const pseudoSelectionRef = useRef<HTMLSpanElement | null>(null);
   const layout = layoutOverride ?? block.layout;
   const isSelected = selectedId === block.id;
   const isEditingText = editingTextId === block.id;
@@ -153,18 +154,72 @@ function BlockView({
     selectionRef.current = range.cloneRange();
   };
 
-  const handleToolbarCommand = (command: string, value?: string) => {
-    if (selectionRef.current) {
-      const selection = window.getSelection();
-      if (selection) {
-        selection.removeAllRanges();
-        selection.addRange(selectionRef.current);
-      }
+  const restoreSelection = () => {
+    if (!selectionRef.current) return;
+    const selection = window.getSelection();
+    if (!selection) return;
+    selection.removeAllRanges();
+    selection.addRange(selectionRef.current);
+  };
+
+  const clearPseudoSelection = () => {
+    const marker = pseudoSelectionRef.current;
+    if (!marker) return;
+    const parent = marker.parentNode;
+    if (!parent) {
+      pseudoSelectionRef.current = null;
+      return;
     }
+    while (marker.firstChild) {
+      parent.insertBefore(marker.firstChild, marker);
+    }
+    parent.removeChild(marker);
+    pseudoSelectionRef.current = null;
+  };
+
+  const showPseudoSelection = () => {
+    if (!textRef.current || !selectionRef.current || pseudoSelectionRef.current) return;
+    const liveRange = selectionRef.current.cloneRange();
+    if (liveRange.collapsed) return;
+    const marker = document.createElement("span");
+    marker.style.background = "#2563eb";
+    marker.style.color = "#ffffff";
+    marker.style.borderRadius = "1px";
+    try {
+      const fragment = liveRange.extractContents();
+      marker.appendChild(fragment);
+      liveRange.insertNode(marker);
+      const next = document.createRange();
+      next.selectNodeContents(marker);
+      selectionRef.current = next;
+      pseudoSelectionRef.current = marker;
+    } catch {
+      // Complex ranges can fail to wrap. Skip pseudo-highlight in those cases.
+    }
+  };
+
+  const handleToolbarCommand = (command: string, value?: string) => {
+    clearPseudoSelection();
+    restoreSelection();
     applyTextCommand(command, value);
     captureSelection();
     textRef.current?.focus();
   };
+
+  const handleFontSizeFocusChange = (focused: boolean) => {
+    if (focused) {
+      showPseudoSelection();
+      return;
+    }
+    clearPseudoSelection();
+    restoreSelection();
+    textRef.current?.focus();
+  };
+
+  useEffect(() => {
+    if (isEditingText) return;
+    clearPseudoSelection();
+  }, [isEditingText]);
 
   const controls = (
     <div className="absolute top-1 right-1 z-20 flex items-center gap-1">
@@ -319,7 +374,10 @@ function BlockView({
         {isSelected ? controls : null}
         {isSelected && isEditingText ? (
           <div className="absolute bottom-full left-0 z-30 mb-1 max-w-full">
-            <TextFormatToolbar onCommand={handleToolbarCommand} />
+            <TextFormatToolbar
+              onCommand={handleToolbarCommand}
+              onFontSizeFocusChange={handleFontSizeFocusChange}
+            />
           </div>
         ) : null}
         {isEditingText ? (
@@ -329,7 +387,10 @@ function BlockView({
             suppressContentEditableWarning
             onMouseUp={captureSelection}
             onKeyUp={captureSelection}
-            onBlur={(event) => onTextInput(block.id, event.currentTarget.innerHTML)}
+            onBlur={(event) => {
+              if (pseudoSelectionRef.current) return;
+              onTextInput(block.id, event.currentTarget.innerHTML);
+            }}
             onInput={(event) => onTextInput(block.id, event.currentTarget.innerHTML)}
             className="h-full w-full overflow-auto rounded-md bg-[var(--background-soft)] px-2 py-1 text-[15px] leading-relaxed text-[var(--text)] outline-none ring-1 ring-[var(--accent)]"
           />

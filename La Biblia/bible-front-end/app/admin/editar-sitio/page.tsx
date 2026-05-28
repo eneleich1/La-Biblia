@@ -32,6 +32,7 @@ export default function EditSitePage() {
   const [saveError, setSaveError] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [pagePendingDelete, setPagePendingDelete] = useState<SitePage | null>(null);
 
   const loadPages = useCallback(async () => {
     setLoading(true);
@@ -141,6 +142,27 @@ export default function EditSitePage() {
         24,
       ) || 24;
     updateSelectedPage({ blocks: [...selectedPage.blocks, createBlock(type, yOffset)] });
+  };
+
+  const requestDeleteSelectedPage = () => {
+    if (!selectedPage?.id || selectedPage.id.startsWith("draft-")) return;
+    setPagePendingDelete(selectedPage);
+  };
+
+  const confirmDeleteSelectedPage = async () => {
+    if (!pagePendingDelete?.id) return;
+    try {
+      await deleteSitePageApi(pagePendingDelete.id);
+      const next = pages.filter((p) => p.id !== pagePendingDelete.id);
+      setPages(next);
+      setSelectedPageId((current) => (current === pagePendingDelete.id ? next[0]?.id ?? "" : current));
+      setSaveSuccess("Página eliminada.");
+      setSaveError("");
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "No se pudo eliminar.");
+    } finally {
+      setPagePendingDelete(null);
+    }
   };
 
   if (!isAdmin) {
@@ -288,19 +310,7 @@ export default function EditSitePage() {
                   <div className="mt-4 flex flex-wrap justify-end gap-2">
                     <button
                       type="button"
-                      onClick={async () => {
-                        if (!selectedPage.id) return;
-                        if (!window.confirm("¿Eliminar esta página de la base de datos?")) return;
-                        try {
-                          await deleteSitePageApi(selectedPage.id);
-                          const next = pages.filter((p) => p.id !== selectedPage.id);
-                          setPages(next);
-                          setSelectedPageId(next[0]?.id ?? "");
-                          setSaveSuccess("Página eliminada.");
-                        } catch (error) {
-                          setSaveError(error instanceof Error ? error.message : "No se pudo eliminar.");
-                        }
-                      }}
+                      onClick={requestDeleteSelectedPage}
                       disabled={!selectedPage.id || selectedPage.id.startsWith("draft-")}
                       className="inline-flex min-h-10 items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 disabled:opacity-50"
                     >
@@ -348,6 +358,44 @@ export default function EditSitePage() {
           </section>
         </div>
       )}
+      {pagePendingDelete ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="confirm-delete-page-title"
+          onClick={() => setPagePendingDelete(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5 shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 id="confirm-delete-page-title" className="text-base font-semibold text-[var(--text)]">
+              Confirmar eliminación
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--text-muted)]">
+              ¿Eliminar la página &quot;{pagePendingDelete.title || "Página sin título"}&quot; de la base de
+              datos?
+            </p>
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setPagePendingDelete(null)}
+                className="inline-flex min-h-9 items-center rounded-md border border-[var(--border)] bg-[var(--background-soft)] px-3 text-sm font-semibold text-[var(--text)] transition hover:border-[var(--accent)]/35 hover:bg-[var(--accent-soft)]"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteSelectedPage}
+                className="inline-flex min-h-9 items-center rounded-md border border-red-300 bg-red-50 px-3 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }

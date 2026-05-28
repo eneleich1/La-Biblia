@@ -6,7 +6,7 @@ export type AuthRole = "admin" | "user";
 
 export type AuthSession = {
   role: AuthRole;
-  username: string;
+  email: string;
 };
 
 export function readAuthSession(): AuthSession | null {
@@ -15,22 +15,18 @@ export function readAuthSession(): AuthSession | null {
   try {
     const raw = window.localStorage.getItem(AUTH_SESSION_KEY);
     if (raw) {
-      const parsed = JSON.parse(raw) as Partial<AuthSession>;
+      const parsed = JSON.parse(raw) as Partial<AuthSession> & { username?: string };
+      const email = (parsed.email ?? parsed.username ?? "").trim().toLowerCase();
       if (
         parsed &&
         (parsed.role === "admin" || parsed.role === "user") &&
-        typeof parsed.username === "string" &&
-        parsed.username.trim()
+        email
       ) {
-        return { role: parsed.role, username: parsed.username.trim() };
+        return { role: parsed.role, email };
       }
     }
   } catch {
     window.localStorage.removeItem(AUTH_SESSION_KEY);
-  }
-
-  if (window.localStorage.getItem(ADMIN_SESSION_KEY) === "admin") {
-    return { role: "admin", username: "admin" };
   }
 
   return null;
@@ -38,12 +34,11 @@ export function readAuthSession(): AuthSession | null {
 
 export function saveAuthSession(session: AuthSession) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
-  if (session.role === "admin") {
-    window.localStorage.setItem(ADMIN_SESSION_KEY, "admin");
-  } else {
-    window.localStorage.removeItem(ADMIN_SESSION_KEY);
-  }
+  window.localStorage.setItem(
+    AUTH_SESSION_KEY,
+    JSON.stringify({ role: session.role, email: session.email.trim().toLowerCase() }),
+  );
+  window.localStorage.removeItem(ADMIN_SESSION_KEY);
 }
 
 export function clearAuthSession() {

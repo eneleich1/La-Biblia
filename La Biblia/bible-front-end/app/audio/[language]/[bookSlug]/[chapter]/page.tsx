@@ -9,8 +9,6 @@ import {
   getSupportedStaticLanguages,
 } from "@/lib/staticBible";
 
-export const dynamic = "force-dynamic";
-
 export async function generateStaticParams() {
   const params = await Promise.all(
     getSupportedStaticLanguages().map(async (language) => {

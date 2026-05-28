@@ -1,6 +1,8 @@
 import { BibliaTranslationsIndex } from "@/components/bible/BibliaTranslationsIndex";
 import { getStaticTranslations } from "@/lib/staticBible";
 
+export const dynamic = "force-static";
+
 export default async function BibliaIndexPage() {
   const langs = await getStaticTranslations();
 

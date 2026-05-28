@@ -1,11 +1,10 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  SAINTS_GUIDE_PARENT_SLUG,
-  iglesiaGuideTopicPages,
-} from "@/data/iglesiaGuideTopics";
-import { getSaintsGuideTopicContent } from "@/data/saintsGuideTopicContent";
+import { iglesiaGuideTopicPages } from "@/data/iglesiaGuideTopics";
+import { getSaintsApologeticTopic } from "@/data/apologetics/saintsTopics";
+import { ApologeticTopicLayout } from "@/components/apologetics/ApologeticTopicLayout";
 import { fixSpanishEncoding } from "@/lib/fixSpanishEncoding";
+import { linkifyBibleReferencesInHtml } from "@/lib/linkifyBibleReferences";
+import { getStaticBooks } from "@/lib/staticBible";
 
 export function generateStaticParams() {
   return iglesiaGuideTopicPages.map((topic) => ({ topicSlug: topic.slug }));
@@ -17,54 +16,22 @@ export default async function SaintsGuideTopicPage({
   params: Promise<{ topicSlug: string }>;
 }) {
   const { topicSlug } = await params;
-  const topic = getSaintsGuideTopicContent(topicSlug);
+  const topic = getSaintsApologeticTopic(topicSlug);
   if (!topic) notFound();
+  const bibleBooks = await getStaticBooks("es");
 
-  const html = fixSpanishEncoding(topic.html);
+  const books = bibleBooks.map((book) => ({ slug: book.slug, nameEs: book.nameEs }));
+  const parsedTopic = {
+    ...topic,
+    sections: topic.sections.map((section) =>
+      section.html
+        ? {
+            ...section,
+            html: linkifyBibleReferencesInHtml(fixSpanishEncoding(section.html), books),
+          }
+        : section,
+    ),
+  };
 
-  return (
-    <article className="mx-auto w-full max-w-4xl space-y-5 pb-8">
-      <nav className="text-sm text-[var(--text-muted)]" aria-label="Migas de pan">
-        <ol className="flex flex-wrap items-center gap-1.5">
-          <li>
-            <Link href="/" className="transition hover:text-[var(--accent)]">
-              Inicio
-            </Link>
-          </li>
-          <li aria-hidden className="opacity-40">
-            /
-          </li>
-          <li>
-            <Link href="/apologetica" className="transition hover:text-[var(--accent)]">
-              Apologetica
-            </Link>
-          </li>
-          <li aria-hidden className="opacity-40">
-            /
-          </li>
-          <li>
-            <Link
-              href={`/apologetica/${SAINTS_GUIDE_PARENT_SLUG}`}
-              className="transition hover:text-[var(--accent)]"
-            >
-              Guia madre
-            </Link>
-          </li>
-        </ol>
-      </nav>
-
-      <Link
-        href={`/apologetica/${SAINTS_GUIDE_PARENT_SLUG}`}
-        className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--accent)] transition hover:underline"
-      >
-        Volver a la guia principal
-      </Link>
-
-      <header className="space-y-2">
-        <h1 className="page-title">{fixSpanishEncoding(topic.title)}</h1>
-      </header>
-
-      <div className="content-html saints-guide-topic" dangerouslySetInnerHTML={{ __html: html }} />
-    </article>
-  );
+  return <ApologeticTopicLayout topic={parsedTopic} books={books} />;
 }

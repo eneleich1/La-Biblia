@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import {
   ArrowRight,
@@ -154,6 +154,8 @@ export function BibleSearchClient({ books }: { books: BookOption[] }) {
   const [hits, setHits] = useState<Hit[]>([]);
   const [found, setFound] = useState(0);
   const [exactCount, setExactCount] = useState<number | null>(null);
+  const [searchRunId, setSearchRunId] = useState(0);
+  const resultsRef = useRef<HTMLDivElement | null>(null);
 
   const testamentParam = useMemo(() => {
     if (testament === "1" || testament === "2") return testament;
@@ -240,7 +242,16 @@ export function BibleSearchClient({ books }: { books: BookOption[] }) {
     return () => window.clearInterval(timer);
   }, [loading, searchStartedAt]);
 
+  useEffect(() => {
+    if (!searchRunId || loading) return;
+    if (!resultsRef.current) return;
+
+    const top = window.scrollY + resultsRef.current.getBoundingClientRect().top - 104;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }, [searchRunId, loading, hits.length, error]);
+
   async function runSearch() {
+    setSearchRunId((value) => value + 1);
     setLoading(true);
     setSearchStartedAt(Date.now());
     setElapsedSeconds(0);
@@ -369,7 +380,7 @@ export function BibleSearchClient({ books }: { books: BookOption[] }) {
                   </div>
                 </label>
 
-                <label className="block">
+                <label className="block xl:col-span-2">
                   <span className={labelClass}>Traduccion</span>
                   <div className="relative">
                     <BookOpen className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" strokeWidth={1.75} aria-hidden />
@@ -635,7 +646,10 @@ export function BibleSearchClient({ books }: { books: BookOption[] }) {
         </p>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--scripture-gold)]/60 pb-2">
+      <div
+        ref={resultsRef}
+        className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--scripture-gold)]/60 pb-2"
+      >
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="font-serif-display text-2xl font-semibold leading-none text-[var(--text)]">
             Resultados

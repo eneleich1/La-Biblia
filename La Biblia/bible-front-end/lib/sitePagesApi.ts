@@ -10,17 +10,32 @@ async function parseJson<T>(response: Response): Promise<T> {
 
 export async function fetchAdminSession() {
   const response = await fetch("/api/auth/admin", { credentials: "include" });
-  return parseJson<{ isAdmin: boolean }>(response);
+  return parseJson<{
+    isAuthenticated: boolean;
+    isAdmin: boolean;
+    email: string | null;
+    role: "admin" | "user" | null;
+  }>(response);
 }
 
-export async function loginAdmin(username: string, password: string) {
+export async function loginWithEmail(email: string, password: string) {
   const response = await fetch("/api/auth/admin", {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ email, password }),
   });
-  return parseJson<{ ok: boolean }>(response);
+  return parseJson<{ ok: boolean; role: "admin" | "user"; email: string; isAdmin: boolean }>(response);
+}
+
+export async function registerWithEmail(email: string, password: string) {
+  const response = await fetch("/api/auth/admin", {
+    method: "PUT",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  return parseJson<{ ok: boolean; role: "admin" | "user"; email: string; isAdmin: boolean }>(response);
 }
 
 export async function logoutAdmin() {

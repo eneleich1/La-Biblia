@@ -78,7 +78,7 @@ function buildGroups(
 
 function bookHref(language: string, slug: string, variant: "read" | "audio") {
   return variant === "audio"
-    ? `/audio/${language}/${slug}`
+    ? `/audio/${language}/${slug}/1`
     : `/biblia/${language}/${slug}/1`;
 }
 

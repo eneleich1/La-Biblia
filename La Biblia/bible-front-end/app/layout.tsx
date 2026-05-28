@@ -1,19 +1,16 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
-import { cookies } from "next/headers";
 import "./globals.css";
 import { PageShell } from "@/components/layout/PageShell";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { HashAnchorScroller } from "@/components/navigation/HashAnchorScroller";
 import {
-  BIBLE_INDEX_MODE_COOKIE_KEY,
   DEFAULT_THEME,
   DEFAULT_BIBLE_INDEX_MODE,
   THEME_COOKIE_KEY,
   THEME_STORAGE_KEY,
   ThemeProvider,
-  type BibleIndexMode,
-  type SiteTheme,
 } from "@/components/theme/ThemeProvider";
 
 const inter = Inter({
@@ -38,14 +35,6 @@ export const metadata: Metadata = {
   },
 };
 
-function normalizeTheme(theme: string | undefined): SiteTheme {
-  return theme === "warm" || theme === "blue" ? theme : DEFAULT_THEME;
-}
-
-function normalizeBibleIndexMode(mode: string | undefined): BibleIndexMode {
-  return mode === "grouped" || mode === "natural" ? mode : DEFAULT_BIBLE_INDEX_MODE;
-}
-
 function themeInitScript() {
   return `
 try {
@@ -63,35 +52,32 @@ try {
 `;
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const initialTheme = normalizeTheme(cookieStore.get(THEME_COOKIE_KEY)?.value);
-  const initialBibleIndexMode = normalizeBibleIndexMode(
-    cookieStore.get(BIBLE_INDEX_MODE_COOKIE_KEY)?.value,
-  );
-
   return (
     <html
       lang="es"
       className={`${inter.variable} ${playfair.variable}`}
-      data-site-theme={initialTheme}
+      data-site-theme={DEFAULT_THEME}
       suppressHydrationWarning
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript() }} />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} flex min-h-screen flex-col`}>
         <ThemeProvider
-          initialTheme={initialTheme}
-          initialBibleIndexMode={initialBibleIndexMode}
+          initialTheme={DEFAULT_THEME}
+          initialBibleIndexMode={DEFAULT_BIBLE_INDEX_MODE}
         >
+          <HashAnchorScroller />
           <SiteHeader />
-          <PageShell>{children}</PageShell>
-          <SiteFooter />
+          <div className="flex flex-1 flex-col pt-[78px] sm:pt-[84px]">
+            <PageShell>{children}</PageShell>
+            <SiteFooter />
+          </div>
         </ThemeProvider>
       </body>
     </html>
