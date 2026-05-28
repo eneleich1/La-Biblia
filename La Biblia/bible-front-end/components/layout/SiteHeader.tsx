@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BookOpen,
   BookOpenCheck,
@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { ThemeSettings } from "@/components/theme/ThemeSettings";
+import { AUTH_SESSION_EVENT, readAuthSession } from "@/lib/clientAuth";
 
 type NavItem = {
   href: string;
@@ -45,10 +46,16 @@ function MobileMenu({
   pathname,
   open,
   onClose,
+  authLabel,
+  authHref,
+  isAdmin,
 }: {
   pathname: string;
   open: boolean;
   onClose: () => void;
+  authLabel: string;
+  authHref: string;
+  isAdmin: boolean;
 }) {
   if (!open) return null;
 
@@ -77,7 +84,7 @@ function MobileMenu({
           );
         })}
         <Link
-          href="/admin"
+          href={authHref}
           onClick={onClose}
           className={`inline-flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-medium no-underline transition visited:text-[var(--text-muted)] ${
             navIsActive(pathname, "/admin")
@@ -86,8 +93,22 @@ function MobileMenu({
           }`}
         >
           <User className="h-5 w-5" strokeWidth={1.6} aria-hidden />
-          <span>Admin</span>
+          <span>{authLabel}</span>
         </Link>
+        {isAdmin ? (
+          <Link
+            href="/admin/dashboard"
+            onClick={onClose}
+            className={`inline-flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-medium no-underline transition visited:text-[var(--text-muted)] ${
+              navIsActive(pathname, "/admin/dashboard")
+                ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                : "text-[var(--text-muted)] hover:bg-[var(--accent-soft)] hover:text-[var(--text)]"
+            }`}
+          >
+            <ShieldCheck className="h-5 w-5" strokeWidth={1.6} aria-hidden />
+            <span>Panel admin</span>
+          </Link>
+        ) : null}
       </div>
     </nav>
   );
@@ -96,6 +117,34 @@ function MobileMenu({
 export function SiteHeader() {
   const pathname = usePathname() ?? "/";
   const [menuOpen, setMenuOpen] = useState(false);
+  const [authLabel, setAuthLabel] = useState("Iniciar sesión");
+  const [authHref, setAuthHref] = useState("/admin");
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const syncSession = () => {
+      const session = readAuthSession();
+      if (!session) {
+        setAuthLabel("Iniciar sesión");
+        setAuthHref("/admin");
+        setIsAdmin(false);
+        return;
+      }
+      setAuthLabel(session.role === "admin" ? "Admin" : session.username);
+      setAuthHref("/admin");
+      setIsAdmin(session.role === "admin");
+    };
+
+    syncSession();
+    window.addEventListener("storage", syncSession);
+    window.addEventListener(AUTH_SESSION_EVENT, syncSession);
+    window.addEventListener("seekoftruth-admin-session", syncSession);
+    return () => {
+      window.removeEventListener("storage", syncSession);
+      window.removeEventListener(AUTH_SESSION_EVENT, syncSession);
+      window.removeEventListener("seekoftruth-admin-session", syncSession);
+    };
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 bg-[var(--background)]/85 px-1 pt-1 backdrop-blur-xl">
@@ -155,12 +204,21 @@ export function SiteHeader() {
               <div className="flex shrink-0 items-center justify-end gap-2 border-[var(--border)] lg:border-l lg:pl-3">
                 <ThemeSettings />
                 <Link
-                  href="/admin"
+                  href={authHref}
                   className="inline-flex items-center gap-1 rounded-md px-1.5 py-1.5 text-[11px] font-medium text-[var(--text-muted)] no-underline visited:text-[var(--text-muted)] transition hover:bg-[var(--accent-soft)] xl:text-[12px] 2xl:text-[13px]"
                 >
                   <User className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden />
-                  <span>Admin</span>
+                  <span>{authLabel}</span>
                 </Link>
+                {isAdmin ? (
+                  <Link
+                    href="/admin/dashboard"
+                    className="inline-flex items-center gap-1 rounded-md px-1.5 py-1.5 text-[11px] font-medium text-[var(--text-muted)] no-underline visited:text-[var(--text-muted)] transition hover:bg-[var(--accent-soft)] xl:text-[12px] 2xl:text-[13px]"
+                  >
+                    <ShieldCheck className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden />
+                    <span>Panel admin</span>
+                  </Link>
+                ) : null}
               </div>
           </div>
 
@@ -189,6 +247,9 @@ export function SiteHeader() {
           pathname={pathname}
           open={menuOpen}
           onClose={() => setMenuOpen(false)}
+          authLabel={authLabel}
+          authHref={authHref}
+          isAdmin={isAdmin}
         />
       </div>
     </header>

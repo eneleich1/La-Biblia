@@ -7,6 +7,9 @@ import {
   getContentPage,
   getForumPage,
 } from "@/data/seekContent";
+import { formatBibleBookTitle } from "@/lib/formatTitle";
+import { fixSpanishEncoding } from "@/lib/fixSpanishEncoding";
+import { getStaticBook, getStaticBooks } from "@/lib/staticBible";
 
 export default async function ApologeticaArticlePage({
   params,
@@ -19,7 +22,23 @@ export default async function ApologeticaArticlePage({
   const forum = getForumPage(slug);
 
   if (guide) {
-    return <ApologeticaGuidePage guide={guide} />;
+    const books = await getStaticBooks("es");
+    const bibleBooks = await Promise.all(
+      books.map(async (book) => {
+        const fullBook = await getStaticBook("es", book.slug);
+        return {
+          slug: book.slug,
+          title: formatBibleBookTitle(fixSpanishEncoding(book.nameEs), book.slug),
+          testament: book.testament,
+          chapters: fullBook.chapters.map((chapter) => ({
+            number: chapter.number,
+            verseCount: chapter.verses.length,
+          })),
+        };
+      }),
+    );
+
+    return <ApologeticaGuidePage guide={guide} bibleBooks={bibleBooks} />;
   }
 
   if (!page && !forum) notFound();

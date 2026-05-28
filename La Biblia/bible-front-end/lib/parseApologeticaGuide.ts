@@ -17,6 +17,25 @@ export type GuideTag = {
   href: string;
 };
 
+export type GuideReference = GuideTag & {
+  text?: string;
+  formattedText?: string;
+};
+
+export type GuideTextItem = {
+  id: string;
+  body: string;
+  explanation?: string;
+  references: GuideReference[];
+};
+
+export type GuideContentBlock = {
+  id: string;
+  body?: string;
+  tags?: GuideTag[];
+  items?: GuideTextItem[];
+};
+
 export type GuideSection = {
   id: string;
   number: number;
@@ -24,9 +43,11 @@ export type GuideSection = {
   icon: GuideSectionIconName;
   tags: GuideTag[];
   body: string;
+  contentBlocks?: GuideContentBlock[];
   quote?: {
     text: string;
     reference: string;
+    href?: string;
   };
 };
 
@@ -62,7 +83,8 @@ export const CHURCH_GUIDE_SECTION_INDEXES = [0, 1, 2, 3, 4];
 
 export type GuideSectionOverride = {
   body?: string;
-  quote?: { text: string; reference: string };
+  contentBlocks?: GuideContentBlock[];
+  quote?: { text: string; reference: string; href?: string };
   tags?: GuideTag[];
 };
 
@@ -256,13 +278,16 @@ export function buildApologeticaGuidePage(
 
   const sections: GuideSection[] = picked.map((section, index) => {
     const override = meta.sectionOverrides?.[index];
+    const contentBlocks = override?.contentBlocks ?? section.contentBlocks;
+    const firstBlock = contentBlocks?.[0];
     return {
       ...section,
       number: index + 1,
       icon: meta.icons[index % meta.icons.length] ?? section.icon,
-      body: override?.body ?? section.body,
+      body: override?.body ?? firstBlock?.body ?? section.body,
       quote: override?.quote ?? section.quote,
-      tags: override?.tags?.length ? override.tags : section.tags,
+      tags: override?.tags?.length ? override.tags : firstBlock?.tags ?? section.tags,
+      contentBlocks,
     };
   });
 
