@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { PageShell } from "@/components/layout/PageShell";
@@ -72,7 +73,9 @@ export default function RootLayout({
           initialTheme={DEFAULT_THEME}
           initialBibleIndexMode={DEFAULT_BIBLE_INDEX_MODE}
         >
-          <HashAnchorScroller />
+          <Suspense fallback={null}>
+            <HashAnchorScroller />
+          </Suspense>
           <SiteHeader />
           <div className="flex flex-1 flex-col pt-[78px] sm:pt-[84px]">
             <PageShell>{children}</PageShell>

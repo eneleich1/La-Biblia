@@ -101,9 +101,3 @@ export async function DELETE() {
   response.cookies.set(ADMIN_COOKIE_NAME, "", { ...adminCookieOptions(), maxAge: 0 });
   return response;
 }
-
-export function verifyAdminFromCookieHeader(cookieHeader: string | null) {
-  if (!cookieHeader) return false;
-  const match = cookieHeader.match(new RegExp(`${ADMIN_COOKIE_NAME}=([^;]+)`));
-  return verifySessionToken(match?.[1])?.role === "admin";
-}
