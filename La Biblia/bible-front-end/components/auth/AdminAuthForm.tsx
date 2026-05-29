@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { LogIn, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, LogIn, ShieldCheck } from "lucide-react";
 import { clearAuthSession, notifyAuthSessionChange, saveAuthSession } from "@/lib/clientAuth";
 import { loginWithEmail, registerWithEmail } from "@/lib/sitePagesApi";
 
@@ -12,12 +12,16 @@ export function AdminAuthForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const cleanEmail = email.trim().toLowerCase();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const cleanEmail = String(formData.get("email") ?? email).trim().toLowerCase();
+    const submittedPassword = String(formData.get("password") ?? password);
     if (!cleanEmail) {
       setError("Debes indicar tu correo electrónico.");
       return;
@@ -27,14 +31,14 @@ export function AdminAuthForm() {
       setError("Debes introducir un correo electrónico válido.");
       return;
     }
-    if (!password) {
+    if (!submittedPassword) {
       setError("Debes introducir la contraseña.");
       return;
     }
 
     try {
       if (isRegisterMode) {
-        await registerWithEmail(cleanEmail, password);
+        await registerWithEmail(cleanEmail, submittedPassword);
         clearAuthSession();
         setError("");
         setSuccessMessage("Cuenta creada correctamente. Ahora puedes iniciar sesión.");
@@ -44,7 +48,7 @@ export function AdminAuthForm() {
         return;
       }
 
-      const response = await loginWithEmail(cleanEmail, password);
+      const response = await loginWithEmail(cleanEmail, submittedPassword);
       saveAuthSession({ role: response.role, email: response.email });
       setError("");
       setSuccessMessage("");
@@ -78,9 +82,10 @@ export function AdminAuthForm() {
           <label className="grid gap-1.5 text-xs font-semibold text-[var(--text-muted)]">
             Correo electrónico
             <input
+              name="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              autoComplete="email"
+              autoComplete="username"
               type="email"
               required
               className="min-h-11 rounded-md border border-[var(--border)] bg-[var(--background-soft)] px-3 text-sm font-medium text-[var(--text)] outline-none transition focus:border-[var(--accent)]"
@@ -89,14 +94,29 @@ export function AdminAuthForm() {
 
           <label className="grid gap-1.5 text-xs font-semibold text-[var(--text-muted)]">
             Contraseña
-            <input
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              type="password"
-              autoComplete="current-password"
-              required
-              className="min-h-11 rounded-md border border-[var(--border)] bg-[var(--background-soft)] px-3 text-sm font-medium text-[var(--text)] outline-none transition focus:border-[var(--accent)]"
-            />
+            <span className="relative block">
+              <input
+                name="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                type={showPassword ? "text" : "password"}
+                autoComplete={isRegisterMode ? "new-password" : "current-password"}
+                required
+                className="min-h-11 w-full rounded-md border border-[var(--border)] bg-[var(--background-soft)] py-3 pl-3 pr-11 text-sm font-medium text-[var(--text)] outline-none transition focus:border-[var(--accent)]"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((current) => !current)}
+                className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center rounded-r-md text-[var(--text-muted)] transition hover:text-[var(--text)]"
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" strokeWidth={1.8} aria-hidden />
+                ) : (
+                  <Eye className="h-4 w-4" strokeWidth={1.8} aria-hidden />
+                )}
+              </button>
+            </span>
           </label>
 
           {error ? <p className="text-sm font-semibold text-red-700">{error}</p> : null}

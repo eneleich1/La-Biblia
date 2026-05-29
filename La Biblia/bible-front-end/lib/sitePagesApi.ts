@@ -22,6 +22,7 @@ export async function loginWithEmail(email: string, password: string) {
   const response = await fetch("/api/auth/admin", {
     method: "POST",
     credentials: "include",
+    cache: "no-store",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
@@ -32,6 +33,7 @@ export async function registerWithEmail(email: string, password: string) {
   const response = await fetch("/api/auth/admin", {
     method: "PUT",
     credentials: "include",
+    cache: "no-store",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
