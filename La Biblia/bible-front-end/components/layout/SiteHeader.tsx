@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   BookOpen,
   BookOpenCheck,
@@ -48,6 +49,19 @@ const mainNav: NavItem[] = [
 function navIsActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+const MOBILE_USER_MENU_MIN_WIDTH_PX = 192;
+const MOBILE_USER_MENU_VIEWPORT_MARGIN_PX = 8;
+
+function getMobileUserMenuPosition(anchor: HTMLElement) {
+  const rect = anchor.getBoundingClientRect();
+  let left = rect.left;
+  if (left + MOBILE_USER_MENU_MIN_WIDTH_PX > window.innerWidth - MOBILE_USER_MENU_VIEWPORT_MARGIN_PX) {
+    left = window.innerWidth - MOBILE_USER_MENU_MIN_WIDTH_PX - MOBILE_USER_MENU_VIEWPORT_MARGIN_PX;
+  }
+  left = Math.max(MOBILE_USER_MENU_VIEWPORT_MARGIN_PX, left);
+  return { top: rect.bottom + 6, left };
 }
 
 function MobileMenu({
@@ -131,8 +145,33 @@ export function SiteHeader() {
   const [authHref, setAuthHref] = useState("/admin");
   const [isAdmin, setIsAdmin] = useState(false);
   const [hasSession, setHasSession] = useState(false);
+  const [portalMounted, setPortalMounted] = useState(false);
+  const [mobileUserMenuPosition, setMobileUserMenuPosition] = useState({ top: 0, left: 0 });
   const userMenuRef = useRef<HTMLDivElement | null>(null);
+  const mobileUserMenuRef = useRef<HTMLDivElement | null>(null);
+  const mobileUserButtonRef = useRef<HTMLButtonElement | null>(null);
   const desktopUserMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setPortalMounted(true);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!mobileUserMenuOpen || !mobileUserButtonRef.current) return;
+
+    const updatePosition = () => {
+      if (!mobileUserButtonRef.current) return;
+      setMobileUserMenuPosition(getMobileUserMenuPosition(mobileUserButtonRef.current));
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [mobileUserMenuOpen]);
 
   useEffect(() => {
     const syncSession = async () => {
@@ -172,13 +211,15 @@ export function SiteHeader() {
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
-      if (!userMenuRef.current) return;
-      if (!userMenuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const insideMobileUser =
+        userMenuRef.current?.contains(target) || mobileUserMenuRef.current?.contains(target);
+      if (!insideMobileUser) {
         setMobileUserMenuOpen(false);
       }
       if (
         desktopUserMenuRef.current &&
-        !desktopUserMenuRef.current.contains(event.target as Node)
+        !desktopUserMenuRef.current.contains(target)
       ) {
         setDesktopUserMenuOpen(false);
       }
@@ -211,21 +252,21 @@ export function SiteHeader() {
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 bg-[var(--background)] px-1">
-      <div className="mx-auto max-w-[1840px] rounded-lg bg-white/90 px-4 shadow-[0_12px_36px_-28px_rgba(11,45,97,0.55)] sm:px-8 lg:px-12">
-        <div className="flex min-h-[62px] flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2 lg:min-h-[68px] lg:flex-nowrap lg:gap-y-0">
+    <header className="fixed inset-x-0 top-0 z-50 overflow-visible bg-[var(--background)] px-1">
+      <div className="mx-auto max-w-[1840px] overflow-visible rounded-lg bg-white/90 px-4 shadow-[0_12px_36px_-28px_rgba(11,45,97,0.55)] sm:px-8 lg:px-12">
+        <div className="flex min-h-[62px] flex-nowrap items-center justify-between gap-x-2 py-2 sm:gap-x-4 lg:min-h-[68px]">
           <Link
             href="/"
-            className="group flex max-w-full shrink-0 items-center gap-2.5 text-[var(--text)] no-underline sm:gap-3 lg:max-w-[20rem]"
+            className="group flex min-w-0 flex-1 items-center gap-2 text-[var(--text)] no-underline sm:gap-3 lg:max-w-[20rem] lg:flex-none"
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none text-[var(--accent)] transition sm:h-11 sm:w-11">
-              <BookOpenCheck className="h-9 w-9 sm:h-10 sm:w-10" strokeWidth={1.65} aria-hidden />
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-none text-[var(--accent)] transition sm:h-11 sm:w-11">
+              <BookOpenCheck className="h-8 w-8 sm:h-10 sm:w-10" strokeWidth={1.65} aria-hidden />
             </span>
-            <span className="min-w-0 leading-tight">
-              <span className="font-serif-display block text-[1.28rem] font-semibold tracking-normal text-[var(--text)] sm:text-[1.48rem] lg:text-[1.55rem] xl:text-[1.62rem]">
+            <span className="min-w-0 overflow-hidden leading-tight">
+              <span className="font-serif-display block truncate text-[1.1rem] font-semibold tracking-normal text-[var(--text)] sm:text-[1.48rem] lg:text-[1.55rem] xl:text-[1.62rem]">
                 Seek of Truth
               </span>
-              <span className="mt-0.5 block text-[8px] font-semibold uppercase leading-snug tracking-[0.17em] text-[var(--accent)] sm:text-[10px] sm:tracking-[0.18em]">
+              <span className="mt-0.5 block truncate text-[7px] font-semibold uppercase leading-snug tracking-[0.14em] text-[var(--accent)] sm:text-[10px] sm:tracking-[0.18em]">
                 Plataforma Bíblica Cristiana
               </span>
             </span>
@@ -319,57 +360,62 @@ export function SiteHeader() {
               </div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-1.5 lg:hidden">
+          <div className="ml-1 flex shrink-0 items-center gap-1 sm:gap-1.5 lg:hidden">
             <ThemeSettings />
-            <div className="relative" ref={userMenuRef}>
+            <div className="relative shrink-0" ref={userMenuRef}>
               <button
+                ref={mobileUserButtonRef}
                 type="button"
                 onClick={() => {
                   setMenuOpen(false);
                   setDesktopUserMenuOpen(false);
                   setMobileUserMenuOpen((current) => !current);
                 }}
-                className="group relative inline-flex h-11 w-11 items-center justify-center rounded-lg border border-[var(--border)] bg-white text-[var(--text)] shadow-[var(--shadow-card)] transition hover:border-[var(--accent)]/40"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-white text-[var(--text)] shadow-[var(--shadow-card)] transition hover:border-[var(--accent)]/40 sm:h-11 sm:w-11"
                 aria-expanded={mobileUserMenuOpen}
                 aria-controls="mobile-user-menu"
-                aria-label={hasSession ? `Cuenta: ${authLabel}` : "Cuenta"}
-                title={hasSession ? authLabel : "Iniciar sesión"}
+                aria-label={hasSession ? `Cuenta: ${authLabel}` : "Iniciar sesión"}
               >
                 <User className="h-5 w-5" strokeWidth={1.8} aria-hidden />
-                <span className="pointer-events-none absolute -bottom-8 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--text)] px-2 py-1 text-[11px] font-medium text-white shadow-md group-hover:block group-focus-visible:block">
-                  {hasSession ? authLabel : "Iniciar sesión"}
-                </span>
               </button>
-              {mobileUserMenuOpen ? (
-                <div
-                  id="mobile-user-menu"
-                  className="absolute right-0 top-[calc(100%+0.4rem)] z-50 min-w-[12rem] rounded-lg border border-[var(--border)] bg-white p-1.5 shadow-[0_18px_36px_-24px_rgba(11,45,97,0.45)]"
-                  role="menu"
-                  aria-label="Menú de usuario"
-                >
-                  {hasSession ? (
-                    <button
-                      type="button"
-                      onClick={handleHeaderLogout}
-                      className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm font-medium text-[var(--text-muted)] transition hover:bg-[var(--accent-soft)] hover:text-[var(--text)]"
-                      role="menuitem"
-                    >
-                      <LogOut className="h-4 w-4" strokeWidth={1.7} aria-hidden />
-                      <span>Cerrar sesión</span>
-                    </button>
-                  ) : (
-                    <Link
-                      href={authHref}
-                      onClick={() => setMobileUserMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--text-muted)] no-underline transition visited:text-[var(--text-muted)] hover:bg-[var(--accent-soft)] hover:text-[var(--text)]"
-                      role="menuitem"
-                    >
-                      <LogIn className="h-4 w-4" strokeWidth={1.7} aria-hidden />
-                      <span>Iniciar sesión</span>
-                    </Link>
-                  )}
-                </div>
-              ) : null}
+              {portalMounted &&
+                mobileUserMenuOpen &&
+                createPortal(
+                  <div
+                    ref={mobileUserMenuRef}
+                    id="mobile-user-menu"
+                    className="fixed z-[2147483646] min-w-[12rem] rounded-lg border border-[var(--border)] bg-white p-1.5 shadow-[0_18px_36px_-24px_rgba(11,45,97,0.45)]"
+                    style={{
+                      top: mobileUserMenuPosition.top,
+                      left: mobileUserMenuPosition.left,
+                    }}
+                    role="menu"
+                    aria-label="Menú de usuario"
+                  >
+                    {hasSession ? (
+                      <button
+                        type="button"
+                        onClick={handleHeaderLogout}
+                        className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm font-medium text-[var(--text-muted)] transition hover:bg-[var(--accent-soft)] hover:text-[var(--text)]"
+                        role="menuitem"
+                      >
+                        <LogOut className="h-4 w-4" strokeWidth={1.7} aria-hidden />
+                        <span>Cerrar sesión</span>
+                      </button>
+                    ) : (
+                      <Link
+                        href={authHref}
+                        onClick={() => setMobileUserMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--text-muted)] no-underline transition visited:text-[var(--text-muted)] hover:bg-[var(--accent-soft)] hover:text-[var(--text)]"
+                        role="menuitem"
+                      >
+                        <LogIn className="h-4 w-4" strokeWidth={1.7} aria-hidden />
+                        <span>Iniciar sesión</span>
+                      </Link>
+                    )}
+                  </div>,
+                  document.body,
+                )}
             </div>
             <button
               type="button"
@@ -378,7 +424,7 @@ export function SiteHeader() {
                 setDesktopUserMenuOpen(false);
                 setMenuOpen((current) => !current);
               }}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-[var(--border)] bg-white text-[var(--text)] shadow-[var(--shadow-card)] transition hover:border-[var(--accent)]/40"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-white text-[var(--text)] shadow-[var(--shadow-card)] transition hover:border-[var(--accent)]/40 sm:h-11 sm:w-11"
               aria-expanded={menuOpen}
               aria-controls="mobile-menu"
               aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
