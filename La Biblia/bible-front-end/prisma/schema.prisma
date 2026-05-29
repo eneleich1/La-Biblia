@@ -201,3 +201,16 @@ model SermonVideo {
 
   @@index([position])
 }
+
+model SaintsCultExampleVideo {
+  id        String   @id @default(cuid())
+  topicId   String
+  title     String
+  url       String
+  tag       String?
+  position  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([topicId, position])
+}

@@ -130,13 +130,36 @@ function linkifyTextNode(text: string, aliases: BookAlias) {
   );
 }
 
+function escapeHtml(text: string) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/** Quita corchetes alrededor de referencias del tipo [1 Corintios 13:12]. */
+function unwrapBracketedBibleReferences(text: string) {
+  return text.replace(/\[([^\]]*\d+\s*:\s*\d+[^\]]*)\]/g, (_match, inner: string) => inner.trim());
+}
+
+export function linkifyBibleReferencesInPlainText(text: string, books: BibleBookSummary[]) {
+  if (!text.trim()) return escapeHtml(text);
+  const aliases = buildBookAliases(books);
+  if (!aliases.aliasVariants.length) return escapeHtml(text);
+
+  const unwrapped = unwrapBracketedBibleReferences(fixSpanishEncoding(text));
+  const escaped = escapeHtml(unwrapped);
+  return linkifyTextNode(escaped, aliases);
+}
+
 export function linkifyBibleReferencesInHtml(html: string, books: BibleBookSummary[]) {
   if (!html.trim()) return html;
   const aliases = buildBookAliases(books);
   if (!aliases.aliasVariants.length) return html;
 
   return html.replace(/>([^<]+)</g, (_match, textNode: string) => {
-    const linked = linkifyTextNode(textNode, aliases);
+    const linked = linkifyTextNode(unwrapBracketedBibleReferences(textNode), aliases);
     return `>${linked}<`;
   });
 }

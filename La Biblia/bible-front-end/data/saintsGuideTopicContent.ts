@@ -30,9 +30,9 @@ export const saintsGuideTopicContent: SaintsGuideTopicContent[] = [
   },
   {
     slug: "argumentos-de-la-iglesia-catolica-para-permitir-el-culto-a-los-santos",
-    title: "Argumentos de la Iglesia Católica para permitir el culto a los Santos",
+    title: "Argumentos de la Iglesia Católica para permitir el culto a los santos",
     wpSource: "local:argumentos-docx",
-    html: "<p><strong>Argumentos de la Iglesia Católica para permitir el culto a los Santos</strong></p>\n<ol class=\"saints-argument-list\"><li><strong>Argumento 1.</strong> El proceso de canonización es serio y demorado, y requiere que se cumplan milagros por la intersección del “santo” al cual se va a canonizar.</li><li><strong>Argumento 2.</strong> Se permite que los creyentes se postren ante la imagen o escultura como símbolo de honor y respeto, no a la imagen sino al “santo” en cuestión.</li><li><strong>Argumento 3.</strong> En la Biblia se muestra cómo podemos orar unos por otros, como Dios es de vivos y no de muertos entonces los “santos” están vivos y oyen nuestras oraciones (“…conocerán como sois conocidos [1 Corintios 13:12]”) e interceden ante Dios por nosotros.</li><li><strong>Argumento 4.</strong> Venerar no es lo mismo que adorar y venerar está permitido en la Biblia. Nosotros veneramos no adoramos.</li><li><strong>Argumento 5.</strong> Un mismo “santo” con diferentes nombres en dependencia de sus apariciones, sus mensajes y el país donde se manifestó.</li><li><strong>Argumento 6.</strong> Dios no prohíbe hacer imágenes sino imágenes que constituyan ídolos.</li><li><strong>Argumento 7.</strong> Varias citas bíblicas donde se ve la intersección de los “santos”.</li><li><strong>Argumento 8.</strong> …La oración ferviente del justo tiene mucho poder [Santiago 5:16].</li><li><strong>Argumento 9.</strong> Las imágenes en las Iglesias son patrimonio del pueblo al que pertenece la Iglesia y han de ser conservadas.</li><li><strong>Argumento 10.</strong> Fueron introducidas las imágenes a fin de instruir a quienes no sabían leer ni escribir.</li><li><strong>Argumento 11.</strong> Se tiene el culto a los “santos” como Tradición de la Iglesia.</li></ol>",
+    html: "",
   },
   {
     slug: "refutaciones-argumentos-iglesia-catolica",

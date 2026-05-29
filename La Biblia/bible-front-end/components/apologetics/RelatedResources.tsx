@@ -7,6 +7,7 @@ const iconByKey: Record<string, typeof BookOpen> = {
   "Debates y respuestas": MessagesSquare,
   "Videos apologéticos": PlayCircle,
   "Historia de la Iglesia": BookOpen,
+  "Qué es la idolatría": BookOpen,
 };
 
 type RelatedResourcesProps = {

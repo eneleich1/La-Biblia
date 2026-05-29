@@ -30,12 +30,12 @@ export const iglesiaGuideDefaultTopics: IglesiaGuideTopicItem[] = [
   },
   {
     id: "topic-argumentos-culto",
-    title: "Argumentos de la Iglesia Catolica para permitir el culto a los Santos",
+    title: "Argumentos de la Iglesia Católica para permitir el culto a los santos",
     href: "/apologetica/no-conviene-a-la-iglesia-catolica-el-culto-a-los-santos/topicos/argumentos-de-la-iglesia-catolica-para-permitir-el-culto-a-los-santos",
   },
   {
     id: "topic-refutaciones",
-    title: "Refutaciones a los argumentos de la Iglesia Catolica",
+    title: "Refutaciones a los argumentos de la Iglesia Católica",
     href: "/apologetica/no-conviene-a-la-iglesia-catolica-el-culto-a-los-santos/topicos/refutaciones-argumentos-iglesia-catolica",
   },
 ];
