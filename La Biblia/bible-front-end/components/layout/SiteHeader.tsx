@@ -16,6 +16,7 @@ import {
   MessagesSquare,
   Mic,
   Search,
+  Share2,
   ShieldCheck,
   User,
   X,
@@ -54,6 +55,28 @@ function navIsActive(pathname: string, href: string) {
 const MOBILE_USER_MENU_MIN_WIDTH_PX = 192;
 const MOBILE_USER_MENU_VIEWPORT_MARGIN_PX = 8;
 
+async function copyCurrentPageUrl() {
+  const url = window.location.href;
+  try {
+    await navigator.clipboard.writeText(url);
+    return true;
+  } catch {
+    try {
+      const textarea = document.createElement("textarea");
+      textarea.value = url;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(textarea);
+      return ok;
+    } catch {
+      return false;
+    }
+  }
+}
+
 function getMobileUserMenuPosition(anchor: HTMLElement) {
   const rect = anchor.getBoundingClientRect();
   let left = rect.left;
@@ -71,6 +94,8 @@ function MobileMenu({
   authLabel,
   authHref,
   isAdmin,
+  shareCopied,
+  onShare,
 }: {
   pathname: string;
   open: boolean;
@@ -78,6 +103,8 @@ function MobileMenu({
   authLabel: string;
   authHref: string;
   isAdmin: boolean;
+  shareCopied: boolean;
+  onShare: () => void;
 }) {
   if (!open) return null;
 
@@ -131,6 +158,19 @@ function MobileMenu({
             <span>Panel admin</span>
           </Link>
         ) : null}
+        <button
+          type="button"
+          onClick={onShare}
+          className={`inline-flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-medium transition ${
+            shareCopied
+              ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+              : "text-[var(--text-muted)] hover:bg-[var(--accent-soft)] hover:text-[var(--text)]"
+          }`}
+          aria-live="polite"
+        >
+          <Share2 className="h-5 w-5" strokeWidth={1.6} aria-hidden />
+          <span>{shareCopied ? "Enlace copiado" : "Compartir"}</span>
+        </button>
       </div>
     </nav>
   );
@@ -147,7 +187,9 @@ export function SiteHeader() {
   const [hasSession, setHasSession] = useState(false);
   const [portalMounted, setPortalMounted] = useState(false);
   const [mobileUserMenuPosition, setMobileUserMenuPosition] = useState({ top: 0, left: 0 });
+  const [shareCopied, setShareCopied] = useState(false);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
+  const shareTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mobileUserMenuRef = useRef<HTMLDivElement | null>(null);
   const mobileUserButtonRef = useRef<HTMLButtonElement | null>(null);
   const desktopUserMenuRef = useRef<HTMLDivElement | null>(null);
@@ -238,6 +280,20 @@ export function SiteHeader() {
     };
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (shareTimeoutRef.current) clearTimeout(shareTimeoutRef.current);
+    };
+  }, []);
+
+  const handleSharePage = async () => {
+    const ok = await copyCurrentPageUrl();
+    if (!ok) return;
+    if (shareTimeoutRef.current) clearTimeout(shareTimeoutRef.current);
+    setShareCopied(true);
+    shareTimeoutRef.current = setTimeout(() => setShareCopied(false), 2000);
+  };
+
   const handleHeaderLogout = async () => {
     try {
       await logoutAdmin();
@@ -303,6 +359,31 @@ export function SiteHeader() {
                       </li>
                     );
                   })}
+                  <li className="shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => void handleSharePage()}
+                      className={`group relative inline-flex items-center gap-1 whitespace-nowrap px-0 py-2 text-[11px] font-medium tracking-normal transition xl:text-[12px] 2xl:text-[13px] ${
+                        shareCopied
+                          ? "text-[var(--accent)]"
+                          : "text-[var(--text-muted)] hover:text-[var(--text)]"
+                      }`}
+                      aria-live="polite"
+                    >
+                      <Share2
+                        className="hidden h-3.5 w-3.5 shrink-0 opacity-80 xl:block"
+                        strokeWidth={1.65}
+                        aria-hidden
+                      />
+                      <span>{shareCopied ? "Copiado" : "Compartir"}</span>
+                      <span
+                        className={`absolute bottom-0 left-1.5 right-1.5 h-0.5 rounded-full bg-[var(--accent)] transition ${
+                          shareCopied ? "opacity-100" : "opacity-0 group-hover:opacity-40"
+                        }`}
+                        aria-hidden
+                      />
+                    </button>
+                  </li>
                 </ul>
               </nav>
 
@@ -447,6 +528,8 @@ export function SiteHeader() {
           authLabel={authLabel}
           authHref={authHref}
           isAdmin={isAdmin}
+          shareCopied={shareCopied}
+          onShare={() => void handleSharePage()}
         />
       </div>
     </header>
