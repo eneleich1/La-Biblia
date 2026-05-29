@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   ADMIN_COOKIE_NAME,
+  AdminSessionConfigError,
+  adminCookieOptions,
   createSessionToken,
   verifySessionToken,
 } from "@/lib/adminSession";
+import { getClientIp, isLoginRateLimited, loginRateLimitRetryAfterSeconds } from "@/lib/loginRateLimit";
+import { isPublicAdminRegistrationEnabled } from "@/lib/publicAdminRegistration";
 import {
   findUserByEmail,
   hashPassword,
@@ -14,29 +18,52 @@ import {
 } from "@/lib/authUsers";
 import { prisma } from "@/lib/prisma";
 
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+function sessionConfigErrorResponse(error: AdminSessionConfigError) {
+  return NextResponse.json(
+    {
+      error:
+        "El servidor no tiene configurado ADMIN_SESSION_SECRET (mínimo 32 caracteres). Revisa .env.example.",
+      code: "ADMIN_SESSION_SECRET_MISSING",
+    },
+    { status: 503 },
+  );
+}
 
-function adminCookieOptions() {
-  return {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
-    path: "/",
-    maxAge: COOKIE_MAX_AGE,
-  };
+function internalErrorResponse() {
+  return NextResponse.json({ error: "Error interno del servidor." }, { status: 500 });
 }
 
 export async function GET(req: NextRequest) {
-  const session = verifySessionToken(req.cookies.get(ADMIN_COOKIE_NAME)?.value);
-  return NextResponse.json({
-    isAuthenticated: Boolean(session),
-    isAdmin: session?.role === "admin",
-    email: session?.email ?? null,
-    role: session?.role ?? null,
-  });
+  try {
+    const session = verifySessionToken(req.cookies.get(ADMIN_COOKIE_NAME)?.value);
+    return NextResponse.json({
+      isAuthenticated: Boolean(session),
+      isAdmin: session?.role === "admin",
+      email: session?.email ?? null,
+      role: session?.role ?? null,
+      allowRegistration: isPublicAdminRegistrationEnabled(),
+    });
+  } catch (error) {
+    if (error instanceof AdminSessionConfigError) return sessionConfigErrorResponse(error);
+    console.error(error);
+    return internalErrorResponse();
+  }
 }
 
 export async function POST(req: NextRequest) {
+  try {
+  const ip = getClientIp(req);
+  if (isLoginRateLimited(ip)) {
+    const retryAfter = loginRateLimitRetryAfterSeconds(ip);
+    return NextResponse.json(
+      { error: "Demasiados intentos. Espera un momento e inténtalo de nuevo." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(retryAfter) },
+      },
+    );
+  }
+
   let body: { email?: string; password?: string };
   try {
     body = await req.json();
@@ -60,9 +87,19 @@ export async function POST(req: NextRequest) {
   const response = NextResponse.json({ ok: true, role, email: user.email, isAdmin: role === "admin" });
   response.cookies.set(ADMIN_COOKIE_NAME, token, adminCookieOptions());
   return response;
+  } catch (error) {
+    if (error instanceof AdminSessionConfigError) return sessionConfigErrorResponse(error);
+    console.error(error);
+    return internalErrorResponse();
+  }
 }
 
 export async function PUT(req: NextRequest) {
+  try {
+  if (!isPublicAdminRegistrationEnabled()) {
+    return NextResponse.json({ error: "El registro público está deshabilitado." }, { status: 403 });
+  }
+
   let body: { email?: string; password?: string };
   try {
     body = await req.json();
@@ -94,10 +131,21 @@ export async function PUT(req: NextRequest) {
 
   const role = toClientRole(created.role);
   return NextResponse.json({ ok: true, role, email: created.email, isAdmin: false });
+  } catch (error) {
+    if (error instanceof AdminSessionConfigError) return sessionConfigErrorResponse(error);
+    console.error(error);
+    return internalErrorResponse();
+  }
 }
 
 export async function DELETE() {
+  try {
   const response = NextResponse.json({ ok: true });
   response.cookies.set(ADMIN_COOKIE_NAME, "", { ...adminCookieOptions(), maxAge: 0 });
   return response;
+  } catch (error) {
+    if (error instanceof AdminSessionConfigError) return sessionConfigErrorResponse(error);
+    console.error(error);
+    return internalErrorResponse();
+  }
 }

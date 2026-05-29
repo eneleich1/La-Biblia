@@ -24,6 +24,7 @@ const SLUG_ICON: Record<string, LucideIcon> = {
   jeremias: BookOpen,
   ezequiel: Shield,
   daniel: Star,
+  "los-salmos": Heart,
   salmos: Heart,
   proverbios: ScrollText,
   job: Users,

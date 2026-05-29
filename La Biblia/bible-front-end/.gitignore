@@ -1,2 +1,37 @@
-.next/
+# Dependencies
 node_modules/
+
+# Next.js
+.next/
+out/
+
+# Environment (keep example only)
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+next-dev-*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build / tooling
+tsconfig.tsbuildinfo
+dist/
+build/
+coverage/
+
+# Editor / local backups
+.codex-backups/
+*.bak
+*.tmp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads are served from public/ but user media may be local-only in some setups
+# (committed defaults in public/uploads are intentional project assets)

@@ -1,9 +1,21 @@
 import type { SiteBlock, SitePage } from "@/lib/sitePageTypes";
 
 async function parseJson<T>(response: Response): Promise<T> {
-  const data = (await response.json()) as T & { error?: string };
+  const text = await response.text();
+  let data = {} as T & { error?: string };
+  if (text) {
+    try {
+      data = JSON.parse(text) as T & { error?: string };
+    } catch {
+      throw new Error(
+        response.ok
+          ? "Respuesta del servidor inválida."
+          : `Error del servidor (${response.status}).`,
+      );
+    }
+  }
   if (!response.ok) {
-    throw new Error((data as { error?: string }).error ?? "Error en la solicitud.");
+    throw new Error(data.error ?? `Error en la solicitud (${response.status}).`);
   }
   return data;
 }
@@ -15,6 +27,7 @@ export async function fetchAdminSession() {
     isAdmin: boolean;
     email: string | null;
     role: "admin" | "user" | null;
+    allowRegistration?: boolean;
   }>(response);
 }
 

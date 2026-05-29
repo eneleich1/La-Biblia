@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { BibleReaderClient } from "@/components/bible/BibleReaderClient";
 import {
   getStaticBook,
@@ -6,6 +6,7 @@ import {
   getStaticBookSummary,
   getStaticTranslation,
   getSupportedStaticLanguages,
+  resolveStaticBookSlug,
 } from "@/lib/staticBible";
 
 export async function generateStaticParams() {
@@ -36,20 +37,27 @@ export default async function ChapterReadPage({
   const chapterNumber = parseInt(chapterParam, 10);
   if (!Number.isFinite(chapterNumber) || chapterNumber < 1) notFound();
 
-  const [translation, book, bookContent] = await Promise.all([
+  const canonicalSlug = resolveStaticBookSlug(bookSlug);
+  if (canonicalSlug !== bookSlug) {
+    const query = highlight ? `?highlight=${encodeURIComponent(highlight)}` : "";
+    redirect(`/biblia/${language}/${canonicalSlug}/${chapterParam}${query}`);
+  }
+
+  const [translation, book] = await Promise.all([
     getStaticTranslation(language),
-    getStaticBookSummary(language, bookSlug),
-    getStaticBook(language, bookSlug),
+    getStaticBookSummary(language, canonicalSlug),
   ]);
 
   if (!translation || !book || !book.chapters.some((chapter) => chapter.number === chapterNumber)) {
     notFound();
   }
 
+  const bookContent = await getStaticBook(language, canonicalSlug);
+
   return (
     <BibleReaderClient
       initialLanguage={language}
-      initialBookSlug={bookSlug}
+      initialBookSlug={canonicalSlug}
       initialChapter={chapterNumber}
       initialBook={bookContent}
       initialHighlight={highlight}

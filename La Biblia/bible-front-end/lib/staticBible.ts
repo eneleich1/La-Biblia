@@ -43,6 +43,18 @@ const STATIC_BIBLE_ROOT = path.join(process.cwd(), "data", "bible-static");
 const manifestCache = new Map<string, Promise<StaticManifest>>();
 const bookCache = new Map<string, Promise<StaticBook>>();
 
+/** Legacy / short URL slugs → canonical manifest slug (filename without .json). */
+const STATIC_BOOK_SLUG_ALIASES: Record<string, string> = {
+  salmo: "los-salmos",
+  salmos: "los-salmos",
+  sal: "los-salmos",
+};
+
+export function resolveStaticBookSlug(slug: string) {
+  const normalized = slug.trim().toLowerCase();
+  return STATIC_BOOK_SLUG_ALIASES[normalized] ?? normalized;
+}
+
 async function readJson<T>(filePath: string): Promise<T> {
   const text = await readFile(filePath, "utf-8");
   return JSON.parse(text) as T;
@@ -85,16 +97,20 @@ export async function getStaticBooks(language: string) {
 }
 
 export async function getStaticBookSummary(language: string, slug: string) {
+  const resolvedSlug = resolveStaticBookSlug(slug);
   const manifest = await getStaticBibleManifest(language);
-  return manifest.books.find((book) => book.slug === slug) ?? null;
+  return manifest.books.find((book) => book.slug === resolvedSlug) ?? null;
 }
 
 export function getStaticBook(language: string, slug: string) {
-  const key = `${language}:${slug}`;
+  const resolvedSlug = resolveStaticBookSlug(slug);
+  const key = `${language}:${resolvedSlug}`;
   if (!bookCache.has(key)) {
     bookCache.set(
       key,
-      readJson<StaticBook>(path.join(STATIC_BIBLE_ROOT, language, "books", `${slug}.json`)),
+      readJson<StaticBook>(
+        path.join(STATIC_BIBLE_ROOT, language, "books", `${resolvedSlug}.json`),
+      ),
     );
   }
   return bookCache.get(key)!;

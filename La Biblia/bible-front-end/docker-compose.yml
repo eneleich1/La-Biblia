@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: bible
       POSTGRES_DB: bible
     ports:
-      - "15432:5432"
+      - "127.0.0.1:15432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -22,7 +22,7 @@ services:
       TYPESENSE_ENABLE_CORS: "true"
     ports:
       # Windows often forbids binding 8108 on the host; map a high host port → 8108 in container.
-      - "18108:8108"
+      - "127.0.0.1:18108:8108"
     volumes:
       - typesense_data:/data
 

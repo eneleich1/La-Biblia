@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { sanitizeRichHtml } from "@/lib/sanitizeRichHtml";
 import {
   ensurePageStructure,
   normalizePageBlocks,
@@ -37,13 +38,22 @@ function toSitePage(row: DbSitePage): SitePage {
   });
 }
 
+function sanitizeBlocks(blocks: SiteBlock[]): SiteBlock[] {
+  return blocks.map((block) => ({
+    ...block,
+    value: block.type === "text" ? sanitizeRichHtml(block.value) : block.value,
+    children: block.children?.length ? sanitizeBlocks(block.children) : block.children,
+  }));
+}
+
 function pageToDbData(page: SitePage) {
   const structured = ensurePageStructure(page);
+  const blocks = sanitizeBlocks(structured.blocks);
   return {
     title: structured.title.trim() || "Pagina sin titulo",
     route: sanitizePageRoute(structured.route),
     status: structured.status ?? "PUBLISHED",
-    blocks: structured.blocks as Prisma.InputJsonValue,
+    blocks: blocks as Prisma.InputJsonValue,
     canvas: structured.canvas as Prisma.InputJsonValue,
     parentHref: structured.parentHref ?? null,
     parentLabel: structured.parentLabel ?? null,

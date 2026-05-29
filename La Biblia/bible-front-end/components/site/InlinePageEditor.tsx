@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Edit3, GripVertical, Save, Trash2, Upload } from "lucide-react";
 import { convertImageFileToWebpDataUrl } from "@/lib/convertImageToWebp";
+import { sanitizeRichHtml } from "@/lib/sanitizeRichHtml";
 import { uploadSiteImage } from "@/lib/sitePagesApi";
 import {
   PAGE_ROOT_ID,
@@ -397,7 +398,9 @@ function BlockView({
         ) : (
           <div
             className="h-full w-full overflow-auto rounded-md px-2 py-1 text-[15px] leading-relaxed text-[var(--text)]"
-            dangerouslySetInnerHTML={{ __html: block.value || "<p>Texto</p>" }}
+            dangerouslySetInnerHTML={{
+              __html: sanitizeRichHtml(block.value) || "<p>Texto</p>",
+            }}
           />
         )}
         {isSelected ? (
@@ -725,7 +728,9 @@ export function InlinePageEditor({
             setImagePanelId((current) => (current === id ? null : id));
             setEditingTextId(null);
           }}
-          onTextInput={(id, html) => patchBlock(id, (b) => ({ ...b, value: html }))}
+          onTextInput={(id, html) =>
+            patchBlock(id, (b) => ({ ...b, value: sanitizeRichHtml(html) }))
+          }
           onDelete={(id) => {
             if (id === PAGE_ROOT_ID) return;
             patchBlock(PAGE_ROOT_ID, (container) => {

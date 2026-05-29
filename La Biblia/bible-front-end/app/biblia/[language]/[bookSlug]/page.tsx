@@ -1,5 +1,10 @@
-import { redirect } from "next/navigation";
-import { getStaticBooks, getSupportedStaticLanguages } from "@/lib/staticBible";
+import { notFound, redirect } from "next/navigation";
+import {
+  getStaticBookSummary,
+  getStaticBooks,
+  getSupportedStaticLanguages,
+  resolveStaticBookSlug,
+} from "@/lib/staticBible";
 
 export const dynamic = "force-static";
 
@@ -19,5 +24,11 @@ export default async function BookChaptersPage({
   params: Promise<{ language: string; bookSlug: string }>;
 }) {
   const { language, bookSlug } = await params;
-  redirect(`/biblia/${language}/${bookSlug}/1`);
+  const canonicalSlug = resolveStaticBookSlug(bookSlug);
+  if (canonicalSlug !== bookSlug) {
+    redirect(`/biblia/${language}/${canonicalSlug}/1`);
+  }
+  const book = await getStaticBookSummary(language, canonicalSlug);
+  if (!book) notFound();
+  redirect(`/biblia/${language}/${canonicalSlug}/1`);
 }

@@ -4,6 +4,7 @@
  * Requires: Docker Desktop running, Node/npm installed.
  */
 import { execSync } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -32,6 +33,24 @@ if (!fs.existsSync(envPath) && fs.existsSync(examplePath)) {
   fs.copyFileSync(examplePath, envPath);
   console.log("Created .env from .env.example");
 }
+
+function ensureAdminSessionSecret() {
+  if (!fs.existsSync(envPath)) return;
+  let envText = fs.readFileSync(envPath, "utf8");
+  const match = envText.match(/^ADMIN_SESSION_SECRET=(.*)$/m);
+  const current = match?.[1]?.replace(/^["']|["']$/g, "").trim() ?? "";
+  if (current.length >= 32) return;
+  const generated = randomBytes(48).toString("base64url");
+  if (match) {
+    envText = envText.replace(/^ADMIN_SESSION_SECRET=.*$/m, `ADMIN_SESSION_SECRET="${generated}"`);
+  } else {
+    envText = `${envText.trimEnd()}\nADMIN_SESSION_SECRET="${generated}"\n`;
+  }
+  fs.writeFileSync(envPath, envText);
+  console.log("Generated ADMIN_SESSION_SECRET in .env (required for login).");
+}
+
+ensureAdminSessionSecret();
 
 run("docker compose up -d");
 

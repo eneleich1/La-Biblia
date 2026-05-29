@@ -2,10 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Eye, EyeOff, LogIn, ShieldCheck } from "lucide-react";
 import { clearAuthSession, notifyAuthSessionChange, saveAuthSession } from "@/lib/clientAuth";
-import { loginWithEmail, registerWithEmail } from "@/lib/sitePagesApi";
+import { isPublicAdminRegistrationEnabledClient } from "@/lib/publicAdminRegistration";
+import { fetchAdminSession, loginWithEmail, registerWithEmail } from "@/lib/sitePagesApi";
 
 export function AdminAuthForm() {
   const router = useRouter();
@@ -15,6 +16,18 @@ export function AdminAuthForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [allowRegistration, setAllowRegistration] = useState(false);
+
+  useEffect(() => {
+    const clientFlag = isPublicAdminRegistrationEnabledClient();
+    if (!clientFlag) {
+      setAllowRegistration(false);
+      return;
+    }
+    fetchAdminSession()
+      .then((session) => setAllowRegistration(session.allowRegistration === true))
+      .catch(() => setAllowRegistration(false));
+  }, []);
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -129,17 +142,19 @@ export function AdminAuthForm() {
             <LogIn className="h-4 w-4" strokeWidth={1.8} aria-hidden />
             {isRegisterMode ? "Crear cuenta" : "Iniciar sesión"}
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              setIsRegisterMode((value) => !value);
-              setError("");
-              setSuccessMessage("");
-            }}
-            className="text-sm font-semibold text-[var(--accent)] hover:underline"
-          >
-            {isRegisterMode ? "Ya tengo cuenta" : "Crear una cuenta nueva"}
-          </button>
+          {allowRegistration ? (
+            <button
+              type="button"
+              onClick={() => {
+                setIsRegisterMode((value) => !value);
+                setError("");
+                setSuccessMessage("");
+              }}
+              className="text-sm font-semibold text-[var(--accent)] hover:underline"
+            >
+              {isRegisterMode ? "Ya tengo cuenta" : "Crear una cuenta nueva"}
+            </button>
+          ) : null}
         </form>
       </div>
     </main>
